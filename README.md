@@ -11,14 +11,6 @@
 	</li>
 	<li>
         <a href="#how-the-application-works">How the Application Works</a>
-		<ul>
-			<li>
-                <a href="#additional-settings">Additional Settings</a>
-                <ul>
-                    <li><a href="#notes-about-the-debugging-menu">Notes About the Debugging Menu</a></li>
-                </ul>
-            </li>
-		</ul>
     </li>
 	<li><a href="#application-purpose-and-limitations">Application Purposes and Limitations</a></li>
 	<li><a href="#software--used-for-developmento">Software Used for Development</a></li>
