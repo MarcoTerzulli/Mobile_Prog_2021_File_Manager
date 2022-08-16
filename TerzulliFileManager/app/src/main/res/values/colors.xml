@@ -9,14 +9,16 @@
     <color name="white">#FFFFFFFF</color>
 
     <!-- Light colors -->
-    <color name="primary_200_light">#90CAF9</color>
-    <color name="primary_500_light">#FFFFFF</color>
-    <color name="primary_700_light">#FFFFFF</color>
+    <color name="primary_200_light">#A5D6A7</color>
+    <color name="primary_500_light">#75B678</color>
+    <color name="primary_700_light">#388E3C</color>
     <color name="background_light">#FFFFFF</color>
 
     <!-- Dark colors -->
-    <color name="primary_200_night">#90CAF9</color>
-    <color name="primary_500_night">#121212</color>
-    <color name="primary_700_night">#212121</color>
-    <color name="background_night">#121212</color>
+    <color name="primary_200_night">#81C784</color>
+    <color name="primary_500_night">#8BC34A</color>
+    <color name="primary_700_night">#689F38</color>
+    <color name="background_night">#232428</color>
+    <color name="background_night_darker">#121212</color>
+    <color name="background_night_lighter">#45494C</color>
 </resources>
