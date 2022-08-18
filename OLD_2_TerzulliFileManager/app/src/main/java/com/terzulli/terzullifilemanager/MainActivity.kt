@@ -1,8 +1,8 @@
 package com.terzulli.terzullifilemanager
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.Menu
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -11,6 +11,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
+                R.id.nav_recents, R.id.nav_gallery, R.id.nav_slideshow
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -53,5 +54,16 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main2)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    override fun onBackPressed() {
+        //binding = ActivityMainBinding.inflate(layoutInflater)
+        /*drawer = findViewById(R.id.drawer_layout);
+
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        }*/
+
+        super.onBackPressed()
     }
 }
