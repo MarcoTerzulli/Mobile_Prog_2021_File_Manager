@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager;
+package com.terzulli.terzullifilemanager.ui.activities;
 
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +15,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        setSupportActionBar(binding.appBarMain.toolbar);
+        setSupportActionBar(findViewById(R.id.toolbar_main));
         /*binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

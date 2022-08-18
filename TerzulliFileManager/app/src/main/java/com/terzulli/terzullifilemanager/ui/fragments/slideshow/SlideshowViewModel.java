@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.slideshow;
+package com.terzulli.terzullifilemanager.ui.fragments.slideshow;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

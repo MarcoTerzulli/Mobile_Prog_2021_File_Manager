@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.slideshow;
+package com.terzulli.terzullifilemanager.ui.fragments.slideshow;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.terzulli.terzullifilemanager.databinding.FragmentSlideshowBinding;
+import com.terzulli.terzullifilemanager.ui.fragments.slideshow.SlideshowViewModel;
 
 public class SlideshowFragment extends Fragment {
 
@@ -19,7 +20,7 @@ public class SlideshowFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         SlideshowViewModel slideshowViewModel =
-                new ViewModelProvider(this).get(SlideshowViewModel.class);
+                new ViewModelProvider(this).get(com.terzulli.terzullifilemanager.ui.fragments.slideshow.SlideshowViewModel.class);
 
         binding = FragmentSlideshowBinding.inflate(inflater, container, false);
         View root = binding.getRoot();

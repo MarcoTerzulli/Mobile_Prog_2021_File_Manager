@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.gallery;
+package com.terzulli.terzullifilemanager.ui.fragments.gallery;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.terzulli.terzullifilemanager.databinding.FragmentGalleryBinding;
+import com.terzulli.terzullifilemanager.ui.fragments.gallery.GalleryViewModel;
 
 public class GalleryFragment extends Fragment {
 

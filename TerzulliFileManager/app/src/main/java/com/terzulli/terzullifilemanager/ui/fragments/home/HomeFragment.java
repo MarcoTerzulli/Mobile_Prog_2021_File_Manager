@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.home;
+package com.terzulli.terzullifilemanager.ui.fragments.home;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.terzulli.terzullifilemanager.databinding.FragmentHomeBinding;
+import com.terzulli.terzullifilemanager.ui.fragments.home.HomeViewModel;
 
 public class HomeFragment extends Fragment {
 
@@ -19,7 +20,7 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
+                new ViewModelProvider(this).get(com.terzulli.terzullifilemanager.ui.fragments.home.HomeViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();

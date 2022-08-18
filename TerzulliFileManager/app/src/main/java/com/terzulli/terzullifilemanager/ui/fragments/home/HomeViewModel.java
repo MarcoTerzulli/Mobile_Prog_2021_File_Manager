@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.home;
+package com.terzulli.terzullifilemanager.ui.fragments.home;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
