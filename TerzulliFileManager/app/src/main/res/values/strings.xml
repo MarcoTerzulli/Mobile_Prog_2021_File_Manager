@@ -8,7 +8,7 @@
     <!-- App exsample default strings -->
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <!-- Strings used for fragments for navigation -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
 
@@ -47,6 +47,17 @@
     <string name="drawer_menu_media_images">Images</string>
     <string name="drawer_menu_media_videos">Videos</string>
     <string name="drawer_menu_media_audio">Audio</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Various buttons -->
+    <string name="button_ok">Ok</string>
+    <string name="button_cancel">Cancel</string>
+
+    <!-- Permissions -->
+    <string name="grant">Grant</string>
+    <string name="grant_permission">Grant permission</string>
+    <string name="grant_failed">Permission not granted</string>
+    <string name="grant_failed_exit">Permission not granted. Closing…</string>
+    <string name="grant_successed">Permission granted</string>
+    <string name="grant_permission_msg_storage">The application needs storage permission to continue. Cancelling this dialog will quit the app.</string>
+    <string name="grant_permission_msg_full_storage">Since Android 11, Google requests File Managers to ask users a specific permission for managing all the files on the device.\n\nAfter pressing "Grant", please select "Allow access to manage all files" option on the next screen.\n\nCancelling this dialog will quit the app.</string>
 </resources>
