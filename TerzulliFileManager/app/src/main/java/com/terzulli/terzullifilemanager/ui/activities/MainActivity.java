@@ -21,7 +21,7 @@ import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 
 public class MainActivity extends PermissionsActivity
-    implements PermissionsActivity.OnPermissionGranted {
+        implements PermissionsActivity.OnPermissionGranted {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
@@ -73,9 +73,9 @@ public class MainActivity extends PermissionsActivity
     @Override
     public void onBackPressed() {
         //getSupportFragmentManager().popBackStackImmediate();
-        DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -85,6 +85,7 @@ public class MainActivity extends PermissionsActivity
     @Override
     public void onPermissionGranted() {
         // TODO bisogna ricaricare il contenuto della home ora che abbiamo i permessi per lo storage
+
     }
 
     public void checkForSystemPermissions() {

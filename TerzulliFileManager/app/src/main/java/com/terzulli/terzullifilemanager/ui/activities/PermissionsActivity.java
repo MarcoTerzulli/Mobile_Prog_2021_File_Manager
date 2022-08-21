@@ -45,8 +45,6 @@ public class PermissionsActivity extends AppCompatActivity
         Utils.disableScreenRotation(this);
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-            Toast.makeText(this, "mostro il rationale", Toast.LENGTH_SHORT).show();
-
             rationaleDialog
                     .setPositiveButton(R.string.grant, (thisDialog, which) -> {
                         ActivityCompat.requestPermissions(this, new String[]{permission}, permissionCode);
@@ -54,12 +52,8 @@ public class PermissionsActivity extends AppCompatActivity
                     })
                     .create().show();
         } else if (isFirstStart) {
-            Toast.makeText(this, "initial start", Toast.LENGTH_SHORT).show();
-
             ActivityCompat.requestPermissions(this, new String[]{permission}, permissionCode);
         } else {
-
-            Toast.makeText(this, "dovrei aprire la snackbar", Toast.LENGTH_SHORT).show();
 
             int snackBarBackgroundColor, snackBarTextColor;
             if (isNightModeEnabled()) {
@@ -94,8 +88,6 @@ public class PermissionsActivity extends AppCompatActivity
                 .setMessage(R.string.grant_permission_msg_storage)
                 .setNegativeButton(R.string.button_cancel, (dialog, which) -> {
                     //dialog.dismiss();
-
-                    //Toast.makeText(PermissionsActivity.this, "qui dovremmo uscire dallapp", Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .setCancelable(false);
@@ -152,31 +144,25 @@ public class PermissionsActivity extends AppCompatActivity
     public void onRequestPermissionsResult(
             int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        Toast.makeText(this, "dentro result: codice = " + requestCode, Toast.LENGTH_SHORT).show();
-        Toast.makeText(this, "dentro result: permission granted = " + permissionIsGranted(grantResults), Toast.LENGTH_SHORT).show();
 
         switch (requestCode) {
-            case PERMISSION_CODE_STORAGE: {
+            case PERMISSION_CODE_STORAGE:
                 if (permissionIsGranted(grantResults)) {
                     Utils.enableScreenRotation(this);
-                    Toast.makeText(this, R.string.grant_successed, Toast.LENGTH_SHORT).show();
 
                     onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE].onPermissionGranted();
                     onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE] = null;
                 } else {
-                    //Log.e("DEBUG", "Non ho ottenuto i permessi per lo storage", null);
-                    //Toast.makeText(this, R.string.grant_failed_exit, Toast.LENGTH_SHORT).show();
-                    Toast.makeText(this, "Non ho ottenuto i permessi per lo storage. Chiedo di nuobo", Toast.LENGTH_SHORT).show();
                     requestStoragePermission(false, onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE]);
-                    //finishAffinity();
                 }
-            }
+                break;
 
             case PERMISSION_CODE_INSTALL_APK:
                 if (permissionIsGranted(grantResults)) {
                     onPermissionGrantedCallbacks[PERMISSION_CODE_INSTALL_APK].onPermissionGranted();
                     onPermissionGrantedCallbacks[PERMISSION_CODE_INSTALL_APK] = null;
                 }
+                break;
         }
     }
 
