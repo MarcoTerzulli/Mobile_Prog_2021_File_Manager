@@ -38,42 +38,63 @@ public class PermissionsActivity extends AppCompatActivity {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    public void requestStoragePermission() {
-        Utils.disableScreenRotation(this);
-
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-
-        Utils.enableScreenRotation(this);
+    private void requestPermission(final String permission,
+                                   final int permissionCode,
+                                   @NonNull final AlertDialog rationaleDialog,
+                                   boolean isFirstStart) {
+        
     }
 
-    public void requestAllFilesAccess() {
+    private void requestStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.grant_permission)
+                    .setMessage(R.string.grant_permission_msg_storage)
+                    .setPositiveButton(R.string.grant, (dialog, which) -> requestStoragePermissionNoRationale())
+                    .setNegativeButton(R.string.button_cancel, (dialog, which) -> {
+                        //dialog.dismiss();
+
+                        //Toast.makeText(PermissionsActivity.this, "qui dovremmo uscire dallapp", Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .setCancelable(false)
+                    .create().show();
+        } else {
+            requestStoragePermissionNoRationale();
+        }
+    }
+
+    private void requestStoragePermissionNoRationale() {
+        Utils.disableScreenRotation(PermissionsActivity.this);
+        ActivityCompat.requestPermissions(PermissionsActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+        Utils.enableScreenRotation(PermissionsActivity.this);
+    }
+
+    private void requestAllFilesAccess() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
 
             new AlertDialog.Builder(this)
             .setTitle(R.string.grant_permission)
             .setMessage(R.string.grant_permission_msg_full_storage)
-            .setPositiveButton(R.string.grant, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+            .setPositiveButton(R.string.grant, (dialog, which) -> {
 
-                    try {
-                        Intent intent =
-                                new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                                        .setData(Uri.parse("package:" + getPackageName()));
-                        startActivity(intent);
-                    } catch (Exception e) {
-                        Toast.makeText(PermissionsActivity.this, R.string.grant_failed_exit, Toast.LENGTH_SHORT).show();
-                    }
+                try {
+                    Intent intent =
+                            new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                                    .setData(Uri.parse("package:" + getPackageName()));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Toast.makeText(PermissionsActivity.this, R.string.grant_failed_exit, Toast.LENGTH_SHORT).show();
                 }
             })
-            .setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
+            .setNegativeButton(R.string.button_cancel, (dialog, which) -> {
+                dialog.dismiss();
 
-                    Toast.makeText(PermissionsActivity.this, "qui dovremmo uscire dallapp", Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(PermissionsActivity.this, "qui dovremmo uscire dallapp", Toast.LENGTH_SHORT).show();
+                finish();
             })
+            .setCancelable(false)
             .create().show();
         }
     }
@@ -94,8 +115,11 @@ public class PermissionsActivity extends AppCompatActivity {
 
                     //TODO gestione di eventuale callback?
                 } else {
-                    Log.e("DEBUG", "Non ho ottenuto i permessi per lo storage", null);
-                    Toast.makeText(this, R.string.grant_failed_exit, Toast.LENGTH_SHORT).show();
+                    //Log.e("DEBUG", "Non ho ottenuto i permessi per lo storage", null);
+                    //Toast.makeText(this, R.string.grant_failed_exit, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Non ho ottenuto i permessi per lo storage. Chiedo di nuobo", Toast.LENGTH_SHORT).show();
+                    requestStoragePermission();
+                    //finishAffinity();
                 }
             }
 
