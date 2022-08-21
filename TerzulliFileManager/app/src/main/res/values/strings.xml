@@ -59,5 +59,9 @@
     <string name="grant_failed_exit">Permission not granted. Closing…</string>
     <string name="grant_successed">Permission granted</string>
     <string name="grant_permission_msg_storage">The application needs storage permission to continue. Cancelling this dialog will quit the app.</string>
-    <string name="grant_permission_msg_full_storage">Since Android 11, Google requests File Managers to ask users a specific permission for managing all the files on the device.\n\nAfter pressing "Grant", please select "Allow access to manage all files" option on the next screen.\n\nCancelling this dialog will quit the app.</string>
+    <string name="grant_permission_msg_full_storage">Since Android 11, Google requests File Managers to ask users a specific permission for managing all the files on the device.
+        \n\nAfter pressing "Grant", please select <b>"Allow access to manage all files" option on the next screen.</b>
+        \n\n<i>Cancelling this dialog will quit the app.</i></string>
+    <string name="grant_permission_msg_apk">The application needs permission to install the APK.</string>
+
 </resources>

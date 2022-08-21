@@ -1,5 +1,6 @@
 package com.terzulli.terzullifilemanager.ui.activities;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
@@ -8,6 +9,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.core.view.GravityCompat;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -18,7 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 
-public class MainActivity extends PermissionsActivity {
+public class MainActivity extends PermissionsActivity
+    implements PermissionsActivity.OnPermissionGranted {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
@@ -78,4 +81,19 @@ public class MainActivity extends PermissionsActivity {
             super.onBackPressed();
         }
     }
+
+    @Override
+    public void onPermissionGranted() {
+        // TODO bisogna ricaricare il contenuto della home ora che abbiamo i permessi per lo storage
+    }
+
+    public void checkForSystemPermissions() {
+        if (!checkStoragePermission()) {
+            requestStoragePermission(true, this);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            requestAllFilesAccess(this);
+        }
+    }
+
 }
