@@ -25,6 +25,7 @@
     <string name="action_get_info">Get info</string>
     <string name="action_show_hidden">Show hidden files</string>
     <string name="action_dont_show_hidden">Don\'t show hidden files</string>
+    <string name="action_search">Search</string>
 
     <!-- Activities Strings -->
     <string name="title_activity_main">MainActivity</string>

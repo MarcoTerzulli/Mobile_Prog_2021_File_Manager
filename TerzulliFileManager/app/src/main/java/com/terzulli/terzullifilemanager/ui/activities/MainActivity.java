@@ -97,4 +97,23 @@ public class MainActivity extends PermissionsActivity
         }
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        // menu per scheda recenti
+        menu.findItem(R.id.new_folder).setVisible(false);
+        menu.findItem(R.id.sort_by).setVisible(true);
+        menu.findItem(R.id.select_all).setVisible(true);
+        menu.findItem(R.id.deselect_all).setVisible(false);
+        menu.findItem(R.id.copy_to).setVisible(false);
+        menu.findItem(R.id.move_to).setVisible(false);
+        menu.findItem(R.id.compress).setVisible(false);
+        menu.findItem(R.id.decompress).setVisible(false);
+        menu.findItem(R.id.get_info).setVisible(true);
+        menu.findItem(R.id.show_hidden).setVisible(true);
+        menu.findItem(R.id.dont_show_hidden).setVisible(false);
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
 }
