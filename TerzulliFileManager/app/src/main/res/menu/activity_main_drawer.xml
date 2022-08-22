@@ -25,20 +25,24 @@
             android:icon="@drawable/ic_menu_file_download"
             android:title="@string/drawer_menu_download" />
 
+
+
         <item android:title="@string/drawer_menu_location">
             <menu>
-                <item
-                    android:id="@+id/nav_internal_storage"
-                    android:icon="@drawable/ic_menu_smartphone"
-                    android:title="@string/drawer_menu_storage_internal" />
-                <item
-                    android:id="@+id/nav_sd_card"
-                    android:icon="@drawable/ic_menu_sd_card"
-                    android:title="@string/drawer_menu_storage_sd_card" />
-                <item
-                    android:id="@+id/nav_external_storage"
-                    android:icon="@drawable/ic_menu_usb"
-                    android:title="@string/drawer_menu_storage_external" />
+                <group android:checkableBehavior="single">
+                    <item
+                        android:id="@+id/nav_internal_storage"
+                        android:icon="@drawable/ic_menu_smartphone"
+                        android:title="@string/drawer_menu_storage_internal" />
+                    <item
+                        android:id="@+id/nav_sd_card"
+                        android:icon="@drawable/ic_menu_sd_card"
+                        android:title="@string/drawer_menu_storage_sd_card" />
+                    <item
+                        android:id="@+id/nav_external_storage"
+                        android:icon="@drawable/ic_menu_usb"
+                        android:title="@string/drawer_menu_storage_external" />
+                </group>
             </menu>
         </item>
     </group>

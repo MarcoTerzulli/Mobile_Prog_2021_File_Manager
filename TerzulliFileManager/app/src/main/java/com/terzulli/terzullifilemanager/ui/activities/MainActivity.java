@@ -2,28 +2,29 @@ package com.terzulli.terzullifilemanager.ui.activities;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
+import android.view.MenuItem;
 import android.view.Menu;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
+import com.terzulli.terzullifilemanager.ui.fragments.MainFragment;
+import com.terzulli.terzullifilemanager.ui.fragments.recents.RecentsFragment;
 
 public class MainActivity extends PermissionsActivity
         implements PermissionsActivity.OnPermissionGranted {
 
-    private AppBarConfiguration mAppBarConfiguration;
+    private AppBarConfiguration AppBarConfiguration;
     private ActivityMainBinding binding;
 
     @Override
@@ -45,16 +46,79 @@ public class MainActivity extends PermissionsActivity
         NavigationView navigationView = binding.navView;
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_recents, R.id.nav_gallery, R.id.nav_slideshow)
+        AppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_recents, R.id.nav_images, R.id.nav_videos, R.id.nav_audio, R.id.nav_download,
+                R.id.nav_internal_storage, R.id.nav_sd_card, R.id.nav_external_storage)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        NavigationUI.setupActionBarWithNavController(this, navController, AppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+        //navigationView.setNavigationItemSelectedListener((NavigationView.OnNavigationItemSelectedListener) this);
+
+        /*NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        NavigationUI.setupActionBarWithNavController(this, navController, drawer);
+        NavigationUI.setupWithNavController(binding.navView, navController);*/
 
         checkForSystemPermissions();
     }
+
+    /*@Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        //displayFragment(item.getItemId());
+        return true;
+    }
+
+    private void displayFragment(int framentId) {
+        Fragment fragment = null;
+        String title = getString(R.string.app_name);
+
+        switch (framentId) {
+            case R.id.nav_recents:
+                fragment = new RecentsFragment();
+                title  = "Recents";
+                break;
+            case R.id.nav_images:
+                fragment = new RecentsFragment();
+                title  = "Recents";
+                break;
+            case R.id.nav_videos:
+                fragment = new RecentsFragment();
+                title  = "Recents";
+                break;
+            case R.id.nav_download:
+                fragment = new RecentsFragment();
+                title  = "Recents";
+                break;
+            case R.id.nav_internal_storage:
+                fragment = new MainFragment();
+                title  = "Internal Storage";
+                break;
+            case R.id.nav_sd_card:
+                fragment = new MainFragment();
+                title  = "SD Card";
+                break;
+            case R.id.nav_external_storage:
+                fragment = new MainFragment();
+                title = "USB Storage";
+                break;
+
+        }
+
+        if (fragment != null) {
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.content_main, fragment);
+            fragmentTransaction.commit();
+        }
+
+        // set the toolbar title
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(title);
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -66,7 +130,7 @@ public class MainActivity extends PermissionsActivity
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+        return NavigationUI.navigateUp(navController, AppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
 

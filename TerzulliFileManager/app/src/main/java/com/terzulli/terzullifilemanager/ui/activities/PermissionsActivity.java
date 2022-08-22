@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -21,7 +22,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
-public class PermissionsActivity extends AppCompatActivity
+public abstract class PermissionsActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     private final int PERMISSION_LIST_LENGHT = 3;
@@ -170,6 +171,8 @@ public class PermissionsActivity extends AppCompatActivity
         return grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
     }
 
+    //public abstract boolean onNavigationItemSelected(MenuItem item);
+
 
     public interface OnPermissionGranted {
         void onPermissionGranted();
@@ -190,4 +193,5 @@ public class PermissionsActivity extends AppCompatActivity
 
         return false;
     }
+
 }
