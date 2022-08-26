@@ -1,35 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fragment_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/fragment_main_swipe_refresh_layout"
+    <RelativeLayout
+        android:id="@+id/items_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:focusable="false">
+        android:layout_height="wrap_content">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/fragment_main_list_view"
+        <!-- TODO breadcrumb -->
+
+        <moe.feng.common.view.breadcrumbs.BreadcrumbsView
+            android:id="@+id/fragment_main_breadcrumbs"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:descendantFocusability="afterDescendants"
-            android:divider="@null"
-            android:scrollbars="none" />
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            android:layout_height="?attr/actionBarSize"/>
 
 
-    <TextView
-        android:id="@+id/text_home"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:text="PROVA"/>
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/fragment_main_swipe_refresh_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_main_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:descendantFocusability="afterDescendants"
+                android:divider="@null"
+                android:scrollbars="none" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/items_empty_folder_placeholder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true">
+
+            <ImageView
+                android:id="@+id/items_empty_folder_icon"
+                android:layout_width="@dimen/items_empty_folder_icon_size"
+                android:layout_height="@dimen/items_empty_folder_icon_size"
+                android:layout_centerHorizontal="true"
+                android:scaleType="fitXY"
+                app:srcCompat="@drawable/ic_folder_off" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/items_empty_folder_icon"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/frag_no_items"
+                android:textAlignment="center"
+                android:textSize="20sp" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
 
 </FrameLayout>

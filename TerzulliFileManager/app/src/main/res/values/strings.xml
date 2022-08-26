@@ -65,4 +65,9 @@
         \n\n<i>Cancelling this dialog will quit the app.</i></string>
     <string name="grant_permission_msg_apk">The application needs permission to install the APK.</string>
 
+
+    <!-- Folder and Items Fragments strings -->
+    <string name="frag_no_items">No items</string>
+    <string name="file_default_file_name">file.txt</string>
+
 </resources>
