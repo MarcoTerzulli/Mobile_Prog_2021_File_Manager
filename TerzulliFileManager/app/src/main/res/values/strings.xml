@@ -69,5 +69,6 @@
     <!-- Folder and Items Fragments strings -->
     <string name="frag_no_items">No items</string>
     <string name="file_default_file_name">file.txt</string>
+    <string name="file_default_details">Jen 1, 1 kB, JPG Image</string>
 
 </resources>

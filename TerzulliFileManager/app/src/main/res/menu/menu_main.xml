@@ -1,64 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="AppCompatResource">
+
     <item
-        android:id="@+id/search"
+        android:id="@+id/menu_search"
         android:icon="@drawable/ic_menu_search"
         android:title="@string/action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|always" />
     <item
-        android:id="@+id/new_folder"
+        android:id="@+id/menu_new_folder"
         android:title="@string/action_new_folder"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/sort_by"
+        android:id="@+id/menu_sort_by"
         android:title="@string/action_sort_by"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/select_all"
+        android:id="@+id/menu_select_all"
         android:title="@string/action_select_all"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/deselect_all"
+        android:id="@+id/menu_deselect_all"
         android:title="@string/action_deselect_all"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/copy_to"
+        android:id="@+id/menu_copy_to"
         android:title="@string/action_copy_to"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/move_to"
+        android:id="@+id/menu_move_to"
         android:title="@string/action_move_to"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/compress"
+        android:id="@+id/menu_compress"
         android:title="@string/action_compress"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/decompress"
+        android:id="@+id/menu_decompress"
         android:title="@string/action_decompress"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/get_info"
+        android:id="@+id/menu_get_info"
         android:title="@string/action_get_info"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/show_hidden"
+        android:id="@+id/menu_show_hidden"
         android:title="@string/action_show_hidden"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/dont_show_hidden"
+        android:id="@+id/menu_dont_show_hidden"
         android:title="@string/action_dont_show_hidden"
         app:showAsAction="never" />
 

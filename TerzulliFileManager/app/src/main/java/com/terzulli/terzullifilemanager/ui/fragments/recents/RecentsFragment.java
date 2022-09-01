@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.ui.fragments.recents.RecentsViewModel;
@@ -21,6 +22,14 @@ public class RecentsFragment extends Fragment {
 
     public static RecentsFragment newInstance() {
         return new RecentsFragment();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
+
     }
 
     @Override
