@@ -9,7 +9,7 @@
         android:icon="@drawable/ic_menu_search"
         android:title="@string/action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="collapseActionView|always" />
+        app:showAsAction="collapseActionView|ifRoom" />
     <item
         android:id="@+id/menu_new_folder"
         android:title="@string/action_new_folder"

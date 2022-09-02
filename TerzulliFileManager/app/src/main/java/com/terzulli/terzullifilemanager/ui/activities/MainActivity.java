@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
@@ -28,7 +29,7 @@ import com.terzulli.terzullifilemanager.ui.fragments.DownloadFragment;
 import com.terzulli.terzullifilemanager.ui.fragments.ImagesFragment;
 import com.terzulli.terzullifilemanager.ui.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.ui.fragments.VideosFragment;
-import com.terzulli.terzullifilemanager.ui.fragments.recents.RecentsFragment;
+import com.terzulli.terzullifilemanager.ui.fragments.RecentsFragment;
 
 import java.io.File;
 import java.util.List;
@@ -41,6 +42,8 @@ public class MainActivity extends PermissionsActivity
     private RecyclerView recyclerView;
     private List<File> fileList;
     private DrawerLayout drawer;
+    private SearchView searchView;
+    private Toolbar toolbar;
     //private Menu toolbarMenu;
 
     @Override
@@ -51,25 +54,45 @@ public class MainActivity extends PermissionsActivity
         setContentView(binding.getRoot());
 
         // setup layout
-        setSupportActionBar(findViewById(R.id.toolbar_main));
-        setupDrawer();
-        //updateMenuItems();
+        setSupportActionBar(findViewById(R.id.main_toolbar));
+        setupUiItems();
 
         checkForSystemPermissions();
     }
 
-    private void setupDrawer() {
+    private void setupUiItems() {
+        // drawer
         drawer = binding.drawerLayout;
-        NavigationView navigationView = binding.navView;
         AppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_recents, R.id.nav_images, R.id.nav_videos, R.id.nav_audio, R.id.nav_download,
                 R.id.nav_internal_storage, R.id.nav_sd_card, R.id.nav_external_storage)
                 .setOpenableLayout(drawer)
                 .build();
+
+        // nativation view
+        NavigationView navigationView = binding.navView;
         NavController navController = Navigation.findNavController(this, R.id.main_fragment_content);
         NavigationUI.setupActionBarWithNavController(this, navController, AppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
+        // search view
+        toolbar = findViewById(R.id.main_toolbar);
+
+    }
+
+    // TODO
+    private void setupSearchView() {
+
+        /*searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+
+                    Toast.makeText(MainActivity.this, "back", Toast.LENGTH_SHORT).show();
+                    searchView.setIconified(true);
+                }
+            }
+        });*/
     }
 
     // metodo specifico per navHostFragment: restituisce il fragment corrente
@@ -89,22 +112,12 @@ public class MainActivity extends PermissionsActivity
         return null;
     }
 
-    /*
-    public void invalidateFragment() {
-        supportInvalidateOptionsMenu();
-    }*/
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        //toolbarMenu = menu;
-
-        //setupOptionsMenu();
-        //updateMenuItems();
 
         return super.onCreateOptionsMenu(menu);
-        //return true;
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -164,10 +177,8 @@ public class MainActivity extends PermissionsActivity
         //Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_content);
         Fragment currentFragment = getForegroundFragment();
 
-        Toast.makeText(MainActivity.this, currentFragment.getClass().getName(), Toast.LENGTH_SHORT).show();
-
         // TODO eventuale gestione view type grid o column
-        Menu toolbarMenu = ((Toolbar) findViewById(R.id.toolbar_main)).getMenu();
+        Menu toolbarMenu = ((Toolbar) findViewById(R.id.main_toolbar)).getMenu();
 
         menu.findItem(R.id.menu_search).setVisible(true);
 
@@ -182,22 +193,24 @@ public class MainActivity extends PermissionsActivity
         menu.findItem(R.id.menu_get_info).setVisible(true);
 
         if (currentFragment instanceof MainFragment) {
-
-            Toast.makeText(MainActivity.this, "instance of main frag", Toast.LENGTH_SHORT).show();
             menu.findItem(R.id.menu_new_folder).setVisible(true);
+
         } else if (currentFragment instanceof RecentsFragment ||
                 currentFragment instanceof AudioFragment ||
                 currentFragment instanceof DownloadFragment ||
                 currentFragment instanceof ImagesFragment ||
                 currentFragment instanceof VideosFragment) {
 
-            Toast.makeText(MainActivity.this, "instance of altri frag", Toast.LENGTH_SHORT).show();
             menu.findItem(R.id.menu_new_folder).setVisible(false);
         }
 
         // TODO gestione file nascosti
         menu.findItem(R.id.menu_show_hidden).setVisible(false);
         menu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+
+        // setup search view
+        searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        setupSearchView();
 
         return super.onPrepareOptionsMenu(menu);
     }
@@ -212,11 +225,9 @@ public class MainActivity extends PermissionsActivity
 
     @Override
     public void onBackPressed() {
-        //getSupportFragmentManager().popBackStackImmediate();
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
@@ -225,6 +236,11 @@ public class MainActivity extends PermissionsActivity
     @Override
     public void onPermissionGranted() {
         // TODO bisogna ricaricare il contenuto della home ora che abbiamo i permessi per lo storage
+        Fragment currentFragment = getForegroundFragment();
+
+        if (currentFragment != null && currentFragment instanceof MainFragment) {
+            return;
+        }
 
     }
 

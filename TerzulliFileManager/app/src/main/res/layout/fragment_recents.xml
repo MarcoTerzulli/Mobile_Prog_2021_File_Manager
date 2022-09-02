@@ -5,7 +5,7 @@
     android:id="@+id/fragment_recents"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.recents.RecentsFragment">
+    tools:context=".ui.fragments.RecentsFragment">
 
     <TextView
         android:id="@+id/text_home"

@@ -1,16 +1,16 @@
-package com.terzulli.terzullifilemanager.ui.fragments.recents;
+package com.terzulli.terzullifilemanager.ui.fragments.data;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class RecentsViewModel extends ViewModel {
+public class GalleryViewModel extends ViewModel {
 
     private final MutableLiveData<String> mText;
 
-    public RecentsViewModel() {
+    public GalleryViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is home fragment");
+        mText.setValue("This is gallery fragment");
     }
 
     public LiveData<String> getText() {

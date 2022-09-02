@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.fragments.images;
+package com.terzulli.terzullifilemanager.ui.fragments.data;
 
 import androidx.lifecycle.ViewModel;
 

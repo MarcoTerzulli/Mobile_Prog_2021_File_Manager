@@ -15,6 +15,7 @@
         <entry key="app/src/main/res/drawable/ic_file_music.xml" value="0.185" />
         <entry key="app/src/main/res/drawable/ic_file_pdf.xml" value="0.185" />
         <entry key="app/src/main/res/drawable/ic_file_video.xml" value="0.185" />
+        <entry key="app/src/main/res/drawable/ic_folder.xml" value="0.195" />
         <entry key="app/src/main/res/drawable/ic_folder_off.xml" value="0.185" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.222" />
         <entry key="app/src/main/res/drawable/ic_menu_slideshow.xml" value="0.222" />
@@ -30,6 +31,7 @@
         <entry key="app/src/main/res/layout/fragment_slideshow.xml" value="0.254981884057971" />
         <entry key="app/src/main/res/layout/item_file.xml" value="0.19166666666666668" />
         <entry key="app/src/main/res/layout/item_file_for_grid.xml" value="0.19166666666666668" />
+        <entry key="app/src/main/res/layout/item_file_for_list.xml" value="0.23867753623188406" />
         <entry key="app/src/main/res/layout/nav_header_main.xml" value="0.22056159420289856" />
         <entry key="app/src/main/res/menu/activity_main_drawer.xml" value="0.3182291666666667" />
         <entry key="app/src/main/res/menu/main.xml" value="0.3182291666666667" />

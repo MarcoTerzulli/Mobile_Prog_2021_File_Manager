@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.fragments.recents;
+package com.terzulli.terzullifilemanager.ui.fragments;
 
 import androidx.lifecycle.ViewModelProvider;
 
@@ -11,10 +11,9 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.terzulli.terzullifilemanager.R;
-import com.terzulli.terzullifilemanager.ui.fragments.recents.RecentsViewModel;
+import com.terzulli.terzullifilemanager.ui.fragments.data.RecentsViewModel;
 
 public class RecentsFragment extends Fragment {
 
@@ -41,7 +40,7 @@ public class RecentsFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(com.terzulli.terzullifilemanager.ui.fragments.recents.RecentsViewModel.class);
+        mViewModel = new ViewModelProvider(this).get(RecentsViewModel.class);
         // TODO: Use the ViewModel
     }
 

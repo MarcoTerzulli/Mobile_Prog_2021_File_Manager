@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.terzulli.terzullifilemanager.R;
-import com.terzulli.terzullifilemanager.ui.fragments.images.ImagesViewModel;
+import com.terzulli.terzullifilemanager.ui.fragments.data.ImagesViewModel;
 
 public class ImagesFragment extends Fragment {
 
@@ -32,7 +32,7 @@ public class ImagesFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(com.terzulli.terzullifilemanager.ui.fragments.images.ImagesViewModel.class);
+        mViewModel = new ViewModelProvider(this).get(ImagesViewModel.class);
         // TODO: Use the ViewModel
     }
 
