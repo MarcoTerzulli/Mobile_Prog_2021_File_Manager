@@ -14,6 +14,7 @@
         <item name="android:windowLightStatusBar">true</item>
         <!-- Other Customizations -->
         <item name="android:background">@color/background_light</item>
+
     </style>
 
     <style name="Theme.TerzulliFileManager.NoActionBar">
@@ -32,5 +33,14 @@
     </style>
 
     <style name="Theme.TerzulliFileManager.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+    <style name="Theme.TerzulliFileManager.ItemNameColor" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="Theme.TerzulliFileManager.ItemDetailsColor" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColor">@color/dark_grey</item>
+    </style>
+
 
 </resources>

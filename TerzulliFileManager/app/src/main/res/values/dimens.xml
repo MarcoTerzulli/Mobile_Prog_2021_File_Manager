@@ -29,5 +29,5 @@
 
     <!-- Folder and Items Fragments -->
     <dimen name="items_empty_folder_icon_size">100dp</dimen>
-    <dimen name="file_list_icon_size">54dp</dimen>
+    <dimen name="file_list_icon_size">48dp</dimen>
 </resources>

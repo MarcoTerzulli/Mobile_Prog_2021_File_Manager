@@ -2,6 +2,7 @@ package com.terzulli.terzullifilemanager.ui.fragments;
 
 import android.os.Bundle;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -42,7 +43,6 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setActionBarTitle();
         setHasOptionsMenu(true);
 
         sortBy = "NAME";
@@ -65,6 +65,8 @@ public class MainFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         loadPath(Environment.getExternalStorageDirectory().getAbsolutePath());
 
+        setActionBarTitle();
+
         return view;
     }
 
@@ -77,7 +79,9 @@ public class MainFragment extends Fragment {
 
     private void setActionBarTitle() {
         String title  = getString(R.string.drawer_menu_storage_internal);
-        Objects.requireNonNull(((MainActivity) requireActivity()).getSupportActionBar()).setTitle(title);
+        ActionBar supportActionBar = ((MainActivity) requireActivity()).getSupportActionBar();
+        if (supportActionBar != null)
+            Objects.requireNonNull(supportActionBar).setTitle(title);
     }
 
     public void initializeEmptyDirectoryLayout(boolean showEmptyLayout) {

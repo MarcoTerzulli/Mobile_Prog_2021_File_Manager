@@ -4,14 +4,22 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.Uri;
+import android.os.Environment;
+import android.webkit.MimeTypeMap;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.terzulli.terzullifilemanager.R;
+
 import java.io.File;
-import java.util.ArrayList;
+import java.text.CharacterIterator;
+import java.text.SimpleDateFormat;
+import java.text.StringCharacterIterator;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 
 public class Utils {
 
@@ -35,7 +43,7 @@ public class Utils {
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
 
-    public static void sortByName(File[] files, final boolean ascending){
+    public static void sortByName(File[] files, final boolean ascending) {
         if (ascending) {
             Arrays.sort(files, new Comparator<File>() {
                 @Override
@@ -65,7 +73,7 @@ public class Utils {
         }
     }
 
-    public static void sortByDate(File[] files, final boolean ascending){
+    public static void sortByDate(File[] files, final boolean ascending) {
         if (ascending) {
 
             Arrays.sort(files, new Comparator<File>() {
@@ -98,7 +106,7 @@ public class Utils {
 
     }
 
-    public static void sortBySize(File[] files, final boolean ascending){
+    public static void sortBySize(File[] files, final boolean ascending) {
         if (ascending) {
             Arrays.sort(files, new Comparator<File>() {
                 @Override
@@ -129,7 +137,6 @@ public class Utils {
     }
 
 
-
     public static File[] sortFileAndFoldersList(File[] filesAndDirs, final String sortBy, final boolean ascending) {
         switch (sortBy) {
             case "NAME":
@@ -146,10 +153,143 @@ public class Utils {
                 break;
         }
 
-
         return filesAndDirs;
     }
 
+    public static String formatFileDetails(File file) {
+        String details = "";
 
+        long fileSize = file.length();
+        String formattedUsedSpace = humanReadableByteCountSI(fileSize);
+
+        Date lastModified = new Date(file.lastModified());
+        String formattedDateString = formatDateDetails(lastModified);
+
+        String mimeType = getReadableMimeType(getMimeType(Uri.fromFile(file)));
+
+        details = formattedDateString + ", " + formattedUsedSpace + ", " + mimeType;
+
+        return details;
+    }
+
+    public static String formatDateDetails(Date date) {
+        Date todayDate = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yy");;
+
+        if (todayDate.getDate() == date.getDate()) {
+            formatter = new SimpleDateFormat("HH:mm");
+        } else if (todayDate.getYear() == date.getYear()) {
+            formatter = new SimpleDateFormat("dd MMM");
+        }
+
+        return formatter.format(date);
+    }
+
+    public static String humanReadableByteCountSI(long bytes) {
+        if (-1000 < bytes && bytes < 1000) {
+            return bytes + " B";
+        }
+
+        CharacterIterator ci = new StringCharacterIterator("kMGTPE");
+        while (bytes <= -999_950 || bytes >= 999_950) {
+            bytes /= 1000;
+            ci.next();
+        }
+        return String.format("%.1f %cB", bytes / 1000.0, ci.current());
+    }
+
+    public static String getMimeType(Uri url) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(String.valueOf(url));
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
+    }
+
+    public static String getReadableMimeType(String mimeType) {
+        if (mimeType.length() == 0 || mimeType.split("/").length != 2) {
+            return mimeType;
+        }
+
+        String mediaType = mimeType.split("/")[0];
+        mediaType = mediaType.substring(0, 1).toUpperCase() + mediaType.substring(1);
+
+        String extension = mimeType.split("/")[1];
+        extension = extension.toUpperCase();
+
+        return extension + " " + mediaType;
+    }
+
+    public static int getFileTypeIcon(File file) {
+        if (file.isDirectory())
+            return R.drawable.ic_folder;
+
+        switch(MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file)))) {
+            case "png":
+            case "jpg":
+            case "jpeg":
+            case "gif":
+            case "bmp":
+                return R.drawable.ic_file_image;
+
+            case "mp3":
+            case "wav":
+            case "ogg":
+            case "midi":
+                return R.drawable.ic_file_audio;
+
+            case "mp4":
+            case "rmvb":
+            case "avi":
+            case "flv":
+            case "3gp":
+                return R.drawable.ic_file_video;
+
+            case "jsp":
+            case "html":
+            case "htm":
+            case "js":
+            case "php":
+            case "c":
+            case "cpp":
+            case "py":
+            case "json":
+                return R.drawable.ic_file_code;
+
+            case "txt":
+            case "xml":
+            case "log":
+                return R.drawable.ic_file_document;
+
+            case "xls":
+            case "xlsx":
+                return R.drawable.ic_file_sheets;
+
+            case "doc":
+            case "docx":
+                return R.drawable.ic_file_docs;
+
+            case "ppt":
+            case "pptx":
+                return R.drawable.ic_file_slides;
+
+            case "pdf":
+                return R.drawable.ic_file_pdf;
+
+            case "jar":
+            case "zip":
+            case "rar":
+            case "gz":
+            case "7z":
+                return R.drawable.ic_file_folder_zip;
+
+            case "apk":
+                return R.drawable.ic_file_apk;
+
+            default:
+                return R.drawable.ic_file_generic;
+        }
+    }
 
 }

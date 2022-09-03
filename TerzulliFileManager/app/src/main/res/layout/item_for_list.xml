@@ -7,8 +7,8 @@
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:paddingTop="@dimen/padding_tiny"
-    android:paddingBottom="@dimen/padding_tiny">
+    android:paddingTop="@dimen/padding_normal"
+    android:paddingBottom="@dimen/padding_normal">
 
     <RelativeLayout
         android:id="@+id/item_holder"
@@ -16,36 +16,51 @@
         android:layout_height="wrap_content"
         android:paddingEnd="@dimen/padding_medium">
 
-        <ImageView
-            android:id="@+id/item_icon"
-            android:layout_width="@dimen/file_list_icon_size"
-            android:layout_height="@dimen/file_list_icon_size"
-            android:layout_centerVertical="true"
-            android:padding="@dimen/padding_medium"
-            android:src="@drawable/ic_file_generic" />
+        <RelativeLayout
+            android:id="@+id/item_icon_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/padding_medium"
+            android:paddingRight="@dimen/padding_medium">
+
+
+            <ImageView
+                android:id="@+id/item_icon"
+                android:layout_width="@dimen/file_list_icon_size"
+                android:layout_height="@dimen/file_list_icon_size"
+                android:layout_centerVertical="true"
+                android:padding="@dimen/padding_medium"
+                android:src="@drawable/ic_file_generic" />
+
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/item_name"
+            android:textColor="?android:textColorPrimary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/item_icon"
-            android:layout_toEndOf="@+id/item_icon"
+            android:layout_alignTop="@+id/item_icon_container"
+            android:layout_toEndOf="@+id/item_icon_container"
             android:ellipsize="end"
             android:maxLines="1"
             android:paddingStart="@dimen/padding_tiny"
             android:paddingTop="@dimen/padding_small"
-            tools:text="@string/file_default_file_name" />
+            android:textSize="@dimen/text_medium"
+            tools:text="@string/file_default_file_name"
+            android:theme="@style/Theme.TerzulliFileManager.ItemNameColor" />
 
         <TextView
             android:id="@+id/item_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/item_name"
-            android:layout_toEndOf="@+id/item_icon"
+            android:layout_toEndOf="@+id/item_icon_container"
             android:alpha="0.6"
             android:paddingStart="@dimen/padding_tiny"
+            android:paddingTop="@dimen/padding_small"
             android:textSize="@dimen/text_small"
-            tools:text="@string/file_default_details" />
+            tools:text="@string/file_default_details"
+            android:theme="@style/Theme.TerzulliFileManager.ItemDetailsColor" />
 
         <!--
         <TextView

@@ -1,5 +1,7 @@
 package com.terzulli.terzullifilemanager.ui.adapters;
 
+import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -13,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.terzulli.terzullifilemanager.R;
+import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
 
@@ -29,7 +32,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     @NonNull
     @Override
     public ItemsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_file_for_list, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_for_list, parent, false);
 
         return new ItemsViewHolder(view);
     }
@@ -44,15 +47,14 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         // dettagli
         holder.item_name.setText(selectedFile.getName());
-        holder.item_details.setText(selectedFile.getName());
-
-        // icona
-        if (selectedFile.isDirectory()) {
-            holder.item_icon.setImageResource(R.drawable.ic_folder);
-        } else if (selectedFile.isFile()) {
-            // TODO icone varie in base all'estensione
-            holder.item_icon.setImageResource(R.drawable.ic_file_generic);
+        if (selectedFile.isFile()) {
+            holder.item_details.setText(formatFileDetails(selectedFile));
+        } else {
+            holder.item_details.setText("");
         }
+
+        //icona
+        holder.item_icon.setImageResource(Utils.getFileTypeIcon(selectedFile));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,7 +62,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 if (selectedFile.isDirectory()) {
                     //MainFragment.loadPath(selectedFile.getAbsolutePath());
                 } else if (selectedFile.isFile()) {
-                    // TODO icone varie in base all'estensione
+                    // TODO azioni varie in base all'estensione
                     String fileType = "image/*";
 
                     try {
