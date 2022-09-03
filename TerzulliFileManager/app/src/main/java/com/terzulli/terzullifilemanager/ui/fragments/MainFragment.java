@@ -19,8 +19,10 @@ import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.ui.activities.MainActivity;
 import com.terzulli.terzullifilemanager.ui.adapters.ItemsAdapter;
 import com.terzulli.terzullifilemanager.ui.fragments.data.MainFragmentViewModel;
+import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class MainFragment extends Fragment {
@@ -29,6 +31,8 @@ public class MainFragment extends Fragment {
     private View view;
     private SwipeRefreshLayout swipeRefreshLayout;
     private MainFragmentViewModel mainFragmentViewModel;
+    private String sortBy;
+    private boolean ascending;
 
     public MainFragment() {
         // Required empty public constructor
@@ -41,7 +45,8 @@ public class MainFragment extends Fragment {
         setActionBarTitle();
         setHasOptionsMenu(true);
 
-
+        sortBy = "NAME";
+        ascending = true;
     }
 
     @Override
@@ -95,15 +100,16 @@ public class MainFragment extends Fragment {
         // TODO caricamento elementi
 
         File rootFile = new File(path);
-        File[] filesAndFolders = rootFile.listFiles();
+        File[] filesAndDirs = rootFile.listFiles();
+        Utils.sortFileAndFoldersList(filesAndDirs, sortBy, true);
 
-        if (filesAndFolders == null || filesAndFolders.length == 0) {
+        if (filesAndDirs == null || filesAndDirs.length == 0) {
             initializeEmptyDirectoryLayout(true);
             return;
         }
 
         initializeEmptyDirectoryLayout(false);
-        recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndFolders));
+        recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
 
 
 

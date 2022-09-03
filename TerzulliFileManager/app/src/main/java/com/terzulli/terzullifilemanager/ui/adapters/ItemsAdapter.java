@@ -1,6 +1,8 @@
 package com.terzulli.terzullifilemanager.ui.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +18,11 @@ import java.io.File;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
     private Context context;
-    private File[] filesAndFolders;
+    private File[] filesAndDirs;
 
     public ItemsAdapter(Context context, File[] filesAndFolders) {
         this.context = context;
-        this.filesAndFolders = filesAndFolders;
+        this.filesAndDirs = filesAndFolders;
 
     }
 
@@ -34,13 +36,15 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     @Override
     public void onBindViewHolder(@NonNull ItemsViewHolder holder, int position) {
-        if (filesAndFolders == null || filesAndFolders.length == 0) {
+        if (filesAndDirs == null || filesAndDirs.length == 0) {
             return;
         }
 
-        File selectedFile = filesAndFolders[position];
+        File selectedFile = filesAndDirs[position];
 
+        // dettagli
         holder.item_name.setText(selectedFile.getName());
+        holder.item_details.setText(selectedFile.getName());
 
         // icona
         if (selectedFile.isDirectory()) {
@@ -50,14 +54,35 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             holder.item_icon.setImageResource(R.drawable.ic_file_generic);
         }
 
-        holder.item_details.setText(selectedFile.getName());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (selectedFile.isDirectory()) {
+                    //MainFragment.loadPath(selectedFile.getAbsolutePath());
+                } else if (selectedFile.isFile()) {
+                    // TODO icone varie in base all'estensione
+                    String fileType = "image/*";
+
+                    try {
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_VIEW);
+                        intent.setDataAndType(Uri.parse(selectedFile.getAbsolutePath()), fileType);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        });
+
 
 
     }
 
     @Override
     public int getItemCount() {
-        return filesAndFolders.length;
+        return filesAndDirs.length;
     }
 
     public class ItemsViewHolder extends RecyclerView.ViewHolder {
