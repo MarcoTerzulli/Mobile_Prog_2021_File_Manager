@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Environment;
 import android.webkit.MimeTypeMap;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -228,6 +229,19 @@ public class Utils {
         return extension + " " + mediaType;
     }
 
+    public static boolean fileIsImage(File file) {
+        switch (MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file)))) {
+            case "png":
+            case "jpg":
+            case "jpeg":
+            case "gif":
+            case "bmp":
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static int getFileTypeIcon(File file) {
         if (file.isDirectory())
             return R.drawable.ic_folder;
@@ -238,6 +252,7 @@ public class Utils {
             case "jpeg":
             case "gif":
             case "bmp":
+                // TODO preview immagine
                 return R.drawable.ic_file_image;
 
             case "mp3":
@@ -299,4 +314,18 @@ public class Utils {
         }
     }
 
+    public static String getFileExtension(File file) {
+        String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+
+        if (ext.length() > 0)
+            return ext;
+        else {
+            int dotPosition = file.getName().lastIndexOf(".");
+            if (dotPosition >= 0) {
+                return file.getName().substring(dotPosition).replace(".", "");
+            }
+        }
+
+        return "";
+    }
 }

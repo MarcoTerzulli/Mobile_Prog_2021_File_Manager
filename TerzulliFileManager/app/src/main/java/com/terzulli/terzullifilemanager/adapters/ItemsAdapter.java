@@ -4,12 +4,17 @@ import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,7 +52,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         File selectedFile = filesAndDirs[position];
 
         //icona
-        holder.item_icon.setImageResource(Utils.getFileTypeIcon(selectedFile));
+        if (Utils.fileIsImage(selectedFile))
+            holder.item_icon.setImageBitmap(loadImagePreview(selectedFile));
+        else
+            holder.item_icon.setImageResource(Utils.getFileTypeIcon(selectedFile));
 
         // dettagli
         holder.item_name.setText(selectedFile.getName());
@@ -67,22 +75,43 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 if (selectedFile.isDirectory()) {
                     MainFragment.loadPath(selectedFile.getAbsolutePath());
                 } else if (selectedFile.isFile()) {
-                    // TODO azioni varie in base all'estensione
-                    String fileType = "image/*";
 
-                    try {
-                        Intent intent = new Intent();
-                        intent.setAction(Intent.ACTION_VIEW);
-                        intent.setDataAndType(Uri.parse(selectedFile.getAbsolutePath()), fileType);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                    } catch (Exception e) {
+                    MimeTypeMap map = MimeTypeMap.getSingleton();
+                    String ext = Utils.getFileExtension(selectedFile);
+                    String type = map.getMimeTypeFromExtension(ext);
 
+                    //if (type == null)
+                    //type = "*/*";
+
+                    if (type == null)
+                        Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
+                    else {
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            Uri data = Uri.parse(selectedFile.getAbsolutePath());
+
+                            intent.setDataAndType(data, type);
+                            context.startActivity(intent);
+                        } catch (Exception e) {
+                            Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
+                        }
                     }
+
                 }
             }
         });
 
+    }
+
+    private Bitmap loadImagePreview(File file) {
+        if (file == null)
+            return null;
+
+        if (file.exists()) {
+            return BitmapFactory.decodeFile(file.getAbsolutePath());
+        }
+
+        return null;
     }
 
     @Override

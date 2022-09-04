@@ -68,8 +68,10 @@ public class MainFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
-        currentPath = pathHome;
-        loadPath(pathHome);
+        //currentPath = pathHome;
+        if(currentPath == null)
+            currentPath = pathHome;
+        loadPath(currentPath);
 
         setActionBarTitle();
 
@@ -145,5 +147,8 @@ public class MainFragment extends Fragment {
         return false;
     }
 
+    public static void setHomePath(String path) {
+        pathHome = path;
+    }
 
 }

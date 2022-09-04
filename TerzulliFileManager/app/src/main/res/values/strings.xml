@@ -73,5 +73,6 @@
     <string name="file_item_icon_description">Item Icon</string>
     <string name="press_again_to_exit">Press again to exit app</string>
     <string name="unknown_file_bin">BIN file</string>
+    <string name="cant_open_file">Can\'t open the file</string>
 
 </resources>
