@@ -1,14 +1,14 @@
-package com.terzulli.terzullifilemanager.ui.fragments.data;
+package com.terzulli.terzullifilemanager.fragments.data;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class RecentsViewModel extends ViewModel {
+public class HomeViewModel extends ViewModel {
 
     private final MutableLiveData<String> mText;
 
-    public RecentsViewModel() {
+    public HomeViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("This is home fragment");
     }

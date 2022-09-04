@@ -70,5 +70,8 @@
     <string name="frag_no_items">No items</string>
     <string name="file_default_file_name">file.txt</string>
     <string name="file_default_details">Jen 1, 1 kB, JPG Image</string>
+    <string name="file_item_icon_description">Item Icon</string>
+    <string name="press_again_to_exit">Press again to exit app</string>
+    <string name="unknown_file_bin">BIN file</string>
 
 </resources>

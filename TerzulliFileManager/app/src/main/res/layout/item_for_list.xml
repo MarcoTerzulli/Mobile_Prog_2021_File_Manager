@@ -7,14 +7,15 @@
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:paddingTop="@dimen/padding_normal"
-    android:paddingBottom="@dimen/padding_normal">
+    android:paddingTop="@dimen/padding_medium"
+    android:paddingBottom="@dimen/padding_medium">
 
     <RelativeLayout
         android:id="@+id/item_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingEnd="@dimen/padding_medium">
+        android:paddingEnd="@dimen/padding_medium"
+        tools:ignore="RtlSymmetry">
 
         <RelativeLayout
             android:id="@+id/item_icon_container"
@@ -23,58 +24,51 @@
             android:paddingLeft="@dimen/padding_medium"
             android:paddingRight="@dimen/padding_medium">
 
-
             <ImageView
                 android:id="@+id/item_icon"
                 android:layout_width="@dimen/file_list_icon_size"
                 android:layout_height="@dimen/file_list_icon_size"
                 android:layout_centerVertical="true"
+                android:contentDescription="@string/file_item_icon_description"
                 android:padding="@dimen/padding_medium"
                 android:src="@drawable/ic_file_generic" />
 
         </RelativeLayout>
 
-        <TextView
-            android:id="@+id/item_name"
-            android:textColor="?android:textColorPrimary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/item_icon_container"
-            android:layout_toEndOf="@+id/item_icon_container"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:paddingStart="@dimen/padding_tiny"
-            android:paddingTop="@dimen/padding_small"
-            android:textSize="@dimen/text_medium"
-            tools:text="@string/file_default_file_name"
-            android:theme="@style/Theme.TerzulliFileManager.ItemNameColor" />
-
-        <TextView
-            android:id="@+id/item_details"
+        <RelativeLayout
+            android:id="@+id/item_text_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/item_name"
-            android:layout_toEndOf="@+id/item_icon_container"
-            android:alpha="0.6"
-            android:paddingStart="@dimen/padding_tiny"
-            android:paddingTop="@dimen/padding_small"
-            android:textSize="@dimen/text_small"
-            tools:text="@string/file_default_details"
-            android:theme="@style/Theme.TerzulliFileManager.ItemDetailsColor" />
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/item_icon_container">
 
-        <!--
-        <TextView
-            android:id="@+id/item_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/item_details"
-            android:layout_alignBottom="@+id/item_details"
-            android:layout_toEndOf="@+id/item_details"
-            android:alpha="0.6"
-            android:gravity="end"
-            android:textSize="@dimen/text_small"
-            tools:text="1.1.1980" />
-            -->
+            <TextView
+                android:id="@+id/item_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingStart="@dimen/padding_tiny"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="@dimen/text_medium"
+                android:theme="@style/Theme.TerzulliFileManager.ItemNameColor"
+                tools:ignore="RtlSymmetry"
+                tools:text="@string/file_default_file_name" />
+
+            <TextView
+                android:id="@+id/item_details"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/item_name"
+                android:alpha="0.6"
+                android:paddingStart="@dimen/padding_tiny"
+                android:paddingTop="@dimen/padding_small"
+                android:textSize="@dimen/text_small"
+                android:theme="@style/Theme.TerzulliFileManager.ItemDetailsColor"
+                tools:ignore="RtlSymmetry"
+                tools:text="@string/file_default_details" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
 </FrameLayout>

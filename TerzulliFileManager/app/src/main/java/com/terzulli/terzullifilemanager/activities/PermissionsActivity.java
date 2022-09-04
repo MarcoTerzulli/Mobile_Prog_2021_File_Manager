@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.activities;
+package com.terzulli.terzullifilemanager.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -14,7 +14,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
-import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;

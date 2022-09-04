@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.adapters;
+package com.terzulli.terzullifilemanager.adapters;
 
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
 
@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.terzulli.terzullifilemanager.R;
+import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
@@ -45,22 +46,26 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         File selectedFile = filesAndDirs[position];
 
-        // dettagli
-        holder.item_name.setText(selectedFile.getName());
-        if (selectedFile.isFile()) {
-            holder.item_details.setText(formatFileDetails(selectedFile));
-        } else {
-            holder.item_details.setText("");
-        }
-
         //icona
         holder.item_icon.setImageResource(Utils.getFileTypeIcon(selectedFile));
+
+        // dettagli
+        holder.item_name.setText(selectedFile.getName());
+        if (selectedFile.isDirectory()) {
+            // questo permette di centrare la textview con il nome all'interno del container
+            holder.item_details.setText("");
+            holder.item_details.setVisibility(View.GONE);
+        } else {
+            holder.item_details.setText(formatFileDetails(selectedFile));
+            holder.item_details.setVisibility(View.VISIBLE);
+        }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 if (selectedFile.isDirectory()) {
-                    //MainFragment.loadPath(selectedFile.getAbsolutePath());
+                    MainFragment.loadPath(selectedFile.getAbsolutePath());
                 } else if (selectedFile.isFile()) {
                     // TODO azioni varie in base all'estensione
                     String fileType = "image/*";
@@ -77,8 +82,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 }
             }
         });
-
-
 
     }
 

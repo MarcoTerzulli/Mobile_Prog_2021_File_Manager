@@ -7,49 +7,49 @@
 
     <fragment
         android:id="@+id/nav_recents"
-        android:name="com.terzulli.terzullifilemanager.ui.fragments.RecentsFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.RecentsFragment"
         android:label="@string/drawer_menu_recent"
         tools:layout="@layout/fragment_recents" />
 
     <fragment
         android:id="@+id/nav_images"
-        android:name="com.terzulli.terzullifilemanager.ui.fragments.ImagesFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.ImagesFragment"
         android:label="@string/drawer_menu_media_images"
         tools:layout="@layout/fragment_images" />
 
     <fragment
         android:id="@+id/nav_videos"
-        android:name="com.terzulli.terzullifilemanager.ui.fragments.VideosFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.VideosFragment"
         android:label="@string/drawer_menu_media_videos"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_audio"
-        android:name="com.terzulli.terzullifilemanager.ui.fragments.AudioFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.AudioFragment"
         android:label="@string/drawer_menu_media_audio"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_download"
-        android:name="com.terzulli.terzullifilemanager.ui.fragments.DownloadFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.DownloadFragment"
         android:label="@string/drawer_menu_download"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_internal_storage"
-        android:name="com.terzulli.terzullifilemanager.ui.fragments.MainFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.MainFragment"
         android:title="@string/drawer_menu_storage_internal"
         tools:layout="@layout/fragment_main" />
 
     <fragment
         android:id="@+id/nav_sd_card"
-        android:name="com.terzulli.terzullifilemanager.ui.fragments.MainFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.MainFragment"
         android:title="@string/drawer_menu_storage_sd_card"
         tools:layout="@layout/fragment_main" />
 
     <fragment
         android:id="@+id/nav_external_storage"
-        android:name="com.terzulli.terzullifilemanager.ui.fragments.MainFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.MainFragment"
         android:title="@string/drawer_menu_storage_external"
         tools:layout="@layout/fragment_main" />
 

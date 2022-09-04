@@ -167,7 +167,11 @@ public class Utils {
 
         String mimeType = getReadableMimeType(getMimeType(Uri.fromFile(file)));
 
-        details = formattedDateString + ", " + formattedUsedSpace + ", " + mimeType;
+        details = formattedDateString + ", " + formattedUsedSpace;
+        if (!mimeType.equals(""))
+            details +=  ", " + mimeType;
+        else
+            details +=  ", BIN file";
 
         return details;
     }
@@ -208,6 +212,9 @@ public class Utils {
     }
 
     public static String getReadableMimeType(String mimeType) {
+        if (mimeType == null)
+            return "";
+
         if (mimeType.length() == 0 || mimeType.split("/").length != 2) {
             return mimeType;
         }

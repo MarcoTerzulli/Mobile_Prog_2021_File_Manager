@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.fragments;
+package com.terzulli.terzullifilemanager.fragments;
 
 import androidx.lifecycle.ViewModelProvider;
 
@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.terzulli.terzullifilemanager.R;
-import com.terzulli.terzullifilemanager.ui.fragments.data.RecentsViewModel;
+import com.terzulli.terzullifilemanager.fragments.data.RecentsViewModel;
 
 public class RecentsFragment extends Fragment {
 

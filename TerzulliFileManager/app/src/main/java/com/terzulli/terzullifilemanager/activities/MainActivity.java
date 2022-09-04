@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.activities;
+package com.terzulli.terzullifilemanager.activities;
 
 import android.annotation.SuppressLint;
 import android.os.Build;
@@ -24,12 +24,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
-import com.terzulli.terzullifilemanager.ui.fragments.AudioFragment;
-import com.terzulli.terzullifilemanager.ui.fragments.DownloadFragment;
-import com.terzulli.terzullifilemanager.ui.fragments.ImagesFragment;
-import com.terzulli.terzullifilemanager.ui.fragments.MainFragment;
-import com.terzulli.terzullifilemanager.ui.fragments.VideosFragment;
-import com.terzulli.terzullifilemanager.ui.fragments.RecentsFragment;
+import com.terzulli.terzullifilemanager.fragments.AudioFragment;
+import com.terzulli.terzullifilemanager.fragments.DownloadFragment;
+import com.terzulli.terzullifilemanager.fragments.ImagesFragment;
+import com.terzulli.terzullifilemanager.fragments.MainFragment;
+import com.terzulli.terzullifilemanager.fragments.VideosFragment;
+import com.terzulli.terzullifilemanager.fragments.RecentsFragment;
 
 import java.io.File;
 import java.util.List;
@@ -44,6 +44,8 @@ public class MainActivity extends PermissionsActivity
     private DrawerLayout drawer;
     private SearchView searchView;
     private Toolbar toolbar;
+    private long timeBackPressed;
+    private static final int backPressedInterval = 2000;
     //private Menu toolbarMenu;
 
     @Override
@@ -228,6 +230,19 @@ public class MainActivity extends PermissionsActivity
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if (getForegroundFragment() != null && getForegroundFragment() instanceof MainFragment) {
+            if (!MainFragment.isInHomePath()) {
+                // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
+                MainFragment.loadPath(MainFragment.getParentPath());
+            } else {
+                if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
+                    finish();
+                else {
+                    timeBackPressed = System.currentTimeMillis();
+                    Toast.makeText(MainActivity.this, R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
+                }
+            }
+
         } else {
             super.onBackPressed();
         }
@@ -241,6 +256,8 @@ public class MainActivity extends PermissionsActivity
         if (currentFragment != null && currentFragment instanceof MainFragment) {
             return;
         }
+
+        MainFragment.updateList();
 
     }
 

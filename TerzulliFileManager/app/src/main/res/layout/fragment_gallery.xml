@@ -5,7 +5,7 @@
     android:id="@+id/fragment_gallery"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.GalleryFragment">
+    tools:context=".fragments.GalleryFragment">
 
     <TextView
         android:id="@+id/text_gallery"

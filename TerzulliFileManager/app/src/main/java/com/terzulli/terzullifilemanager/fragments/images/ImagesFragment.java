@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.fragments.images;
+package com.terzulli.terzullifilemanager.fragments.images;
 
 import androidx.lifecycle.ViewModelProvider;
 
@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.terzulli.terzullifilemanager.R;
-import com.terzulli.terzullifilemanager.ui.fragments.data.ImagesViewModel;
+import com.terzulli.terzullifilemanager.fragments.data.ImagesViewModel;
 
 public class ImagesFragment extends Fragment {
 

@@ -1,4 +1,4 @@
-package com.terzulli.terzullifilemanager.ui.fragments;
+package com.terzulli.terzullifilemanager.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.terzulli.terzullifilemanager.databinding.FragmentHomeBinding;
-import com.terzulli.terzullifilemanager.ui.fragments.data.HomeViewModel;
+import com.terzulli.terzullifilemanager.fragments.data.HomeViewModel;
 
 public class HomeFragment extends Fragment {
 

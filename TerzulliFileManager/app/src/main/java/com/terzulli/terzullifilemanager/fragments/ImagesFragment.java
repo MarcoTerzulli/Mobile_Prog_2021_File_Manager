@@ -1,14 +1,16 @@
-package com.terzulli.terzullifilemanager.ui.fragments;
+package com.terzulli.terzullifilemanager.fragments;
 
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-public class AudioFragment extends Fragment {
+public class ImagesFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+
     }
 }
