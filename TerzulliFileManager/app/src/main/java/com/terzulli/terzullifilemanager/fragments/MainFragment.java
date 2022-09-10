@@ -1,23 +1,19 @@
 package com.terzulli.terzullifilemanager.fragments;
 
-import android.app.Activity;
 import android.os.Bundle;
-
-import androidx.appcompat.app.ActionBar;
-import androidx.core.view.GravityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.os.Environment;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
@@ -26,10 +22,7 @@ import com.terzulli.terzullifilemanager.fragments.data.MainFragmentViewModel;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -63,17 +56,16 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         // TODO inizializzazione breadcrumb
 
-        //Toast.makeText(getContext(), Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
-
         mainFragmentViewModel = new ViewModelProvider(this).get(MainFragmentViewModel.class);
         swipeRefreshLayout = view.findViewById(R.id.fragment_main_swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.fragment_main_list_view);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         swipeRefreshLayout.setOnRefreshListener(this);
+
         pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
         //currentPath = pathHome;
-        if(currentPath == null)
+        if (currentPath == null)
             currentPath = pathHome;
         loadPath(currentPath);
 
@@ -114,37 +106,32 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         swipeRefreshLayout.setRefreshing(true);
         currentPath = path;
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        new Handler().postDelayed(() -> {
+            File rootFile = new File(path);
+            File[] filesAndDirs = rootFile.listFiles();
+            Utils.sortFileAndFoldersList(filesAndDirs, sortBy, ascending);
+
+            // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
+            initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
+
+            recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
+            swipeRefreshLayout.setRefreshing(false);
+        }, 10);
+
+
+        /*ExecutorService executor = Executors.newSingleThreadExecutor();
         Runnable backgroundRunnable = () -> {
             File rootFile = new File(path);
             File[] filesAndDirs = rootFile.listFiles();
             Utils.sortFileAndFoldersList(filesAndDirs, sortBy, ascending);
 
+            // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
             initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
 
             recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
-
             swipeRefreshLayout.setRefreshing(false);
         };
-        executor.execute(backgroundRunnable);
-
-
-
-
-
-
-
-
-        /*File rootFile = new File(path);
-        File[] filesAndDirs = rootFile.listFiles();
-        Utils.sortFileAndFoldersList(filesAndDirs, sortBy, ascending);
-
-        initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
-
-        // TODO gestione con thread
-        recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
-
-        swipeRefreshLayout.setRefreshing(false);*/
+        executor.execute(backgroundRunnable);*/
     }
 
     public static void updateList() {
@@ -167,9 +154,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public static boolean isInHomePath() {
         // se siamo già nella root
-        if (Objects.equals(currentPath, pathHome))
-            return true;
-        return false;
+        return Objects.equals(currentPath, pathHome);
     }
 
     public static void setHomePath(String path) {

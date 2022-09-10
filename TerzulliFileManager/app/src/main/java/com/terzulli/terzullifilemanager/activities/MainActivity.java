@@ -8,30 +8,27 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.material.navigation.NavigationView;
-
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.navigation.NavigationView;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 import com.terzulli.terzullifilemanager.fragments.AudioFragment;
 import com.terzulli.terzullifilemanager.fragments.DownloadFragment;
 import com.terzulli.terzullifilemanager.fragments.ImagesFragment;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
-import com.terzulli.terzullifilemanager.fragments.VideosFragment;
 import com.terzulli.terzullifilemanager.fragments.RecentsFragment;
+import com.terzulli.terzullifilemanager.fragments.VideosFragment;
 
-import java.io.File;
 import java.util.List;
 
 public class MainActivity extends PermissionsActivity
@@ -39,14 +36,11 @@ public class MainActivity extends PermissionsActivity
 
     private AppBarConfiguration AppBarConfiguration;
     private ActivityMainBinding binding;
-    private RecyclerView recyclerView;
-    private List<File> fileList;
     private DrawerLayout drawer;
     private SearchView searchView;
     private Toolbar toolbar;
     private long timeBackPressed;
     private static final int backPressedInterval = 2000;
-    //private Menu toolbarMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +92,7 @@ public class MainActivity extends PermissionsActivity
     }
 
     // metodo specifico per navHostFragment: restituisce il fragment corrente
-    public Fragment getForegroundFragment(){
+    public Fragment getForegroundFragment() {
         Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_content);
         return navHostFragment == null ? null : navHostFragment.getChildFragmentManager().getFragments().get(0);
     }
