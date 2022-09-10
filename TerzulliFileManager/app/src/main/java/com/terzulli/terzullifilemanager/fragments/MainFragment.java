@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Environment;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +28,10 @@ import com.terzulli.terzullifilemanager.utils.Utils;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class MainFragment extends Fragment {
+public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private static RecyclerView recyclerView;
     private static SwipeRefreshLayout swipeRefreshLayout;
@@ -67,6 +70,7 @@ public class MainFragment extends Fragment {
         recyclerView = view.findViewById(R.id.fragment_main_list_view);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        swipeRefreshLayout.setOnRefreshListener(this);
         pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
         //currentPath = pathHome;
         if(currentPath == null)
@@ -110,7 +114,28 @@ public class MainFragment extends Fragment {
         swipeRefreshLayout.setRefreshing(true);
         currentPath = path;
 
-        File rootFile = new File(path);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Runnable backgroundRunnable = () -> {
+            File rootFile = new File(path);
+            File[] filesAndDirs = rootFile.listFiles();
+            Utils.sortFileAndFoldersList(filesAndDirs, sortBy, ascending);
+
+            initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
+
+            recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
+
+            swipeRefreshLayout.setRefreshing(false);
+        };
+        executor.execute(backgroundRunnable);
+
+
+
+
+
+
+
+
+        /*File rootFile = new File(path);
         File[] filesAndDirs = rootFile.listFiles();
         Utils.sortFileAndFoldersList(filesAndDirs, sortBy, ascending);
 
@@ -119,7 +144,7 @@ public class MainFragment extends Fragment {
         // TODO gestione con thread
         recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
 
-        swipeRefreshLayout.setRefreshing(false);
+        swipeRefreshLayout.setRefreshing(false);*/
     }
 
     public static void updateList() {
@@ -151,4 +176,8 @@ public class MainFragment extends Fragment {
         pathHome = path;
     }
 
+    @Override
+    public void onRefresh() {
+        updateList();
+    }
 }
