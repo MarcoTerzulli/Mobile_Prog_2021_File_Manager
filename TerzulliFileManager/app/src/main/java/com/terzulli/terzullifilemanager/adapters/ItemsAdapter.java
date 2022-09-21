@@ -192,6 +192,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     @Override
     public int getItemCount() {
+        if (filesAndDirs == null)
+            return 0;
         return filesAndDirs.length;
     }
 

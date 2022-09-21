@@ -45,6 +45,9 @@ public class Utils {
     }
 
     public static void sortByName(File[] files, final boolean ascending) {
+        if (files == null)
+            return;
+
         if (ascending) {
             Arrays.sort(files, new Comparator<File>() {
                 @Override
@@ -75,6 +78,9 @@ public class Utils {
     }
 
     public static void sortByDate(File[] files, final boolean ascending) {
+        if (files == null)
+            return;
+
         if (ascending) {
 
             Arrays.sort(files, new Comparator<File>() {
@@ -108,6 +114,9 @@ public class Utils {
     }
 
     public static void sortBySize(File[] files, final boolean ascending) {
+        if (files == null)
+            return;
+
         if (ascending) {
             Arrays.sort(files, new Comparator<File>() {
                 @Override
