@@ -6,17 +6,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.net.Uri;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.terzulli.terzullifilemanager.R;
@@ -24,14 +27,17 @@ import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
-    private Context context;
-    private File[] filesAndDirs;
+    private final Context context;
+    private final File[] filesAndDirs;
+    private ArrayList<File> selectedFiles;
 
     public ItemsAdapter(Context context, File[] filesAndFolders) {
         this.context = context;
         this.filesAndDirs = filesAndFolders;
+        this.selectedFiles = new ArrayList<>();
 
     }
 
@@ -52,26 +58,27 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         File selectedFile = filesAndDirs[position];
 
         //icona
-        if (Utils.fileIsImage(selectedFile))
-            holder.item_icon.setImageBitmap(loadImagePreview(selectedFile));
-        else
-            holder.item_icon.setImageResource(Utils.getFileTypeIcon(selectedFile));
+        setItemIcon(position, holder, false);
+
+        // background
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        setItemBackgroundColor(outValue.data, holder);
 
         // dettagli
-        holder.item_name.setText(selectedFile.getName());
+        holder.itemName.setText(selectedFile.getName());
         if (selectedFile.isDirectory()) {
             // questo permette di centrare la textview con il nome all'interno del container
-            holder.item_details.setText("");
-            holder.item_details.setVisibility(View.GONE);
+            holder.itemDetails.setText("");
+            holder.itemDetails.setVisibility(View.GONE);
         } else {
-            holder.item_details.setText(formatFileDetails(selectedFile));
-            holder.item_details.setVisibility(View.VISIBLE);
+            holder.itemDetails.setText(formatFileDetails(selectedFile));
+            holder.itemDetails.setVisibility(View.VISIBLE);
         }
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        holder.itemView.setOnClickListener(view -> {
 
+            if (!isSelectionModeEnabled()) {
                 if (selectedFile.isDirectory()) {
                     MainFragment.loadPath(selectedFile.getAbsolutePath());
                 } else if (selectedFile.isFile()) {
@@ -96,11 +103,80 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                             Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
                         }
                     }
-
                 }
+
+            } else {
+                toggleItemSelection(position, holder, true);
             }
         });
 
+        // gestione selezione item con long click
+        holder.itemView.setOnLongClickListener(view -> {
+            toggleItemSelection(position, holder, false);
+
+            return true;
+        });
+
+        // gestione selezione item con click sull'icona
+        holder.itemIcon.setOnClickListener(view -> toggleItemSelection(position, holder, true));
+    }
+
+    private boolean isSelectionModeEnabled() {
+        if (selectedFiles == null)
+            return false;
+        else return !selectedFiles.isEmpty();
+    }
+
+    private void setItemIcon(int position, @NonNull ItemsViewHolder holder, boolean isSelected) {
+        File selectedFile = filesAndDirs[position];
+
+        if (!isSelected) {
+            if (Utils.fileIsImage(selectedFile))
+                holder.itemIcon.setImageBitmap(loadImagePreview(selectedFile));
+            else
+                holder.itemIcon.setImageResource(Utils.getFileTypeIcon(selectedFile));
+        } else {
+            holder.itemIcon.setImageResource(R.drawable.ic_check_circle_filled);
+        }
+
+    }
+
+    private void toggleItemSelection(int position, @NonNull ItemsViewHolder holder, boolean unselect) {
+        File selectedFile = filesAndDirs[position];
+        int color;
+        boolean setSelectedIcon = false;
+
+        if (selectedFiles == null)
+            return;
+
+        if (selectedFiles.contains(selectedFile) && unselect) {
+            // unselect
+            selectedFiles.remove(selectedFile);
+
+            TypedValue outValue = new TypedValue();
+            context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+            color = outValue.data;
+
+            setItemBackgroundColor(color, holder);
+        } else {
+            // select
+            selectedFiles.add(selectedFile);
+
+            color = ContextCompat.getColor(context, R.color.primary_200_light);
+            setSelectedIcon = true;
+        }
+
+        setItemBackgroundColor(color, holder);
+        setItemIcon(position, holder, setSelectedIcon);
+    }
+
+    private void setItemBackgroundColor(final int color, @NonNull ItemsViewHolder holder) {
+        holder.itemHolder.setBackgroundColor(color);
+        holder.itemIconContainer.setBackgroundColor(color);
+        holder.itemIcon.setBackgroundColor(color);
+        holder.itemTextContainer.setBackgroundColor(color);
+        holder.itemName.setBackgroundColor(color);
+        holder.itemDetails.setBackgroundColor(color);
     }
 
     private Bitmap loadImagePreview(File file) {
@@ -120,15 +196,19 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     public class ItemsViewHolder extends RecyclerView.ViewHolder {
-        private ImageView item_icon;
-        private TextView item_name, item_details;
+        private final ImageView itemIcon;
+        private final TextView itemName, itemDetails;
+        private final RelativeLayout itemHolder, itemIconContainer, itemTextContainer;
 
         public ItemsViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            item_icon = itemView.findViewById(R.id.item_icon);
-            item_name = itemView.findViewById(R.id.item_name);
-            item_details = itemView.findViewById(R.id.item_details);
+            itemIcon = itemView.findViewById(R.id.item_icon);
+            itemName = itemView.findViewById(R.id.item_name);
+            itemDetails = itemView.findViewById(R.id.item_details);
+            itemHolder = itemView.findViewById(R.id.item_holder);
+            itemIconContainer = itemView.findViewById(R.id.item_icon_container);
+            itemTextContainer = itemView.findViewById(R.id.item_text_container);
         }
     }
 }

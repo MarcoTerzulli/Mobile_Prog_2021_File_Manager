@@ -16,6 +16,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_open_with"
+        android:title="@string/action_open_with"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_sort_by"
         android:title="@string/action_sort_by"
         app:showAsAction="never" />

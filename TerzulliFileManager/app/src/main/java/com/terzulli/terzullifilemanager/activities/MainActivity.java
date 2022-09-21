@@ -129,6 +129,9 @@ public class MainActivity extends PermissionsActivity
             case R.id.menu_new_folder:
                 Toast.makeText(MainActivity.this, "Menu new folder", Toast.LENGTH_SHORT).show();
                 break;
+            case R.id.menu_open_with:
+                Toast.makeText(MainActivity.this, "Menu open with", Toast.LENGTH_SHORT).show();
+                break;
             case R.id.menu_sort_by:
                 Toast.makeText(MainActivity.this, "Menu sort by", Toast.LENGTH_SHORT).show();
                 break;
@@ -185,6 +188,7 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_compress).setVisible(false);
         toolbarMenu.findItem(R.id.menu_decompress).setVisible(false);
         menu.findItem(R.id.menu_sort_by).setVisible(true);
+        menu.findItem(R.id.menu_open_with).setVisible(false);
         menu.findItem(R.id.menu_select_all).setVisible(true);
         menu.findItem(R.id.menu_get_info).setVisible(true);
 

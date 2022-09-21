@@ -37,11 +37,13 @@
                     <item
                         android:id="@+id/nav_sd_card"
                         android:icon="@drawable/ic_menu_sd_card"
-                        android:title="@string/drawer_menu_storage_sd_card" />
+                        android:title="@string/drawer_menu_storage_sd_card"
+                        android:visible="false" />
                     <item
                         android:id="@+id/nav_external_storage"
                         android:icon="@drawable/ic_menu_usb"
-                        android:title="@string/drawer_menu_storage_external" />
+                        android:title="@string/drawer_menu_storage_external"
+                        android:visible="false"/>
                 </group>
             </menu>
         </item>
