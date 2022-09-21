@@ -1,5 +1,6 @@
 package com.terzulli.terzullifilemanager.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -27,13 +28,16 @@ import java.util.Objects;
 public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private static RecyclerView recyclerView;
+    @SuppressLint("StaticFieldLeak")
     private static SwipeRefreshLayout swipeRefreshLayout;
     private static MainFragmentViewModel mainFragmentViewModel;
+    @SuppressLint("StaticFieldLeak")
     private static View view;
     private static String currentPath;
     private static String sortBy;
     private static boolean ascending;
     private static String pathHome;
+    private static ActionBar supportActionBar;
 
     public MainFragment() {
         // Required empty public constructor
@@ -56,6 +60,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         // TODO inizializzazione breadcrumb
 
+        supportActionBar = ((MainActivity) requireActivity()).getSupportActionBar();
         mainFragmentViewModel = new ViewModelProvider(this).get(MainFragmentViewModel.class);
         swipeRefreshLayout = view.findViewById(R.id.fragment_main_swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.fragment_main_list_view);
@@ -69,7 +74,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             currentPath = pathHome;
         loadPath(currentPath);
 
-        setActionBarTitle();
+        setActionBarTitle(getCurrentDirectoryName());
 
         return view;
     }
@@ -78,12 +83,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onResume() {
         super.onResume();
 
-        setActionBarTitle();
+        setActionBarTitle(getCurrentDirectoryName());
     }
 
-    private void setActionBarTitle() {
-        String title = getString(R.string.drawer_menu_storage_internal);
-        ActionBar supportActionBar = ((MainActivity) requireActivity()).getSupportActionBar();
+    private static void setActionBarTitle(String title) {
         if (supportActionBar != null)
             Objects.requireNonNull(supportActionBar).setTitle(title);
     }
@@ -103,8 +106,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             return;
         }
 
-        swipeRefreshLayout.setRefreshing(true);
         currentPath = path;
+        setActionBarTitle(getCurrentDirectoryName());
+
+        swipeRefreshLayout.setRefreshing(true);
 
         new Handler().postDelayed(() -> {
             File rootFile = new File(path);
@@ -132,6 +137,19 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             swipeRefreshLayout.setRefreshing(false);
         };
         executor.execute(backgroundRunnable);*/
+    }
+
+    private static String getCurrentDirectoryName() {
+        if (isInHomePath()) {
+            return recyclerView.getContext().getResources().getString(R.string.drawer_menu_storage_internal);
+        }
+
+        if (currentPath == null || currentPath.length() == 0 || currentPath.split("/").length <= 1) {
+            return "";
+        } else if (currentPath.split("/").length > 1)
+            return currentPath.split("/")[currentPath.split("/").length - 1];
+
+        return "";
     }
 
     public static void updateList() {
