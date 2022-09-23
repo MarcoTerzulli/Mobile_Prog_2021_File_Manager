@@ -138,6 +138,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         if (!pathHome.equals(path) && pathHome.contains(path)) {
             // stiamo tentando di accedere a file di root
+            updateBreadCrumbList(currentPath, null);
             Toast.makeText(recyclerView.getContext(), R.string.error_access_to_root_folder, Toast.LENGTH_SHORT).show();
             return;
         }
