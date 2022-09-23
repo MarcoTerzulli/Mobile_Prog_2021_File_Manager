@@ -66,7 +66,6 @@
         \n\n<i>Cancelling this dialog will quit the app.</i></string>
     <string name="grant_permission_msg_apk">The application needs permission to install the APK.</string>
 
-
     <!-- Folder and Items Fragments strings -->
     <string name="frag_no_items">No items</string>
     <string name="file_default_file_name">file.txt</string>
@@ -75,5 +74,8 @@
     <string name="press_again_to_exit">Press again to exit app</string>
     <string name="unknown_file_bin">BIN file</string>
     <string name="cant_open_file">Can\'t open the file</string>
+
+    <!-- Error -->
+    <string name="error_access_to_root_folder">ERROR: You don\'t have to permission to access this location</string>
 
 </resources>

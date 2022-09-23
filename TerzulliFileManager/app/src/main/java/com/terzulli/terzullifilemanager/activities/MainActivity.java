@@ -231,7 +231,7 @@ public class MainActivity extends PermissionsActivity
         } else if (getForegroundFragment() != null && getForegroundFragment() instanceof MainFragment) {
             if (!MainFragment.isInHomePath()) {
                 // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
-                MainFragment.loadPath(MainFragment.getParentPath());
+                MainFragment.loadPath(MainFragment.getParentPath(), true);
             } else {
                 if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
                     finish();

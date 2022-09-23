@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -32,7 +31,7 @@ import java.util.ArrayList;
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
     private final Context context;
     private final File[] filesAndDirs;
-    private ArrayList<File> selectedFiles;
+    private final ArrayList<File> selectedFiles;
 
     public ItemsAdapter(Context context, File[] filesAndFolders) {
         this.context = context;
@@ -79,32 +78,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         holder.itemView.setOnClickListener(view -> {
 
             if (!isSelectionModeEnabled()) {
-                if (selectedFile.isDirectory()) {
-                    MainFragment.loadPath(selectedFile.getAbsolutePath());
-                } else if (selectedFile.isFile()) {
-
-                    MimeTypeMap map = MimeTypeMap.getSingleton();
-                    String ext = Utils.getFileExtension(selectedFile);
-                    String type = map.getMimeTypeFromExtension(ext);
-
-                    //if (type == null)
-                    //type = "*/*";
-
-                    if (type == null)
-                        Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
-                    else {
-                        try {
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            Uri data = Uri.parse(selectedFile.getAbsolutePath());
-
-                            intent.setDataAndType(data, type);
-                            context.startActivity(intent);
-                        } catch (Exception e) {
-                            Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-
+                itemOpenerHandler(selectedFile);
             } else {
                 toggleItemSelection(position, holder, true);
             }
@@ -119,6 +93,39 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         // gestione selezione item con click sull'icona
         holder.itemIcon.setOnClickListener(view -> toggleItemSelection(position, holder, true));
+    }
+
+    private void itemOpenerHandler(File selectedFile) {
+        // se il file è una directory, viene caricato il path
+        // in caso contrario, si avvia un intent per l'apertura del file
+
+        if (selectedFile.isDirectory()) {
+            MainFragment.loadPath(selectedFile.getAbsolutePath(), true);
+        } else if (selectedFile.isFile()) {
+
+            MimeTypeMap map = MimeTypeMap.getSingleton();
+            String ext = Utils.getFileExtension(selectedFile);
+            String type = map.getMimeTypeFromExtension(ext);
+
+            //if (type == null)
+            //type = "*/*";
+
+            // TODO gestione apertura zip
+
+            if (type == null)
+                Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
+            else {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    Uri data = Uri.parse(selectedFile.getAbsolutePath());
+
+                    intent.setDataAndType(data, type);
+                    context.startActivity(intent);
+                } catch (Exception e) {
+                    Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     private boolean isSelectionModeEnabled() {
@@ -162,7 +169,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             // select
             selectedFiles.add(selectedFile);
 
-            color = ContextCompat.getColor(context, R.color.primary_200_light);
+            color = ContextCompat.getColor(context, R.color.item_selected_light);
             setSelectedIcon = true;
         }
 

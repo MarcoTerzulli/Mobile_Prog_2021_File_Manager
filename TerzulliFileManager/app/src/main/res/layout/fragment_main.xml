@@ -14,17 +14,17 @@
 
         <!-- TODO breadcrumb -->
 
-        <!--
         <moe.feng.common.view.breadcrumbs.BreadcrumbsView
             android:id="@+id/fragment_main_breadcrumbs"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"/> -->
+            android:layout_height="?attr/actionBarSize"/>
 
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/fragment_main_swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/fragment_main_breadcrumbs"
             android:focusable="false">
 
             <androidx.recyclerview.widget.RecyclerView

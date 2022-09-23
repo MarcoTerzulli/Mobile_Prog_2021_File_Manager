@@ -23,4 +23,7 @@
     <color name="background_night">#232428</color>
     <color name="background_night_darker">#121212</color>
     <color name="background_night_lighter">#45494C</color>
+
+    <!-- Other colors -->
+    <color name="item_selected_light">#EF9A9A</color>
 </resources>
