@@ -209,6 +209,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return file.getParent();
     }
 
+    public static String getCurrentPath() {
+        return currentPath;
+    }
+
     public static boolean isInHomePath() {
         // se siamo già nella root
         return Objects.equals(currentPath, pathHome);

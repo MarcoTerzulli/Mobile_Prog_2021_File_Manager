@@ -1,6 +1,7 @@
 package com.terzulli.terzullifilemanager.activities;
 
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.isSelectionModeEnabled;
 
 import android.annotation.SuppressLint;
 import android.os.Build;
@@ -351,18 +352,24 @@ public class MainActivity extends PermissionsActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (getForegroundFragment() != null && getForegroundFragment() instanceof MainFragment) {
-            if (!MainFragment.isInHomePath()) {
-                // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
+
+            if(isSelectionModeEnabled()) {
                 clearSelection();
-                MainFragment.loadPath(MainFragment.getParentPath(), true);
+                MainFragment.loadPath(MainFragment.getCurrentPath(), false);
             } else {
-                if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
-                    finish();
-                else {
-                    timeBackPressed = System.currentTimeMillis();
-                    Toast.makeText(MainActivity.this, R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
+                if (!MainFragment.isInHomePath()) {
+                    // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
+                    MainFragment.loadPath(MainFragment.getParentPath(), true);
+                } else {
+                    if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
+                        finish();
+                    else {
+                        timeBackPressed = System.currentTimeMillis();
+                        Toast.makeText(MainActivity.this, R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
+
 
         } else {
             super.onBackPressed();

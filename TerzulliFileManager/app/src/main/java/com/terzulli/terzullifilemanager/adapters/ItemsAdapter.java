@@ -35,6 +35,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     private final Context context;
     private final File[] filesAndDirs;
     private static ArrayList<File> selectedFiles;
+    //private ItemsViewHolder holder;
 
     public ItemsAdapter(Context context, File[] filesAndFolders) {
         this.context = context;
@@ -49,7 +50,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     @Override
     public ItemsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_for_list, parent, false);
+        /*holder = new ItemsViewHolder(view);
 
+        return holder;*/
         return new ItemsViewHolder(view);
     }
 
@@ -205,8 +208,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             }
         }
 
-
-
         setItemBackgroundColor(color, holder);
         setItemIcon(position, holder, setSelectedIcon);
 
@@ -277,7 +278,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         return filesAndDirs.length;
     }
 
-    public class ItemsViewHolder extends RecyclerView.ViewHolder {
+    public static class ItemsViewHolder extends RecyclerView.ViewHolder {
         private final ImageView itemIcon;
         private final TextView itemName, itemDetails;
         private final RelativeLayout itemHolder, itemIconContainer, itemTextContainer;
