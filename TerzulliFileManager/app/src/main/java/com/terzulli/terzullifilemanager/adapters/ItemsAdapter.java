@@ -1,5 +1,8 @@
 package com.terzulli.terzullifilemanager.adapters;
 
+import static com.terzulli.terzullifilemanager.activities.MainActivity.updateMenuItems;
+import static com.terzulli.terzullifilemanager.fragments.MainFragment.resetActionBarTitle;
+import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionBarTitle;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
 
 import android.content.Context;
@@ -129,9 +132,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     private boolean isSelectionModeEnabled() {
-        if (selectedFiles == null)
-            return false;
-        else return !selectedFiles.isEmpty();
+        return !selectedFiles.isEmpty();
     }
 
     private void setItemIcon(int position, @NonNull ItemsViewHolder holder, boolean isSelected) {
@@ -153,9 +154,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         int color;
         boolean setSelectedIcon = false;
 
-        if (selectedFiles == null)
-            return;
-
         if (selectedFiles.contains(selectedFile) && unselect) {
             // unselect
             selectedFiles.remove(selectedFile);
@@ -175,6 +173,45 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         setItemBackgroundColor(color, holder);
         setItemIcon(position, holder, setSelectedIcon);
+
+        // aggiorno il titolo della toolbar in base al numero di elementi selezionati
+        if (!selectedFiles.isEmpty()) {
+            setActionBarTitle(selectedFiles.size() + " " + context.getResources().getString(R.string.selected_file_lowercase));
+        } else {
+            resetActionBarTitle();
+        }
+        updateMenuItems(checkSelectedFilesType());
+    }
+
+    private int checkSelectedFilesType() {
+        if (selectedFiles.isEmpty())
+            return 0;
+
+        int foundFileCount = 0;
+        int foundDirsCount = 0;
+
+        for (File file : selectedFiles) {
+            if (file.isDirectory()) {
+                foundDirsCount++;
+            } else {
+                foundFileCount++;
+            }
+        }
+
+        if (filesAndDirs.length == foundFileCount)
+            return 6;
+        if (selectedFiles.size() == filesAndDirs.length)
+            return 5;
+        if (foundDirsCount > 1 || (foundDirsCount > 0 && foundFileCount > 0))
+            return 4;
+        if(foundFileCount == 1)
+            return 1;
+        if(foundDirsCount == 1)
+            return 2;
+        if(foundFileCount > 1)
+            return 3;
+
+        return 0; // non dovremmo mai arrivare qui
     }
 
     private void setItemBackgroundColor(final int color, @NonNull ItemsViewHolder holder) {

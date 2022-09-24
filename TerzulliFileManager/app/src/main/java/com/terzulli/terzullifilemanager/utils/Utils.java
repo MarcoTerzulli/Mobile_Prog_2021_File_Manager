@@ -18,9 +18,11 @@ import java.io.File;
 import java.text.CharacterIterator;
 import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 public class Utils {
 
@@ -336,5 +338,22 @@ public class Utils {
         }
 
         return "";
+    }
+
+    public static File[] removeHiddenFilesFromArray(File[] filesAndDirs) {
+        if (filesAndDirs == null)
+            return filesAndDirs;
+
+        List<File> fileList = Arrays.asList(filesAndDirs);
+        List<File> filetoRemoveList = new ArrayList<File>();
+
+        for(File file : fileList){
+            if(file.isHidden()){
+                filetoRemoveList.add(file);
+            }
+        }
+        fileList.removeAll(filetoRemoveList);
+
+        return fileList.toArray(new File[0]);
     }
 }

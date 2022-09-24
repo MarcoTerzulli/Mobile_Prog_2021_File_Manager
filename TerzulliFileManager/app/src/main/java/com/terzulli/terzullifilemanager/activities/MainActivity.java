@@ -34,13 +34,188 @@ import java.util.List;
 public class MainActivity extends PermissionsActivity
         implements PermissionsActivity.OnPermissionGranted {
 
+    private static final int backPressedInterval = 2000;
+    private static SearchView searchView;
+    private static Menu toolbarMenu;
+    private static Fragment navHostFragment;
     private AppBarConfiguration AppBarConfiguration;
     private ActivityMainBinding binding;
     private DrawerLayout drawer;
-    private SearchView searchView;
     private Toolbar toolbar;
     private long timeBackPressed;
-    private static final int backPressedInterval = 2000;
+    private static int menuActualCase;
+
+    // TODO
+    private static void setupSearchView() {
+
+        /*searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+
+                    Toast.makeText(MainActivity.this, "back", Toast.LENGTH_SHORT).show();
+                    searchView.setIconified(true);
+                }
+            }
+        });*/
+    }
+
+    // metodo specifico per navHostFragment: restituisce il fragment corrente
+    public static Fragment getForegroundFragment() {
+        return navHostFragment == null ? null : navHostFragment.getChildFragmentManager().getFragments().get(0);
+    }
+
+    public static void updateMenuItems(int menuCase) {
+        menuActualCase = menuCase;
+
+        switch (menuActualCase) {
+            case 1:
+                // 1 file selezionato
+                setMenuItemsOneFileSelected();
+                break;
+            case 2:
+                // 1 directory selezionata
+                setMenuItemsOneFolderSelected();
+                break;
+            case 3:
+                // molteplici file selezionati
+                setMenuItemsMultipleFileSelected();
+                break;
+            case 4:
+                // molteplici file / directory selezionate
+                setMenuItemsMultipleGenericSelected();
+                break;
+            case 5:
+                // selezione completa
+                setMenuItemsAllSelected();
+                break;
+            case 6:
+                // selezione completa ma di soli file
+                setMenuItemsAllSelectedOnlyFiles();
+                break;
+            default:
+                setMenuItemsDefault();
+                break;
+        }
+    }
+
+    private static void setMenuItemsOneFileSelected() {
+        toolbarMenu.findItem(R.id.menu_open_with).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_select_all).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_copy_to).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_move_to).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_compress).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_rename).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_get_info).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
+
+        // todo mostrare cestino e bottone condividi
+        toolbarMenu.findItem(R.id.menu_share).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_delete).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_search).setVisible(false);
+
+        // nascondo il resto
+        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
+    }
+
+    private static void setMenuItemsOneFolderSelected() {
+        // sono sostanzialmente gli stessi...
+        setMenuItemsOneFileSelected();
+
+        toolbarMenu.findItem(R.id.menu_open_with).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_share).setVisible(false);
+    }
+
+    private static void setMenuItemsMultipleGenericSelected() {
+        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_select_all).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_copy_to).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_move_to).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_compress).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
+
+        // todo mostrare cestino e bottone condividi
+        toolbarMenu.findItem(R.id.menu_delete).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_search).setVisible(false);
+
+        // nascondo il resto
+        toolbarMenu.findItem(R.id.menu_share).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_open_with).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_rename).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_get_info).setVisible(false);
+
+    }
+
+    private static void setMenuItemsMultipleFileSelected() {
+        // sono sostanzialmente gli stessi...
+        setMenuItemsMultipleGenericSelected();
+        toolbarMenu.findItem(R.id.menu_share).setVisible(true);
+    }
+
+    private static void setMenuItemsAllSelected() {
+        // sono sostanzialmente gli stessi...
+        setMenuItemsMultipleGenericSelected();
+
+        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
+    }
+
+    private static void setMenuItemsAllSelectedOnlyFiles() {
+        // sono sostanzialmente gli stessi...
+        setMenuItemsAllSelected();
+        toolbarMenu.findItem(R.id.menu_share).setVisible(true);
+
+    }
+
+    private static void setMenuItemsDefault() {
+        Fragment currentFragment = getForegroundFragment();
+
+        // TODO eventuale gestione view type grid o column
+
+        toolbarMenu.findItem(R.id.menu_search).setVisible(true);
+
+        // default
+        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_copy_to).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_move_to).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_compress).setVisible(false);
+        //toolbarMenu.findItem(R.id.menu_decompress).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_rename).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_share).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_delete).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_open_with).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_select_all).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_get_info).setVisible(true);
+
+        if (currentFragment instanceof MainFragment) {
+            toolbarMenu.findItem(R.id.menu_new_folder).setVisible(true);
+
+        } else if (currentFragment instanceof RecentsFragment ||
+                currentFragment instanceof AudioFragment ||
+                currentFragment instanceof DownloadFragment ||
+                currentFragment instanceof ImagesFragment ||
+                currentFragment instanceof VideosFragment) {
+
+            toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
+        }
+
+        // TODO gestione file nascosti
+        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+
+        // setup search view
+        searchView = (SearchView) toolbarMenu.findItem(R.id.menu_search).getActionView();
+        setupSearchView();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +226,10 @@ public class MainActivity extends PermissionsActivity
 
         // setup layout
         setSupportActionBar(findViewById(R.id.main_toolbar));
+        toolbarMenu = ((Toolbar) findViewById(R.id.main_toolbar)).getMenu();
+        navHostFragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_content);
         setupUiItems();
+        menuActualCase = 0;
 
         checkForSystemPermissions();
     }
@@ -76,27 +254,6 @@ public class MainActivity extends PermissionsActivity
 
     }
 
-    // TODO
-    private void setupSearchView() {
-
-        /*searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-
-                    Toast.makeText(MainActivity.this, "back", Toast.LENGTH_SHORT).show();
-                    searchView.setIconified(true);
-                }
-            }
-        });*/
-    }
-
-    // metodo specifico per navHostFragment: restituisce il fragment corrente
-    public Fragment getForegroundFragment() {
-        Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_content);
-        return navHostFragment == null ? null : navHostFragment.getChildFragmentManager().getFragments().get(0);
-    }
-
     public Fragment getVisibleFragment() {
         FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
         List<Fragment> fragmentsList = fragmentManager.getFragments();
@@ -107,7 +264,6 @@ public class MainActivity extends PermissionsActivity
         }
         return null;
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -150,9 +306,9 @@ public class MainActivity extends PermissionsActivity
             case R.id.menu_compress:
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.menu_decompress:
+            /*case R.id.menu_decompress:
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
-                break;
+                break;*/
             case R.id.menu_get_info:
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;
@@ -173,44 +329,8 @@ public class MainActivity extends PermissionsActivity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        //Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_content);
-        Fragment currentFragment = getForegroundFragment();
-
-        // TODO eventuale gestione view type grid o column
-        Menu toolbarMenu = ((Toolbar) findViewById(R.id.main_toolbar)).getMenu();
-
-        menu.findItem(R.id.menu_search).setVisible(true);
-
-        // default
-        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_copy_to).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_move_to).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_compress).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_decompress).setVisible(false);
-        menu.findItem(R.id.menu_sort_by).setVisible(true);
-        menu.findItem(R.id.menu_open_with).setVisible(false);
-        menu.findItem(R.id.menu_select_all).setVisible(true);
-        menu.findItem(R.id.menu_get_info).setVisible(true);
-
-        if (currentFragment instanceof MainFragment) {
-            menu.findItem(R.id.menu_new_folder).setVisible(true);
-
-        } else if (currentFragment instanceof RecentsFragment ||
-                currentFragment instanceof AudioFragment ||
-                currentFragment instanceof DownloadFragment ||
-                currentFragment instanceof ImagesFragment ||
-                currentFragment instanceof VideosFragment) {
-
-            menu.findItem(R.id.menu_new_folder).setVisible(false);
-        }
-
-        // TODO gestione file nascosti
-        menu.findItem(R.id.menu_show_hidden).setVisible(false);
-        menu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
-
-        // setup search view
-        searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
-        setupSearchView();
+        //setMenuItemsDefault();
+        updateMenuItems(menuActualCase);
 
         return super.onPrepareOptionsMenu(menu);
     }

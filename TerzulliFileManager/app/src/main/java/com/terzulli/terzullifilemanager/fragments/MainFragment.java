@@ -1,5 +1,7 @@
 package com.terzulli.terzullifilemanager.fragments;
 
+import static com.terzulli.terzullifilemanager.utils.Utils.removeHiddenFilesFromArray;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Environment;
@@ -45,78 +47,19 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static String sortBy;
     private static boolean ascending;
     private static String pathHome;
+    private static String pathRoot;
+    private static String pathHomeFriendlyName;
     private static ActionBar supportActionBar;
     private static BreadcrumbsView breadcrumbsView;
+    private static String lastActionBarTitle;
 
     public MainFragment() {
         // Required empty public constructor
     }
 
+    public static void setActionBarTitle(String title) {
+        lastActionBarTitle = title;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-
-        sortBy = "NAME";
-        ascending = true;
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_main, container, false);
-
-        // TODO inizializzazione breadcrumb
-
-        supportActionBar = ((MainActivity) requireActivity()).getSupportActionBar();
-        mainFragmentViewModel = new ViewModelProvider(this).get(MainFragmentViewModel.class);
-        swipeRefreshLayout = view.findViewById(R.id.fragment_main_swipe_refresh_layout);
-        recyclerView = view.findViewById(R.id.fragment_main_list_view);
-        breadcrumbsView = view.findViewById(R.id.fragment_main_breadcrumbs);
-
-
-        pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
-        //currentPath = pathHome;
-        if (currentPath == null)
-            currentPath = pathHome;
-        loadPath(currentPath, true);
-
-        // inizializzazione layoyt
-        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        swipeRefreshLayout.setOnRefreshListener(this);
-        setActionBarTitle(getCurrentDirectoryName());
-
-        breadcrumbsView.setCallback(new DefaultBreadcrumbsCallback<BreadcrumbItem>() {
-            @Override
-            public void onNavigateBack(BreadcrumbItem item, int position) {
-                loadPath(getSelectedBreadcrumbPath(position), false);
-                //updateBreadCrumbList(currentPath, null);
-            }
-
-            @Override
-            public void onNavigateNewLocation(BreadcrumbItem newItem, int changedPosition) {
-                loadPath(getSelectedBreadcrumbPath(changedPosition - 1) + "/" + newItem.getSelectedItem(), false);
-                //updateBreadCrumbList(currentPath, null);
-            }
-        });
-
-        /*if (savedInstanceState == null) {
-            updateBreadCrumbList(pathHome);
-            loadPath(pathHome);
-        }*/
-
-        return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        setActionBarTitle(getCurrentDirectoryName());
-    }
-
-    private static void setActionBarTitle(String title) {
         if (supportActionBar != null)
             Objects.requireNonNull(supportActionBar).setTitle(title);
     }
@@ -136,7 +79,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             return;
         }
 
-        if (!pathHome.equals(path) && pathHome.contains(path)) {
+        if (isPathProtected(path)) {
             // stiamo tentando di accedere a file di root
             updateBreadCrumbList(currentPath, null);
             Toast.makeText(recyclerView.getContext(), R.string.error_access_to_root_folder, Toast.LENGTH_SHORT).show();
@@ -154,6 +97,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             File[] filesAndDirs = rootFile.listFiles();
             Utils.sortFileAndFoldersList(filesAndDirs, sortBy, ascending);
 
+            // todo rimozione file nascosti se si è scelto di non visualizzarli (iniziano col .)
+            // todo controllare nelle shared preferences cosa è stato scelto
+            /*if (....)
+                filesAndDirs = removeHiddenFilesFromArray(filesAndDirs);*/
+
             // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
             initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
 
@@ -165,88 +113,71 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             swipeRefreshLayout.setRefreshing(false);
         }, 10);
 
-
-        /*ExecutorService executor = Executors.newSingleThreadExecutor();
-        Runnable backgroundRunnable = () -> {
-            File rootFile = new File(path);
-            File[] filesAndDirs = rootFile.listFiles();
-            Utils.sortFileAndFoldersList(filesAndDirs, sortBy, ascending);
-
-            // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
-            initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
-
-            recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
-            swipeRefreshLayout.setRefreshing(false);
-        };
-        executor.execute(backgroundRunnable);*/
     }
 
-    private String getSelectedBreadcrumbPath(int depth) {
-        if (depth == -1) depth = breadcrumbsView.getItems().size() - 1;
-
-        //StringBuilder sb = new StringBuilder(Environment.getExternalStorageDirectory().getAbsolutePath());
-        StringBuilder sb = new StringBuilder("");
-
-        for (int i = 0; i <= depth; i++) {
-            sb.append("/").append(breadcrumbsView.getItems().get(i).getSelectedItem());
-        }
-        return sb.toString();
+    public static void resetActionBarTitle() {
+        setActionBarTitle(getCurrentDirectoryName());
     }
 
     private static void updateBreadCrumbList(String newPath, String oldPath) {
-        if (oldPath == null || oldPath.length() == 0 || breadcrumbsView.getItems().size() == 0) {// || (newPath.split("/").length != breadcrumbsView.getItems().size())) {
+        if (newPath == null || newPath.length() == 0) {
+            List<String> pathList = Collections.singletonList(pathHome);
+            breadcrumbsView.addItem(new BreadcrumbItem(pathList));
+        } else {
 
-            // clean breadcrumb
-            List<IBreadcrumbItem> currentItemsList = breadcrumbsView.getItems();
-            int listSize = currentItemsList.size();
+            if (oldPath == null || oldPath.length() == 0 || breadcrumbsView.getItems().size() == 0) {// || (newPath.split("/").length != breadcrumbsView.getItems().size())) {
 
-            for (int i = 0; i < listSize; i++) {
-                breadcrumbsView.removeLastItem();
-            }
+                emptyBreadcrumb();
 
-            if (newPath == null || newPath.length() == 0) {
-                List<String> pathList = Collections.singletonList(recyclerView.getContext().getResources().getString(R.string.drawer_menu_storage_internal));
-                breadcrumbsView.addItem(new BreadcrumbItem(pathList));
-            } else {
                 String[] pathArr = newPath.split("/");
                 if (pathArr.length > 0) {
                     for (int i = 1; i < pathArr.length; i++)
                         breadcrumbsView.addItem(new BreadcrumbItem(Collections.singletonList(pathArr[i])));
                 }
-            }
-        } else {
-            if (newPath == null || newPath.length() == 0) {
-                List<String> pathList = Collections.singletonList(recyclerView.getContext().getResources().getString(R.string.drawer_menu_storage_internal));
-                breadcrumbsView.addItem(new BreadcrumbItem(pathList));
             } else {
-                if (newPath.equals(oldPath)) {
-                    // non si fa niente
-                } else if (newPath.contains(oldPath)) {
-                    // se il nuovo path è una cartella "successiva" al vecchio, aggiungo solo la parte nuova del path
-                    String difference = newPath.split(oldPath)[1];
 
-                    String[] pathArr = difference.split("/");
-                    if (pathArr.length > 0) {
-                        for (int i = 1; i < pathArr.length; i++)
-                            breadcrumbsView.addItem(new BreadcrumbItem(Collections.singletonList(pathArr[i])));
-                    }
-                } else if (oldPath.contains(newPath)) {
-                    // se il nuovo path è una cartella "superiore" al vecchio, rimuovo parte del path
-                    String difference = oldPath.split(newPath)[1];
-                    String[] pathArr = difference.split("/");
-                    if (pathArr.length > 0) {
-                        for (int i = 1; i < pathArr.length; i++)
-                            breadcrumbsView.removeLastItem();
+                if (!newPath.equals(oldPath)) {
+                    if (newPath.contains(oldPath)) {
+                        // se il nuovo path è una cartella "successiva" al vecchio, aggiungo solo la parte nuova del path
+                        String difference = newPath.split(oldPath)[1];
+
+                        String[] pathArr = difference.split("/");
+                        if (pathArr.length > 0) {
+                            for (int i = 1; i < pathArr.length; i++)
+                                breadcrumbsView.addItem(new BreadcrumbItem(Collections.singletonList(pathArr[i])));
+                        }
+                    } else if (oldPath.contains(newPath)) {
+                        // se il nuovo path è una cartella "superiore" al vecchio, rimuovo parte del path
+                        String difference = oldPath.split(newPath)[1];
+
+                        String[] pathArr = difference.split("/");
+                        if (pathArr.length > 0) {
+                            for (int i = 1; i < pathArr.length; i++)
+                                breadcrumbsView.removeLastItem();
+                        }
                     }
                 }
             }
         }
+    }
 
+    private static void emptyBreadcrumb() {
+        // clean breadcrumb
+        List<IBreadcrumbItem> currentItemsList = breadcrumbsView.getItems();
+        int listSize = currentItemsList.size();
+
+        for (int i = 0; i < listSize; i++) {
+            breadcrumbsView.removeLastItem();
+        }
+    }
+
+    private static boolean isPathProtected(String path) {
+        return (!pathRoot.equals(path) && pathRoot.contains(path));
     }
 
     private static String getCurrentDirectoryName() {
         if (isInHomePath()) {
-            return recyclerView.getContext().getResources().getString(R.string.drawer_menu_storage_internal);
+            return pathHomeFriendlyName;
         }
 
         if (currentPath == null || currentPath.length() == 0 || currentPath.split("/").length <= 1) {
@@ -282,6 +213,90 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public static void setHomePath(String path) {
         pathHome = path;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
+        sortBy = "NAME";
+        ascending = true;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.fragment_main, container, false);
+
+        supportActionBar = ((MainActivity) requireActivity()).getSupportActionBar();
+        mainFragmentViewModel = new ViewModelProvider(this).get(MainFragmentViewModel.class);
+        swipeRefreshLayout = view.findViewById(R.id.fragment_main_swipe_refresh_layout);
+        recyclerView = view.findViewById(R.id.fragment_main_list_view);
+        breadcrumbsView = view.findViewById(R.id.fragment_main_breadcrumbs);
+
+        pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
+        pathRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+        if (currentPath == null)
+            currentPath = pathHome;
+        if (pathHomeFriendlyName == null)
+            setPathRootFriendlyName(recyclerView.getContext().getResources().getString(R.string.drawer_menu_storage_internal));
+        lastActionBarTitle = "";
+
+        // inizializzazione layoyt
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        swipeRefreshLayout.setOnRefreshListener(this);
+        setActionBarTitle(getCurrentDirectoryName());
+
+        breadcrumbsView.setCallback(new DefaultBreadcrumbsCallback<BreadcrumbItem>() {
+            @Override
+            public void onNavigateBack(BreadcrumbItem item, int position) {
+                loadPath(getSelectedBreadcrumbPath(position), false);
+                //updateBreadCrumbList(currentPath, null);
+            }
+
+            @Override
+            public void onNavigateNewLocation(BreadcrumbItem newItem, int changedPosition) {
+                loadPath(getSelectedBreadcrumbPath(changedPosition - 1) + "/" + newItem.getSelectedItem(), false);
+                //updateBreadCrumbList(currentPath, null);
+            }
+        });
+
+        /*if (savedInstanceState == null) {
+            updateBreadCrumbList(pathHome);
+            loadPath(pathHome);
+        }*/
+
+        loadPath(currentPath, true);
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if(lastActionBarTitle.length() == 0)
+            setActionBarTitle(getCurrentDirectoryName());
+        else
+            setActionBarTitle(lastActionBarTitle);
+    }
+
+    private String getSelectedBreadcrumbPath(int depth) {
+        if (depth == -1)
+            depth = breadcrumbsView.getItems().size() - 1;
+
+        //StringBuilder sb = new StringBuilder(Environment.getExternalStorageDirectory().getAbsolutePath());
+        StringBuilder sb = new StringBuilder("");
+
+        for (int i = 0; i <= depth; i++) {
+            sb.append("/").append(breadcrumbsView.getItems().get(i).getSelectedItem());
+        }
+        return sb.toString();
+    }
+
+    public void setPathRootFriendlyName(String friendlyName) {
+        pathHomeFriendlyName = friendlyName;
     }
 
     @Override

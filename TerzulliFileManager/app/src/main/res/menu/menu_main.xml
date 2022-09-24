@@ -4,12 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
 
+
+    <item
+        android:id="@+id/menu_share"
+        android:icon="@drawable/ic_menu_share_filled"
+        android:title="@string/action_share"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_delete"
+        android:icon="@drawable/ic_menu_delete"
+        android:title="@string/action_delete"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/menu_search"
         android:icon="@drawable/ic_menu_search"
         android:title="@string/action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
+
     <item
         android:id="@+id/menu_new_folder"
         android:title="@string/action_new_folder"
@@ -50,9 +64,15 @@
         android:title="@string/action_compress"
         app:showAsAction="never" />
 
+    <!--
     <item
         android:id="@+id/menu_decompress"
         android:title="@string/action_decompress"
+        app:showAsAction="never" /> -->
+
+    <item
+        android:id="@+id/menu_rename"
+        android:title="@string/action_rename"
         app:showAsAction="never" />
 
     <item

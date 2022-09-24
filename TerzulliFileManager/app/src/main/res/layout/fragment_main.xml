@@ -12,13 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- TODO breadcrumb -->
-
         <moe.feng.common.view.breadcrumbs.BreadcrumbsView
             android:id="@+id/fragment_main_breadcrumbs"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"/>
-
+            android:layout_height="?attr/actionBarSize" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/fragment_main_swipe_refresh_layout"

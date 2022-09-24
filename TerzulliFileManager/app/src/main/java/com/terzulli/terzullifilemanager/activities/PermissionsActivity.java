@@ -172,11 +172,6 @@ public abstract class PermissionsActivity extends AppCompatActivity
 
     //public abstract boolean onNavigationItemSelected(MenuItem item);
 
-
-    public interface OnPermissionGranted {
-        void onPermissionGranted();
-    }
-
     private boolean isNightModeEnabled() {
         int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
 
@@ -191,6 +186,10 @@ public abstract class PermissionsActivity extends AppCompatActivity
         }
 
         return false;
+    }
+
+    public interface OnPermissionGranted {
+        void onPermissionGranted();
     }
 
 }
