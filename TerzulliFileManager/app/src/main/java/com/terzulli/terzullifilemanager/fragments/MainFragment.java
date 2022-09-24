@@ -1,5 +1,6 @@
 package com.terzulli.terzullifilemanager.fragments;
 
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
 import static com.terzulli.terzullifilemanager.utils.Utils.removeHiddenFilesFromArray;
 
 import android.annotation.SuppressLint;
@@ -88,7 +89,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         String oldPath = currentPath;
         currentPath = path;
-        setActionBarTitle(getCurrentDirectoryName());
+
+        if (!ItemsAdapter.isSelectionModeEnabled())
+            setActionBarTitle(getCurrentDirectoryName());
 
         swipeRefreshLayout.setRefreshing(true);
 
@@ -251,12 +254,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         breadcrumbsView.setCallback(new DefaultBreadcrumbsCallback<BreadcrumbItem>() {
             @Override
             public void onNavigateBack(BreadcrumbItem item, int position) {
+                clearSelection();
                 loadPath(getSelectedBreadcrumbPath(position), false);
                 //updateBreadCrumbList(currentPath, null);
             }
 
             @Override
             public void onNavigateNewLocation(BreadcrumbItem newItem, int changedPosition) {
+                clearSelection();
                 loadPath(getSelectedBreadcrumbPath(changedPosition - 1) + "/" + newItem.getSelectedItem(), false);
                 //updateBreadCrumbList(currentPath, null);
             }

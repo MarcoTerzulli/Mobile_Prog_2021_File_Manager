@@ -34,14 +34,16 @@ import java.util.ArrayList;
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
     private final Context context;
     private final File[] filesAndDirs;
-    private final ArrayList<File> selectedFiles;
+    private static ArrayList<File> selectedFiles;
 
     public ItemsAdapter(Context context, File[] filesAndFolders) {
         this.context = context;
         this.filesAndDirs = filesAndFolders;
-        this.selectedFiles = new ArrayList<>();
 
+        if (selectedFiles == null)
+            selectedFiles = new ArrayList<>();
     }
+
 
     @NonNull
     @Override
@@ -83,19 +85,29 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             if (!isSelectionModeEnabled()) {
                 itemOpenerHandler(selectedFile);
             } else {
-                toggleItemSelection(position, holder, true);
+                toggleItemSelection(position, holder, true, false);
             }
         });
 
         // gestione selezione item con long click
         holder.itemView.setOnLongClickListener(view -> {
-            toggleItemSelection(position, holder, false);
+            toggleItemSelection(position, holder, false, false);
 
             return true;
         });
 
         // gestione selezione item con click sull'icona
-        holder.itemIcon.setOnClickListener(view -> toggleItemSelection(position, holder, true));
+        holder.itemIcon.setOnClickListener(view -> toggleItemSelection(position, holder, true, false));
+
+        // ripristino lo stato di selezione precedente
+        toggleItemSelection(position, holder, false, true);
+
+    }
+
+    private boolean checkIfItemWasSelected(File file) {
+        if (selectedFiles.isEmpty())
+            return false;
+        return selectedFiles.contains(file);
     }
 
     private void itemOpenerHandler(File selectedFile) {
@@ -103,6 +115,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         // in caso contrario, si avvia un intent per l'apertura del file
 
         if (selectedFile.isDirectory()) {
+            clearSelection();
             MainFragment.loadPath(selectedFile.getAbsolutePath(), true);
         } else if (selectedFile.isFile()) {
 
@@ -131,7 +144,13 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         }
     }
 
-    private boolean isSelectionModeEnabled() {
+    public static void clearSelection() {
+        selectedFiles.clear();
+    }
+
+    public static boolean isSelectionModeEnabled() {
+        if(selectedFiles == null)
+            return false;
         return !selectedFiles.isEmpty();
     }
 
@@ -149,27 +168,44 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     }
 
-    private void toggleItemSelection(int position, @NonNull ItemsViewHolder holder, boolean unselect) {
+    private void toggleItemSelection(int position, @NonNull ItemsViewHolder holder, boolean unselect, boolean recoverLastState) {
         File selectedFile = filesAndDirs[position];
         int color;
         boolean setSelectedIcon = false;
 
-        if (selectedFiles.contains(selectedFile) && unselect) {
-            // unselect
-            selectedFiles.remove(selectedFile);
+        if(!recoverLastState) {
+            // comportamento normale
+            if (selectedFiles.contains(selectedFile) && unselect) {
+                // unselect
+                selectedFiles.remove(selectedFile);
 
-            TypedValue outValue = new TypedValue();
-            context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-            color = outValue.data;
+                TypedValue outValue = new TypedValue();
+                context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+                color = outValue.data;
 
-            setItemBackgroundColor(color, holder);
+                setItemBackgroundColor(color, holder);
+            } else {
+                // select
+                selectedFiles.add(selectedFile);
+
+                color = ContextCompat.getColor(context, R.color.item_selected_light);
+                setSelectedIcon = true;
+            }
         } else {
-            // select
-            selectedFiles.add(selectedFile);
+            // comportamento di ripristino dello stato (ignora il toggle)
+            if (checkIfItemWasSelected(selectedFile)) {
+                color = ContextCompat.getColor(context, R.color.item_selected_light);
+                setSelectedIcon = true;
+            } else {
+                TypedValue outValue = new TypedValue();
+                context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+                color = outValue.data;
 
-            color = ContextCompat.getColor(context, R.color.item_selected_light);
-            setSelectedIcon = true;
+                setItemBackgroundColor(color, holder);
+            }
         }
+
+
 
         setItemBackgroundColor(color, holder);
         setItemIcon(position, holder, setSelectedIcon);
