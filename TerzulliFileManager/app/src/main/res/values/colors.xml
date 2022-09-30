@@ -26,4 +26,5 @@
 
     <!-- Other colors -->
     <color name="item_selected_light">#EF9A9A</color>
+    <color name="error_text_color">#F44336</color>
 </resources>

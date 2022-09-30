@@ -333,7 +333,7 @@ public class MainActivity extends PermissionsActivity
                 Toast.makeText(MainActivity.this, "Menu search", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_new_folder:
-                Toast.makeText(MainActivity.this, "Menu new folder", Toast.LENGTH_SHORT).show();
+                ItemsAdapter.createNewDirectory();
                 break;
             case R.id.menu_open_with:
                 Toast.makeText(MainActivity.this, "Menu open with", Toast.LENGTH_SHORT).show();

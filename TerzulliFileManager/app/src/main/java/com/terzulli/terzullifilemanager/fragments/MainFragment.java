@@ -2,6 +2,7 @@ package com.terzulli.terzullifilemanager.fragments;
 
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.isSelectionModeEnabled;
+import static com.terzulli.terzullifilemanager.utils.Utils.validateDirectoryName;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileName;
 
 import android.annotation.SuppressLint;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -276,24 +278,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
         alertBuilder.setTitle(R.string.action_rename);
-        //AlertDialog alertDialog = alertBuilder.create();
 
         final EditText editText = new EditText(view.getContext());
         editText.setText(file.getName());
 
         alertBuilder.setView(editText);
 
-        alertBuilder.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                renameFile(file, editText.getText().toString());
-            }
-        });
-
-        alertBuilder.setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                // non si fa nulla
-            }
-        });
+        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> renameFile(file, editText.getText().toString()));
+        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {});
 
         AlertDialog alertDialog = alertBuilder.show();
 
@@ -305,6 +297,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 Button button = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
                 if (button != null) {
                     button.setEnabled(isNameValid);
+
+                    if(isNameValid)
+                        editText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.black));
+                    else
+                        editText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.error_text_color));
                 }
             }
 
@@ -317,6 +314,66 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                     if (validateGenericFileName(file, newName)) {
                         renameFile(file, newName);
+                        alertDialog.cancel();
+                    }
+                }
+            }
+        });
+    }
+
+    private static void createDirectory(File currentDirectory, String newDirectoryName) {
+        if (currentDirectory == null)
+            return;
+
+        File newDir = new File(currentDirectory, newDirectoryName);
+
+        if(!newDir.exists()) {
+            newDir.mkdirs();
+            refreshList();
+        }
+    }
+
+    public static void displayNewFolderDialog() {
+        File currentDirectory = new File(currentPath);
+
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
+        alertBuilder.setTitle(R.string.action_new_folder);
+
+        final EditText editText = new EditText(view.getContext());
+        editText.setText("");
+
+        alertBuilder.setView(editText);
+
+        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> createDirectory(currentDirectory, editText.getText().toString()));
+        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {});
+
+        AlertDialog alertDialog = alertBuilder.show();
+
+        editText.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+                boolean isNameValid = validateDirectoryName(s.toString());
+
+                Button button = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                if (button != null) {
+                    button.setEnabled(isNameValid);
+
+                    if(isNameValid)
+                        editText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.black));
+                    else
+                        editText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.error_text_color));
+                }
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s != null && s.toString().contains("\n")) {
+                    String newName = editText.getText().toString().replace("\n", "");
+
+                    if (validateDirectoryName(newName)) {
+                        createDirectory(currentDirectory, newName);
                         alertDialog.cancel();
                     }
                 }

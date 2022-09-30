@@ -114,11 +114,17 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     public static void renameSelectedFile() {
+        // controllo se c'è esattamente un file / cartella selezionato
         if (checkSelectedFilesType() == 1 || checkSelectedFilesType() == 2)
             MainFragment.displayRenameDialog(selectedFiles.get(0));
     }
 
-    private boolean checkIfItemWasSelected(File file) {
+    public static void createNewDirectory() {
+        if (!isSelectionModeEnabled())
+            MainFragment.displayNewFolderDialog();
+    }
+
+    private static boolean checkIfItemWasSelected(File file) {
         if (selectedFiles.isEmpty())
             return false;
         return selectedFiles.contains(file);
