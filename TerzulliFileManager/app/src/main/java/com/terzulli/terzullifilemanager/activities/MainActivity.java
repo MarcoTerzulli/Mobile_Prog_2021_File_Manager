@@ -1,8 +1,5 @@
 package com.terzulli.terzullifilemanager.activities;
 
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.isSelectionModeEnabled;
-
 import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,6 +21,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.terzulli.terzullifilemanager.R;
+import com.terzulli.terzullifilemanager.adapters.ItemsAdapter;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 import com.terzulli.terzullifilemanager.fragments.AudioFragment;
 import com.terzulli.terzullifilemanager.fragments.DownloadFragment;
@@ -37,16 +35,14 @@ import java.util.List;
 public class MainActivity extends PermissionsActivity
         implements PermissionsActivity.OnPermissionGranted {
 
-    private static final int backPressedInterval = 2000;
     private static SearchView searchView;
     private static Menu toolbarMenu;
     private static Fragment navHostFragment;
+    private static int menuActualCase;
     private AppBarConfiguration AppBarConfiguration;
     private ActivityMainBinding binding;
     private DrawerLayout drawer;
     private Toolbar toolbar;
-    private long timeBackPressed;
-    private static int menuActualCase;
 
     // TODO
     private static void setupSearchView() {
@@ -68,6 +64,24 @@ public class MainActivity extends PermissionsActivity
         return navHostFragment == null ? null : navHostFragment.getChildFragmentManager().getFragments().get(0);
     }
 
+    /**
+     * Funzione per l'aggiornamento degli elementi mostrati nel menu in base al valore del parametro
+     * menuCase.
+     * <p>
+     * Casistiche supportate (valore menuCase):
+     * - 1: un file selezionato
+     * - 2: una directory selezionata
+     * - 3: molteplici file selezionati
+     * - 4: molteplici file o directory selezionati
+     * - 5: selezione completa (generica)
+     * - 6: selezione completa ma di soli file
+     * - 7: selezione generica dentro zip
+     * - 8: selezione completa dentro zip
+     * - 9: nessuna selezione attiva, ma la cartella corrente è uno zip
+     * - default: cartella generica
+     *
+     * @param menuCase casistica scelta
+     */
     public static void updateMenuItems(int menuCase) {
         menuActualCase = menuCase;
 
@@ -96,10 +110,56 @@ public class MainActivity extends PermissionsActivity
                 // selezione completa ma di soli file
                 setMenuItemsAllSelectedOnlyFiles();
                 break;
+            case 7:
+                // selezione dentro zip
+                setMenuItemsOneSelectedInsideZip();
+                break;
+            case 8:
+                // selezione dentro zip
+                setMenuItemsAllSelectedInsideZip();
+                break;
+            case 9:
+                // nessuna seleazione ma siamo dentro uno zip
+                setMenuItemsZip();
+                break;
             default:
                 setMenuItemsDefault();
                 break;
         }
+    }
+
+    private static void setMenuItemsOneSelectedInsideZip() {
+        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_select_all).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_extract).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_get_info).setVisible(true);
+
+        // nascondo il resto
+        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_open_with).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_share).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_delete).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_search).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_copy_to).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_move_to).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_compress).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_rename).setVisible(false);
+
+    }
+
+    private static void setMenuItemsAllSelectedInsideZip() {
+        setMenuItemsOneSelectedInsideZip();
+
+        toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(true);
+    }
+
+    private static void setMenuItemsZip() {
+        setMenuItemsDefault();
+        toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
     }
 
     private static void setMenuItemsOneFileSelected() {
@@ -111,7 +171,6 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_compress).setVisible(true);
         toolbarMenu.findItem(R.id.menu_rename).setVisible(true);
         toolbarMenu.findItem(R.id.menu_get_info).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
 
         // todo mostrare cestino e bottone condividi
         toolbarMenu.findItem(R.id.menu_share).setVisible(true);
@@ -123,6 +182,7 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
         toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
         toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_extract).setVisible(false);
     }
 
     private static void setMenuItemsOneFolderSelected() {
@@ -134,27 +194,13 @@ public class MainActivity extends PermissionsActivity
     }
 
     private static void setMenuItemsMultipleGenericSelected() {
-        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_select_all).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_copy_to).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_move_to).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_compress).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
+        // sono sostanzialmente gli stessi...
+        setMenuItemsOneFileSelected();
 
-        // todo mostrare cestino e bottone condividi
-        toolbarMenu.findItem(R.id.menu_delete).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_search).setVisible(false);
-
-        // nascondo il resto
         toolbarMenu.findItem(R.id.menu_share).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
         toolbarMenu.findItem(R.id.menu_open_with).setVisible(false);
         toolbarMenu.findItem(R.id.menu_rename).setVisible(false);
         toolbarMenu.findItem(R.id.menu_get_info).setVisible(false);
-
     }
 
     private static void setMenuItemsMultipleFileSelected() {
@@ -197,6 +243,7 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
         toolbarMenu.findItem(R.id.menu_open_with).setVisible(false);
         toolbarMenu.findItem(R.id.menu_select_all).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_extract).setVisible(false);
         toolbarMenu.findItem(R.id.menu_get_info).setVisible(true);
 
         if (currentFragment instanceof MainFragment) {
@@ -321,6 +368,9 @@ public class MainActivity extends PermissionsActivity
             case R.id.menu_dont_show_hidden:
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;
+            case R.id.menu_rename:
+                ItemsAdapter.renameSelectedFile();
+                break;
             default:
                 // non dovremmo mai arrivarci
                 return false;
@@ -352,25 +402,8 @@ public class MainActivity extends PermissionsActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (getForegroundFragment() != null && getForegroundFragment() instanceof MainFragment) {
-
-            if(isSelectionModeEnabled()) {
-                clearSelection();
-                MainFragment.loadPath(MainFragment.getCurrentPath(), false);
-            } else {
-                if (!MainFragment.isInHomePath()) {
-                    // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
-                    MainFragment.loadPath(MainFragment.getParentPath(), true);
-                } else {
-                    if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
-                        finish();
-                    else {
-                        timeBackPressed = System.currentTimeMillis();
-                        Toast.makeText(MainActivity.this, R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-
+            if (MainFragment.goBack())
+                finish();
         } else {
             super.onBackPressed();
         }
@@ -381,11 +414,11 @@ public class MainActivity extends PermissionsActivity
         // TODO bisogna ricaricare il contenuto della home ora che abbiamo i permessi per lo storage
         Fragment currentFragment = getForegroundFragment();
 
-        if (currentFragment != null && currentFragment instanceof MainFragment) {
+        if (currentFragment instanceof MainFragment) {
             return;
         }
 
-        MainFragment.updateList();
+        MainFragment.refreshList();
 
     }
 

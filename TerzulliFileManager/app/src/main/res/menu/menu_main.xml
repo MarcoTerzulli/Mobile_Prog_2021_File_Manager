@@ -76,6 +76,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_extract"
+        android:title="@string/action_extract"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_get_info"
         android:title="@string/action_get_info"
         app:showAsAction="never" />

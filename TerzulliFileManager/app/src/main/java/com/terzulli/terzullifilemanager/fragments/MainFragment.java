@@ -1,19 +1,26 @@
 package com.terzulli.terzullifilemanager.fragments;
 
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
-import static com.terzulli.terzullifilemanager.utils.Utils.removeHiddenFilesFromArray;
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.isSelectionModeEnabled;
+import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileName;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -38,6 +45,7 @@ import moe.feng.common.view.breadcrumbs.model.IBreadcrumbItem;
 
 public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
+    private static final int backPressedInterval = 2000;
     private static RecyclerView recyclerView;
     @SuppressLint("StaticFieldLeak")
     private static SwipeRefreshLayout swipeRefreshLayout;
@@ -53,6 +61,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static ActionBar supportActionBar;
     private static BreadcrumbsView breadcrumbsView;
     private static String lastActionBarTitle;
+    private static long timeBackPressed;
 
     public MainFragment() {
         // Required empty public constructor
@@ -83,7 +92,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (isPathProtected(path)) {
             // stiamo tentando di accedere a file di root
             updateBreadCrumbList(currentPath, null);
-            Toast.makeText(recyclerView.getContext(), R.string.error_access_to_root_folder, Toast.LENGTH_SHORT).show();
+            Toast.makeText(view.getContext(), R.string.error_access_to_root_folder, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -92,8 +101,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         if (!ItemsAdapter.isSelectionModeEnabled())
             setActionBarTitle(getCurrentDirectoryName());
-
-        swipeRefreshLayout.setRefreshing(true);
+        else
+            swipeRefreshLayout.setRefreshing(true);
 
         new Handler().postDelayed(() -> {
             File rootFile = new File(path);
@@ -191,12 +200,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return "";
     }
 
-    public static void updateList() {
+    public static void refreshList() {
         loadPath(currentPath, true);
-    }
-
-    public static void setCurrentPath(String path) {
-        currentPath = path;
     }
 
     public static String getParentPath() {
@@ -213,6 +218,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return currentPath;
     }
 
+    public static void setCurrentPath(String path) {
+        currentPath = path;
+    }
+
     public static boolean isInHomePath() {
         // se siamo già nella root
         return Objects.equals(currentPath, pathHome);
@@ -220,6 +229,99 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public static void setHomePath(String path) {
         pathHome = path;
+    }
+
+    public static boolean goBack() {
+
+        if (isSelectionModeEnabled()) {
+            clearSelection();
+            MainFragment.loadPath(MainFragment.getCurrentPath(), false);
+        } else {
+            if (!MainFragment.isInHomePath()) {
+                // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
+                MainFragment.loadPath(MainFragment.getParentPath(), true);
+            } else {
+                if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
+                    return true; // la main activity deve invocare finish
+                else {
+                    timeBackPressed = System.currentTimeMillis();
+                    Toast.makeText(view.getContext(), R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static void renameFile(File file, String newName) {
+        if (file == null)
+            return;
+
+        File dir = file.getParentFile();
+        if(dir != null && dir.exists()){
+            File from = new File(dir,file.getName());
+            File to = new File(dir,newName);
+
+            if(from.exists()) {
+                from.renameTo(to);
+                refreshList();
+                ItemsAdapter.clearSelection();
+            }
+        }
+    }
+
+    public static void displayRenameDialog(File file) {
+        if (file == null)
+            return;
+
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
+        alertBuilder.setTitle(R.string.action_rename);
+        //AlertDialog alertDialog = alertBuilder.create();
+
+        final EditText editText = new EditText(view.getContext());
+        editText.setText(file.getName());
+
+        alertBuilder.setView(editText);
+
+        alertBuilder.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                renameFile(file, editText.getText().toString());
+            }
+        });
+
+        alertBuilder.setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // non si fa nulla
+            }
+        });
+
+        AlertDialog alertDialog = alertBuilder.show();
+
+        editText.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+                boolean isNameValid = validateGenericFileName(file, s.toString());
+
+                Button button = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                if (button != null) {
+                    button.setEnabled(isNameValid);
+                }
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s != null && s.toString().contains("\n")) {
+                    String newName = editText.getText().toString().replace("\n", "");
+
+                    if (validateGenericFileName(file, newName)) {
+                        renameFile(file, newName);
+                        alertDialog.cancel();
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -247,7 +349,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (currentPath == null)
             currentPath = pathHome;
         if (pathHomeFriendlyName == null)
-            setPathRootFriendlyName(recyclerView.getContext().getResources().getString(R.string.drawer_menu_storage_internal));
+            setPathRootFriendlyName(getContext().getResources().getString(R.string.drawer_menu_storage_internal));
         lastActionBarTitle = "";
 
         // inizializzazione layoyt
@@ -285,10 +387,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onResume() {
         super.onResume();
 
-        if(lastActionBarTitle.length() == 0)
+        if (lastActionBarTitle.length() == 0)
             setActionBarTitle(getCurrentDirectoryName());
         else
             setActionBarTitle(lastActionBarTitle);
+
+        refreshList();
     }
 
     private String getSelectedBreadcrumbPath(int depth) {
@@ -310,6 +414,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     @Override
     public void onRefresh() {
-        updateList();
+        refreshList();
     }
 }

@@ -30,6 +30,7 @@
     <string name="action_search">Search</string>
     <string name="action_delete">Delete</string>
     <string name="action_share">Share</string>
+    <string name="action_extract">Extract to…</string>
 
     <!-- Activities Strings -->
     <string name="title_activity_main">MainActivity</string>
@@ -56,6 +57,7 @@
     <!-- Various buttons -->
     <string name="button_ok">Ok</string>
     <string name="button_cancel">Cancel</string>
+    <string name="button_save">Save</string>
 
     <!-- Permissions -->
     <string name="grant">Grant</string>

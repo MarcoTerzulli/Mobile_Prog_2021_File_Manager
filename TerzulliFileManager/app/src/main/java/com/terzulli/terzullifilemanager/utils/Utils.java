@@ -5,10 +5,7 @@ import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Environment;
 import android.webkit.MimeTypeMap;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -20,7 +17,6 @@ import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -51,30 +47,24 @@ public class Utils {
             return;
 
         if (ascending) {
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File t, File t1) {
-                    if (t.isDirectory() && t1.isFile())
-                        return -1;
-                    else if (t.isFile() && t1.isDirectory())
-                        return 1;
+            Arrays.sort(files, (t, t1) -> {
+                if (t.isDirectory() && t1.isFile())
+                    return -1;
+                else if (t.isFile() && t1.isDirectory())
+                    return 1;
 
-                    // both files or both directories
-                    return t.getName().compareTo(t1.getName());
-                }
+                // both files or both directories
+                return t.getName().compareTo(t1.getName());
             });
         } else {
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File t, File t1) {
-                    if (t.isDirectory() && t1.isFile())
-                        return -1;
-                    else if (t.isFile() && t1.isDirectory())
-                        return 1;
+            Arrays.sort(files, (t, t1) -> {
+                if (t.isDirectory() && t1.isFile())
+                    return -1;
+                else if (t.isFile() && t1.isDirectory())
+                    return 1;
 
-                    // both files or both directories
-                    return t1.getName().compareTo(t.getName());
-                }
+                // both files or both directories
+                return t1.getName().compareTo(t.getName());
             });
         }
     }
@@ -85,31 +75,25 @@ public class Utils {
 
         if (ascending) {
 
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File t, File t1) {
-                    if (t.isDirectory() && t1.isFile())
-                        return -1;
-                    else if (t.isFile() && t1.isDirectory())
-                        return 1;
+            Arrays.sort(files, (t, t1) -> {
+                if (t.isDirectory() && t1.isFile())
+                    return -1;
+                else if (t.isFile() && t1.isDirectory())
+                    return 1;
 
-                    // both files or both directories
-                    return (int) (t.lastModified() - t1.lastModified());
-                }
+                // both files or both directories
+                return (int) (t.lastModified() - t1.lastModified());
             });
         } else {
 
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File t, File t1) {
-                    if (t.isDirectory() && t1.isFile())
-                        return -1;
-                    else if (t.isFile() && t1.isDirectory())
-                        return 1;
+            Arrays.sort(files, (t, t1) -> {
+                if (t.isDirectory() && t1.isFile())
+                    return -1;
+                else if (t.isFile() && t1.isDirectory())
+                    return 1;
 
-                    // both files or both directories
-                    return (int) (t1.lastModified() - t.lastModified());
-                }
+                // both files or both directories
+                return (int) (t1.lastModified() - t.lastModified());
             });
         }
 
@@ -120,30 +104,24 @@ public class Utils {
             return;
 
         if (ascending) {
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File t, File t1) {
-                    if (t.isDirectory() && t1.isFile())
-                        return -1;
-                    else if (t.isFile() && t1.isDirectory())
-                        return 1;
+            Arrays.sort(files, (t, t1) -> {
+                if (t.isDirectory() && t1.isFile())
+                    return -1;
+                else if (t.isFile() && t1.isDirectory())
+                    return 1;
 
-                    // both files or both directories
-                    return (int) (t.length() - t1.length());
-                }
+                // both files or both directories
+                return (int) (t.length() - t1.length());
             });
         } else {
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File t, File t1) {
-                    if (t.isDirectory() && t1.isFile())
-                        return -1;
-                    else if (t.isFile() && t1.isDirectory())
-                        return 1;
+            Arrays.sort(files, (t, t1) -> {
+                if (t.isDirectory() && t1.isFile())
+                    return -1;
+                else if (t.isFile() && t1.isDirectory())
+                    return 1;
 
-                    // both files or both directories
-                    return (int) (t1.length() - t.length());
-                }
+                // both files or both directories
+                return (int) (t1.length() - t.length());
             });
         }
     }
@@ -169,7 +147,7 @@ public class Utils {
     }
 
     public static String formatFileDetails(File file) {
-        String details = "";
+        String details;
 
         long fileSize = file.length();
         String formattedUsedSpace = humanReadableByteCountSI(fileSize);
@@ -188,9 +166,10 @@ public class Utils {
         return details;
     }
 
+    @SuppressLint("SimpleDateFormat")
     public static String formatDateDetails(Date date) {
         Date todayDate = new Date();
-        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yy");;
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yy");
 
         if (todayDate.getDate() == date.getDate()) {
             formatter = new SimpleDateFormat("HH:mm");
@@ -201,6 +180,7 @@ public class Utils {
         return formatter.format(date);
     }
 
+    @SuppressLint("DefaultLocale")
     public static String humanReadableByteCountSI(long bytes) {
         if (-1000 < bytes && bytes < 1000) {
             return bytes + " B";
@@ -340,12 +320,24 @@ public class Utils {
         return "";
     }
 
+    public static boolean isFileAZipArchive(File file) {
+        if (file.isDirectory())
+            return false;
+
+        String extension = MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file)));
+
+        if (extension == null)
+            return false;
+
+        return extension.equals("zip");
+    }
+
     public static File[] removeHiddenFilesFromArray(File[] filesAndDirs) {
         if (filesAndDirs == null)
-            return filesAndDirs;
+            return null;
 
         List<File> fileList = Arrays.asList(filesAndDirs);
-        List<File> filetoRemoveList = new ArrayList<File>();
+        List<File> filetoRemoveList = new ArrayList<>();
 
         for(File file : fileList){
             if(file.isHidden()){
@@ -355,5 +347,20 @@ public class Utils {
         fileList.removeAll(filetoRemoveList);
 
         return fileList.toArray(new File[0]);
+    }
+
+    public static boolean validateDirectoryName(String name) {
+        return name.matches("^.?[a-zA-Z0-9-_. ]*$");
+    }
+
+    public static boolean validateFileName(String name) {
+        return name.matches("^[a-zA-Z0-9-_ ]*(\\.[a-zA-Z0-9]+)+$");
+    }
+
+    public static boolean validateGenericFileName(File file, String name) {
+        if (file.isDirectory())
+            return validateDirectoryName(name);
+        else
+            return validateFileName(name);
     }
 }

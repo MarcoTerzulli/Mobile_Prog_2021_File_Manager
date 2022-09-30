@@ -32,27 +32,33 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
-    private final Context context;
-    private final File[] filesAndDirs;
     private static ArrayList<File> selectedFiles;
-    //private ItemsViewHolder holder;
+    private final Context context;
+    private static File[] filesAndDirs = null;
 
     public ItemsAdapter(Context context, File[] filesAndFolders) {
         this.context = context;
-        this.filesAndDirs = filesAndFolders;
+        filesAndDirs = filesAndFolders;
 
         if (selectedFiles == null)
             selectedFiles = new ArrayList<>();
     }
 
+    public static void clearSelection() {
+        selectedFiles.clear();
+    }
+
+    public static boolean isSelectionModeEnabled() {
+        if (selectedFiles == null)
+            return false;
+        return !selectedFiles.isEmpty();
+    }
 
     @NonNull
     @Override
     public ItemsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_for_list, parent, false);
-        /*holder = new ItemsViewHolder(view);
 
-        return holder;*/
         return new ItemsViewHolder(view);
     }
 
@@ -107,6 +113,11 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     }
 
+    public static void renameSelectedFile() {
+        if (checkSelectedFilesType() == 1 || checkSelectedFilesType() == 2)
+            MainFragment.displayRenameDialog(selectedFiles.get(0));
+    }
+
     private boolean checkIfItemWasSelected(File file) {
         if (selectedFiles.isEmpty())
             return false;
@@ -131,6 +142,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
             // TODO gestione apertura zip
 
+            // TODO gestione installazione apk e richiesta permessi
+
             if (type == null)
                 Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
             else {
@@ -145,16 +158,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 }
             }
         }
-    }
-
-    public static void clearSelection() {
-        selectedFiles.clear();
-    }
-
-    public static boolean isSelectionModeEnabled() {
-        if(selectedFiles == null)
-            return false;
-        return !selectedFiles.isEmpty();
     }
 
     private void setItemIcon(int position, @NonNull ItemsViewHolder holder, boolean isSelected) {
@@ -176,7 +179,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         int color;
         boolean setSelectedIcon = false;
 
-        if(!recoverLastState) {
+        if (!recoverLastState) {
             // comportamento normale
             if (selectedFiles.contains(selectedFile) && unselect) {
                 // unselect
@@ -220,7 +223,20 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         updateMenuItems(checkSelectedFilesType());
     }
 
-    private int checkSelectedFilesType() {
+    /**
+     * Funzione per ottenere la tipologia di selezione corrente
+     * @return la tipologia di selezione attiva:
+     * - 1: un file selezionato
+     * - 2: una directory selezionata
+     * - 3: molteplici file selezionati
+     * - 4: molteplici file o directory selezionati
+     * - 5: selezione completa (generica)
+     * - 6: selezione completa ma di soli file
+     * - 7: selezione generica dentro zip
+     * - 8: selezione completa dentro zip
+     * - 9: nessuna selezione attiva, ma la cartella corrente è uno zip
+     */
+    private static int checkSelectedFilesType() {
         if (selectedFiles.isEmpty())
             return 0;
 
@@ -241,12 +257,14 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             return 5;
         if (foundDirsCount > 1 || (foundDirsCount > 0 && foundFileCount > 0))
             return 4;
-        if(foundFileCount == 1)
+        if (foundFileCount == 1)
             return 1;
-        if(foundDirsCount == 1)
+        if (foundDirsCount == 1)
             return 2;
-        if(foundFileCount > 1)
+        if (foundFileCount > 1)
             return 3;
+
+        // TODO gestione zip
 
         return 0; // non dovremmo mai arrivare qui
     }
