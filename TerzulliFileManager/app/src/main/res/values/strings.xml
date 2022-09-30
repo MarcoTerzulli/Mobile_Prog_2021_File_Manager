@@ -83,5 +83,7 @@
 
     <!-- Error -->
     <string name="error_access_to_root_folder">ERROR: You don\'t have to permission to access this location</string>
+    <string name="error_generic">ERROR: Something went wrong…</string>
+
 
 </resources>

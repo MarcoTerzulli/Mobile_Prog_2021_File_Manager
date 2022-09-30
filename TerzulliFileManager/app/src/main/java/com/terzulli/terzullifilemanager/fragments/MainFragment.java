@@ -119,7 +119,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
             initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
 
-            recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
+            // TODO gestione apertura file zip
+            boolean isCurrentDirAnArchive = false;
+
+            recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs, isCurrentDirAnArchive));
 
             if (updateBreadcrumb)
                 updateBreadCrumbList(path, oldPath);
@@ -325,9 +328,23 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (currentDirectory == null)
             return;
 
-        File newDir = new File(currentDirectory, newDirectoryName);
+        File newDir = new File(currentDirectory, newDirectoryName);;
+        String originalName = newDirectoryName;
+        int i, maxRetries = 10000;
 
-        if(!newDir.exists()) {
+        // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
+        for (i = 1; i < maxRetries; i++) {
+            newDir = new File(currentDirectory, newDirectoryName);
+
+            if(newDir.exists())
+                newDirectoryName = originalName + " (" + i + ")";
+            else
+                break;
+        }
+
+        if (i == maxRetries) {
+            Toast.makeText(view.getContext(), R.string.error_generic, Toast.LENGTH_SHORT).show();
+        } else {
             newDir.mkdirs();
             refreshList();
         }

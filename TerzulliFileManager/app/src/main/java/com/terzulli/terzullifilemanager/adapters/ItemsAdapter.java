@@ -33,12 +33,14 @@ import java.util.ArrayList;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
     private static ArrayList<File> selectedFiles;
-    private final Context context;
     private static File[] filesAndDirs = null;
+    private final Context context;
+    private static boolean isCurrentDirAnArchive;
 
-    public ItemsAdapter(Context context, File[] filesAndFolders) {
+    public ItemsAdapter(Context context, File[] filesAndFolders, boolean isCurrentDirAnArchive) {
         this.context = context;
         filesAndDirs = filesAndFolders;
+        ItemsAdapter.isCurrentDirAnArchive = isCurrentDirAnArchive;
 
         if (selectedFiles == null)
             selectedFiles = new ArrayList<>();
@@ -52,6 +54,78 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFiles == null)
             return false;
         return !selectedFiles.isEmpty();
+    }
+
+    public static void renameSelectedFile() {
+        // controllo se c'è esattamente un file / cartella selezionato
+        if (checkSelectedFilesType() == 1 || checkSelectedFilesType() == 2)
+            MainFragment.displayRenameDialog(selectedFiles.get(0));
+    }
+
+    public static void createNewDirectory() {
+        if (!isSelectionModeEnabled())
+            MainFragment.displayNewFolderDialog();
+    }
+
+    public static void deleteSelectedFiles() {
+        if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
+            for (File file : selectedFiles) {
+                file.delete();
+            }
+            MainFragment.refreshList();
+        }
+    }
+
+    private static boolean checkIfItemWasSelected(File file) {
+        if (selectedFiles.isEmpty())
+            return false;
+        return selectedFiles.contains(file);
+    }
+
+    /**
+     * Funzione per ottenere la tipologia di selezione corrente
+     * @return la tipologia di selezione attiva:
+     * - 1: un file selezionato
+     * - 2: una directory selezionata
+     * - 3: molteplici file selezionati
+     * - 4: molteplici file o directory selezionati
+     * - 5: selezione completa (generica)
+     * - 6: selezione completa ma di soli file
+     * - 7: selezione generica dentro zip
+     * - 8: selezione completa dentro zip
+     * - 9: nessuna selezione attiva, ma la cartella corrente è uno zip
+     */
+    private static int checkSelectedFilesType() {
+        if (selectedFiles.isEmpty())
+            return 0;
+
+        int foundFileCount = 0;
+        int foundDirsCount = 0;
+
+        for (File file : selectedFiles) {
+            if (file.isDirectory()) {
+                foundDirsCount++;
+            } else {
+                foundFileCount++;
+            }
+        }
+
+        if (filesAndDirs.length == foundFileCount)
+            return 6;
+        if (selectedFiles.size() == filesAndDirs.length)
+            return 5;
+        if (foundDirsCount > 1 || (foundDirsCount > 0 && foundFileCount > 0))
+            return 4;
+        if (foundFileCount == 1)
+            return 1;
+        if (foundDirsCount == 1)
+            return 2;
+        if (foundFileCount > 1)
+            return 3;
+
+        // TODO gestione zip
+
+        return 0; // non dovremmo mai arrivare qui
     }
 
     @NonNull
@@ -111,23 +185,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         // ripristino lo stato di selezione precedente
         toggleItemSelection(position, holder, false, true);
 
-    }
-
-    public static void renameSelectedFile() {
-        // controllo se c'è esattamente un file / cartella selezionato
-        if (checkSelectedFilesType() == 1 || checkSelectedFilesType() == 2)
-            MainFragment.displayRenameDialog(selectedFiles.get(0));
-    }
-
-    public static void createNewDirectory() {
-        if (!isSelectionModeEnabled())
-            MainFragment.displayNewFolderDialog();
-    }
-
-    private static boolean checkIfItemWasSelected(File file) {
-        if (selectedFiles.isEmpty())
-            return false;
-        return selectedFiles.contains(file);
     }
 
     private void itemOpenerHandler(File selectedFile) {
@@ -227,52 +284,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             resetActionBarTitle();
         }
         updateMenuItems(checkSelectedFilesType());
-    }
-
-    /**
-     * Funzione per ottenere la tipologia di selezione corrente
-     * @return la tipologia di selezione attiva:
-     * - 1: un file selezionato
-     * - 2: una directory selezionata
-     * - 3: molteplici file selezionati
-     * - 4: molteplici file o directory selezionati
-     * - 5: selezione completa (generica)
-     * - 6: selezione completa ma di soli file
-     * - 7: selezione generica dentro zip
-     * - 8: selezione completa dentro zip
-     * - 9: nessuna selezione attiva, ma la cartella corrente è uno zip
-     */
-    private static int checkSelectedFilesType() {
-        if (selectedFiles.isEmpty())
-            return 0;
-
-        int foundFileCount = 0;
-        int foundDirsCount = 0;
-
-        for (File file : selectedFiles) {
-            if (file.isDirectory()) {
-                foundDirsCount++;
-            } else {
-                foundFileCount++;
-            }
-        }
-
-        if (filesAndDirs.length == foundFileCount)
-            return 6;
-        if (selectedFiles.size() == filesAndDirs.length)
-            return 5;
-        if (foundDirsCount > 1 || (foundDirsCount > 0 && foundFileCount > 0))
-            return 4;
-        if (foundFileCount == 1)
-            return 1;
-        if (foundDirsCount == 1)
-            return 2;
-        if (foundFileCount > 1)
-            return 3;
-
-        // TODO gestione zip
-
-        return 0; // non dovremmo mai arrivare qui
     }
 
     private void setItemBackgroundColor(final int color, @NonNull ItemsViewHolder holder) {

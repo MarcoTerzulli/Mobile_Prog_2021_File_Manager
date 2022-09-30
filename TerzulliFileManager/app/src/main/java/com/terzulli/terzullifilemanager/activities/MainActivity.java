@@ -371,6 +371,9 @@ public class MainActivity extends PermissionsActivity
             case R.id.menu_rename:
                 ItemsAdapter.renameSelectedFile();
                 break;
+            case R.id.menu_delete:
+                ItemsAdapter.deleteSelectedFiles();
+                break;
             default:
                 // non dovremmo mai arrivarci
                 return false;
