@@ -81,6 +81,20 @@
     <string name="cant_open_file">Can\'t open the file</string>
     <string name="selected_file_lowercase">selected</string>
 
+    <!-- File/Dir delete strings -->
+    <string name="delete_single_dir_first_part">Delete folder</string>
+    <string name="delete_single_dir_second_part">and its contents?</string>
+    <string name="delete_single_file">Delete</string>
+    <string name="delete_multiple_dirs_first_part">Delete</string>
+    <string name="delete_multiple_dirs_second_part">folders and their contents?</string>
+    <string name="delete_multiple_files_first_part">Delete</string>
+    <string name="delete_multiple_files_second_part">files?</string>
+    <string name="delete_multiple_generic_first_part">Delete</string>
+    <string name="delete_multiple_generic_second_part">items?</string>
+    <string name="delete_toast_first_part">Deleting</string>
+    <string name="delete_toast_single_second_part">item.</string>
+    <string name="delete_toast_multiple_second_part">items.</string>
+
     <!-- Error -->
     <string name="error_access_to_root_folder">ERROR: You don\'t have to permission to access this location</string>
     <string name="error_generic">ERROR: Something went wrong…</string>

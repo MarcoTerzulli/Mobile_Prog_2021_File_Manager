@@ -72,12 +72,12 @@ public class MainActivity extends PermissionsActivity
      * - 1: un file selezionato
      * - 2: una directory selezionata
      * - 3: molteplici file selezionati
-     * - 4: molteplici file o directory selezionati
-     * - 5: selezione completa (generica)
-     * - 6: selezione completa ma di soli file
-     * - 7: selezione generica dentro zip
-     * - 8: selezione completa dentro zip
-     * - 9: nessuna selezione attiva, ma la cartella corrente è uno zip
+     * - 4 e 5: molteplici file o directory selezionati
+     * - 6: selezione completa (generica)
+     * - 7: selezione completa ma di soli file
+     * - 8: selezione generica dentro zip
+     * - 9: selezione completa dentro zip
+     * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
      * - default: cartella generica
      *
      * @param menuCase casistica scelta
@@ -99,26 +99,27 @@ public class MainActivity extends PermissionsActivity
                 setMenuItemsMultipleFileSelected();
                 break;
             case 4:
+            case 5:
                 // molteplici file / directory selezionate
                 setMenuItemsMultipleGenericSelected();
                 break;
-            case 5:
+            case 6:
                 // selezione completa
                 setMenuItemsAllSelected();
                 break;
-            case 6:
+            case 7:
                 // selezione completa ma di soli file
                 setMenuItemsAllSelectedOnlyFiles();
                 break;
-            case 7:
+            case 8:
                 // selezione dentro zip
                 setMenuItemsOneSelectedInsideZip();
                 break;
-            case 8:
+            case 9:
                 // selezione dentro zip
                 setMenuItemsAllSelectedInsideZip();
                 break;
-            case 9:
+            case 10:
                 // nessuna seleazione ma siamo dentro uno zip
                 setMenuItemsZip();
                 break;

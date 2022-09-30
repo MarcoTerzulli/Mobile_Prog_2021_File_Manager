@@ -67,12 +67,44 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             MainFragment.displayNewFolderDialog();
     }
 
-    public static void deleteSelectedFiles() {
+    public static void deleteSelectedFilesOperation()  {
         if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
             for (File file : selectedFiles) {
                 file.delete();
             }
+            clearSelection();
             MainFragment.refreshList();
+        }
+    }
+
+    public static void deleteSelectedFiles() {
+        if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
+            int selectionType = 0;
+            String fileName = "";
+
+            switch (checkSelectedFilesType()){
+                case 1:
+                    selectionType = 2;
+                    fileName = selectedFiles.get(0).getName();
+                    break;
+                case 2:
+                    selectionType = 1;
+                    fileName = selectedFiles.get(0).getName();
+                    break;
+                case 3:
+                    selectionType = 4;
+                    break;
+                case 4:
+                    selectionType = 3;
+                    break;
+                case 5:
+                case 6:
+                case 7:
+                    selectionType = 5;
+                    break;
+            }
+
+            MainFragment.displayDeleteSelectionDialog(selectionType, fileName, selectedFiles.size());
         }
     }
 
@@ -88,12 +120,13 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
      * - 1: un file selezionato
      * - 2: una directory selezionata
      * - 3: molteplici file selezionati
-     * - 4: molteplici file o directory selezionati
-     * - 5: selezione completa (generica)
-     * - 6: selezione completa ma di soli file
-     * - 7: selezione generica dentro zip
-     * - 8: selezione completa dentro zip
-     * - 9: nessuna selezione attiva, ma la cartella corrente è uno zip
+     * - 4: molteplici directory selezionate
+     * - 5: molteplici file o directory selezionati
+     * - 6: selezione completa (generica)
+     * - 7: selezione completa ma di soli file
+     * - 8: selezione generica dentro zip
+     * - 9: selezione completa dentro zip
+     * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
      */
     private static int checkSelectedFilesType() {
         if (selectedFiles.isEmpty())
@@ -111,11 +144,13 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         }
 
         if (filesAndDirs.length == foundFileCount)
-            return 6;
+            return 7;
         if (selectedFiles.size() == filesAndDirs.length)
-            return 5;
-        if (foundDirsCount > 1 || (foundDirsCount > 0 && foundFileCount > 0))
+            return 6;
+        if (foundDirsCount > 1 && foundFileCount == 0)
             return 4;
+        if (foundDirsCount > 1 || (foundDirsCount > 0 && foundFileCount > 0))
+            return 5;
         if (foundFileCount == 1)
             return 1;
         if (foundDirsCount == 1)

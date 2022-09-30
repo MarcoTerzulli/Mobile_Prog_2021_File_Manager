@@ -6,7 +6,6 @@ import static com.terzulli.terzullifilemanager.utils.Utils.validateDirectoryName
 import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileName;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -20,6 +19,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -328,7 +328,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (currentDirectory == null)
             return;
 
-        File newDir = new File(currentDirectory, newDirectoryName);;
+        File newDir = new File(currentDirectory, newDirectoryName);
         String originalName = newDirectoryName;
         int i, maxRetries = 10000;
 
@@ -396,6 +396,70 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 }
             }
         });
+    }
+
+    /**
+     *
+     * @param selectionType tipologia di selezione:
+     *                      - 1: singola directory
+     *                      - 2: singolo file
+     *                      - 3: multiple directory
+     *                      - 4: multipli file
+     *                      - 5: multipla generica
+     *
+     * @param fileName nome dell'eventuale file (solo per selezione singola)
+     * @param selectedFilesQt numero di file selezionati
+     *
+     */
+    public static void displayDeleteSelectionDialog(int selectionType, String fileName, int selectedFilesQt) {
+        if (fileName == null)
+            return;
+
+        String message = "";
+        switch (selectionType) {
+            case 1:
+                message = view.getResources().getString(R.string.delete_single_dir_first_part) + " \"" + fileName +
+                        "\" " + view.getResources().getString(R.string.delete_single_dir_second_part);
+                break;
+            case 2:
+                message = view.getResources().getString(R.string.delete_single_file) + " \"" + fileName + "\"?";
+                break;
+            case 3:
+                message = view.getResources().getString(R.string.delete_multiple_dirs_first_part) + " " + selectedFilesQt +
+                        " " + view.getResources().getString(R.string.delete_multiple_dirs_second_part);
+                break;
+            case 4:
+                message = view.getResources().getString(R.string.delete_multiple_files_first_part) + " " + selectedFilesQt +
+                        " " + view.getResources().getString(R.string.delete_multiple_files_second_part);
+                break;
+            case 5:
+                message = view.getResources().getString(R.string.delete_multiple_generic_first_part) + " " + selectedFilesQt +
+                        " " + view.getResources().getString(R.string.delete_multiple_generic_second_part);
+                break;
+            default:
+                return;
+        }
+
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
+        alertBuilder.setMessage(message);
+
+        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> {
+            new Handler().postDelayed(() -> {
+                String toastMessage = view.getResources().getString(R.string.delete_toast_first_part) + " " + selectedFilesQt + " ";
+                if (selectedFilesQt == 1)
+                    toastMessage += view.getResources().getString(R.string.delete_toast_single_second_part);
+                else
+                    toastMessage += view.getResources().getString(R.string.delete_toast_multiple_second_part);
+
+                Toast.makeText(view.getContext(), toastMessage, Toast.LENGTH_SHORT).show();
+                ItemsAdapter.deleteSelectedFilesOperation();
+            }, 10);
+
+
+        });
+        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {});
+
+        alertBuilder.show();
     }
 
     @Override
@@ -474,7 +538,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             depth = breadcrumbsView.getItems().size() - 1;
 
         //StringBuilder sb = new StringBuilder(Environment.getExternalStorageDirectory().getAbsolutePath());
-        StringBuilder sb = new StringBuilder("");
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i <= depth; i++) {
             sb.append("/").append(breadcrumbsView.getItems().get(i).getSelectedItem());
