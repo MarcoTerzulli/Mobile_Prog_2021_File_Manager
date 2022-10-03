@@ -1,5 +1,6 @@
 package com.terzulli.terzullifilemanager.adapters;
 
+import static androidx.core.content.ContextCompat.startActivity;
 import static com.terzulli.terzullifilemanager.activities.MainActivity.updateMenuItems;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.resetActionBarTitle;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionBarTitle;
@@ -22,8 +23,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.terzulli.terzullifilemanager.BuildConfig;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
@@ -301,6 +304,34 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFiles.isEmpty())
             return false;
         return selectedFiles.contains(file);
+    }
+
+    public static void shareSelectedFiles() {
+        if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
+            Intent intentShareFile = new Intent(Intent.ACTION_SEND);
+
+            // impstazione mime type
+            String mimetype = Utils.getMimeType(Uri.fromFile(selectedFiles.get(0)));
+            for (File file : selectedFiles) {
+                if (!mimetype.equals(Utils.getMimeType(Uri.fromFile(file)))) {
+                    mimetype = "*/*";
+                    break;
+                }
+            }
+            intentShareFile.setType(mimetype);
+
+            // allego i file
+            for (File file : selectedFiles) {
+                //intentShareFile.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + file.getAbsolutePath()));
+                intentShareFile.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context,
+                        BuildConfig.APPLICATION_ID +".provider", file));
+            }
+
+            intentShareFile.putExtra(Intent.EXTRA_SUBJECT,"Sharing File...");
+            intentShareFile.putExtra(Intent.EXTRA_TEXT, "Sharing File...");
+
+            context.startActivity(Intent.createChooser(intentShareFile, "Share File"));
+        }
     }
 
     /**

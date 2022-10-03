@@ -375,6 +375,9 @@ public class MainActivity extends PermissionsActivity
             case R.id.menu_delete:
                 ItemsAdapter.deleteSelectedFiles();
                 break;
+            case R.id.menu_share:
+                ItemsAdapter.shareSelectedFiles();
+                break;
             default:
                 // non dovremmo mai arrivarci
                 return false;
