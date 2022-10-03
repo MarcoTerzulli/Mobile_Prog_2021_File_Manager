@@ -17,9 +17,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -49,6 +49,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     private static final int backPressedInterval = 2000;
     private static RecyclerView recyclerView;
+    private static RelativeLayout copyMoveBar;
     @SuppressLint("StaticFieldLeak")
     private static SwipeRefreshLayout swipeRefreshLayout;
     private static MainFragmentViewModel mainFragmentViewModel;
@@ -156,7 +157,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 if (!newPath.equals(oldPath)) {
                     if (newPath.contains(oldPath)) {
                         // se il nuovo path è una cartella "successiva" al vecchio, aggiungo solo la parte nuova del path
-                        String difference = newPath.split(oldPath)[1];
+                        //String difference = newPath.split(oldPath)[1];
+                        String difference = newPath.substring(oldPath.length());
+
 
                         String[] pathArr = difference.split("/");
                         if (pathArr.length > 0) {
@@ -165,7 +168,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                         }
                     } else if (oldPath.contains(newPath)) {
                         // se il nuovo path è una cartella "superiore" al vecchio, rimuovo parte del path
-                        String difference = oldPath.split(newPath)[1];
+                        //String difference = oldPath.split(newPath)[1];
+                        String difference = oldPath.substring(newPath.length());
 
                         String[] pathArr = difference.split("/");
                         if (pathArr.length > 0) {
@@ -264,8 +268,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         File dir = file.getParentFile();
         if(dir != null && dir.exists()){
-            File from = new File(dir,file.getName());
-            File to = new File(dir,newName);
+            File from = new File(dir, file.getName());
+            File to = new File(dir, newName);
 
             if(from.exists()) {
                 from.renameTo(to);
@@ -295,13 +299,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         editText.addTextChangedListener(new TextWatcher() {
 
             public void afterTextChanged(Editable s) {
+                boolean alreadyExists = (new File(file.getParent(), s.toString()).exists());
                 boolean isNameValid = validateGenericFileName(file, s.toString());
 
                 Button button = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
                 if (button != null) {
-                    button.setEnabled(isNameValid);
+                    button.setEnabled(isNameValid && !alreadyExists);
 
-                    if(isNameValid)
+                    if(isNameValid && !alreadyExists)
                         editText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.black));
                     else
                         editText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.error_text_color));
@@ -454,12 +459,50 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 Toast.makeText(view.getContext(), toastMessage, Toast.LENGTH_SHORT).show();
                 ItemsAdapter.deleteSelectedFilesOperation();
             }, 10);
-
-
         });
         alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {});
 
         alertBuilder.show();
+    }
+
+    public static void displayCopyMoveBar(boolean isCopy, int selectedItemsQt) {
+        copyMoveBar.setVisibility(View.VISIBLE);
+
+        Button btnCancel = view.findViewById(R.id.items_btn_cancel_operation);
+        Button btnPaste = view.findViewById(R.id.items_btn_paste);
+        TextView txtOpDescr = view.findViewById(R.id.items_operation_descr);
+
+        String descr = "";
+
+        if(isCopy)
+            descr = view.getResources().getString(R.string.action_copy);
+        else
+            descr = view.getResources().getString(R.string.action_move);
+
+        descr += " " + selectedItemsQt;
+
+        if(selectedItemsQt == 1)
+            descr += " " + view.getResources().getString(R.string.action_copy_move_item);
+        else
+            descr += " " + view.getResources().getString(R.string.action_copy_move_items);
+
+        txtOpDescr.setText(descr);
+
+        btnCancel.setOnClickListener(view -> {
+            hideCopyMoveBar();
+            ItemsAdapter.recoverSelectionFromCopyMove();
+            refreshList();
+        });
+
+        btnPaste.setOnClickListener(view -> {
+            new Handler().postDelayed(() -> {
+                ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath);
+            }, 10);
+        });
+    }
+
+    public static void hideCopyMoveBar() {
+        copyMoveBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -481,6 +524,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         swipeRefreshLayout = view.findViewById(R.id.fragment_main_swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.fragment_main_list_view);
         breadcrumbsView = view.findViewById(R.id.fragment_main_breadcrumbs);
+        copyMoveBar = view.findViewById(R.id.items_copy_move_bar);
 
         pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
         pathRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -494,6 +538,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         swipeRefreshLayout.setOnRefreshListener(this);
         setActionBarTitle(getCurrentDirectoryName());
+        copyMoveBar.setVisibility(View.GONE);
 
         breadcrumbsView.setCallback(new DefaultBreadcrumbsCallback<BreadcrumbItem>() {
             @Override

@@ -22,6 +22,7 @@
     <color name="primary_700_night">#E53935</color>
     <color name="background_night">#232428</color>
     <color name="background_night_darker">#121212</color>
+    <color name="background_night_light">#3C4043</color>
     <color name="background_night_lighter">#45494C</color>
 
     <!-- Other colors -->

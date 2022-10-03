@@ -29,21 +29,41 @@ import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
     private static ArrayList<File> selectedFiles;
+    private static ArrayList<File> selectedFilestoCopyMove;
     private static File[] filesAndDirs = null;
-    private final Context context;
     private static boolean isCurrentDirAnArchive;
+    private static Context context;
 
     public ItemsAdapter(Context context, File[] filesAndFolders, boolean isCurrentDirAnArchive) {
-        this.context = context;
+        ItemsAdapter.context = context;
         filesAndDirs = filesAndFolders;
         ItemsAdapter.isCurrentDirAnArchive = isCurrentDirAnArchive;
 
         if (selectedFiles == null)
             selectedFiles = new ArrayList<>();
+
+        if (selectedFilestoCopyMove == null)
+            selectedFilestoCopyMove = new ArrayList<>();
+    }
+
+    public static void recoverSelectionFromCopyMove() {
+        selectedFiles = new ArrayList<>(selectedFilestoCopyMove.size());
+        selectedFiles.addAll(selectedFilestoCopyMove);
+    }
+
+    public static void saveSelectionFromCopyMove() {
+        selectedFilestoCopyMove = new ArrayList<>(selectedFiles.size());
+        selectedFilestoCopyMove.addAll(selectedFiles);
     }
 
     public static void clearSelection() {
@@ -54,6 +74,52 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFiles == null)
             return false;
         return !selectedFiles.isEmpty();
+    }
+
+    public static void copyMoveSelection(boolean isCopy) {
+        if (selectedFiles == null)
+            return;
+
+        saveSelectionFromCopyMove();
+        clearSelection();
+        MainFragment.refreshList();
+
+        MainFragment.displayCopyMoveBar(isCopy, selectedFilestoCopyMove.size());
+    }
+
+    public static void copyMoveSelectionOperation(boolean isCopy, String copyPath) {
+        if (selectedFilestoCopyMove == null)
+            return;
+
+        File newLocation = new File(copyPath);
+        if (newLocation.exists()) {
+            if (!newLocation.getPath().equals(selectedFilestoCopyMove.get(0).getParent())) {
+                // copy
+                for (File fileToMove : selectedFilestoCopyMove) {
+
+                    try {
+                        copyFileLowLevelOperation(fileToMove, newLocation);
+                    } catch (IOException e) {
+                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                // delete if the operation is move
+                if (!isCopy) {
+                    for (File fileToMove : selectedFilestoCopyMove) {
+                        deleteRecursive(fileToMove);
+                    }
+                }
+            } else {
+                Toast.makeText(context, R.string.error_copy_move_same_location, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        clearSelection();
+        selectedFilestoCopyMove = new ArrayList<>();
+        MainFragment.refreshList();
+        MainFragment.hideCopyMoveBar();
     }
 
     public static void renameSelectedFile() {
@@ -67,13 +133,82 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             MainFragment.displayNewFolderDialog();
     }
 
-    public static void deleteSelectedFilesOperation()  {
+    public static void deleteSelectedFilesOperation() {
         if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
             for (File file : selectedFiles) {
-                file.delete();
+                deleteRecursive(file);
             }
             clearSelection();
             MainFragment.refreshList();
+        }
+    }
+
+    private static void deleteRecursive(File file) {
+        if (file.isDirectory()) {
+            for (File child : Objects.requireNonNull(file.listFiles()))
+                deleteRecursive(child);
+        }
+
+        file.delete();
+    }
+
+    private static void copyFileLowLevelOperation(File sourceLocation, File targetLocation)
+            throws IOException {
+
+        File outFile = new File(targetLocation, sourceLocation.getName());
+
+        // rinomina in caso di duplicato
+        String originalName = sourceLocation.getName();
+        String newName = sourceLocation.getName();
+        int retries, maxRetries = 10000;
+
+        // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
+        for (retries = 1; retries < maxRetries; retries++) {
+            outFile = new File(targetLocation, newName);
+
+            if(outFile.exists()) {
+                if (outFile.isDirectory())
+                    newName = originalName + " (" + retries + ")";
+                else
+                    newName = originalName.substring(0, originalName.indexOf(".")) +
+                            " (" + retries + ")" + originalName.substring(originalName.indexOf("."));
+            } else
+                break;
+        }
+
+        if (retries == maxRetries) {
+            throw new IOException("Cannot create file or directory " + outFile.getAbsolutePath());
+        }
+
+        if (sourceLocation.isDirectory()) {
+            // creo test/livello1
+            if (!outFile.exists() && !outFile.mkdirs()) {
+                throw new IOException("Cannot create directory " + outFile.getAbsolutePath());
+            }
+
+            String[] children = sourceLocation.list();
+
+            for (int i = 0; i < Objects.requireNonNull(children).length; i++) {
+                // copia ricorsiva
+                /*copyFileLowLevelOperation(new File(sourceLocation, children[i]),
+                        new File(outFile, children[i]));*/
+                copyFileLowLevelOperation(new File(sourceLocation, children[i]),
+                        outFile);
+            }
+        } else {
+            try (InputStream in = new FileInputStream(sourceLocation)) {
+
+                if (!outFile.exists())
+                    outFile.createNewFile();
+
+                try (OutputStream out = new FileOutputStream(outFile)) {
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
+                }
+            }
         }
     }
 
@@ -82,7 +217,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             int selectionType = 0;
             String fileName = "";
 
-            switch (checkSelectedFilesType()){
+            switch (checkSelectedFilesType()) {
                 case 1:
                     selectionType = 2;
                     fileName = selectedFiles.get(0).getName();
@@ -116,6 +251,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     /**
      * Funzione per ottenere la tipologia di selezione corrente
+     *
      * @return la tipologia di selezione attiva:
      * - 1: un file selezionato
      * - 2: una directory selezionata

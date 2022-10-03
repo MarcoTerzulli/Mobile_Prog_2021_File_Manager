@@ -58,6 +58,7 @@
     <string name="button_ok">Ok</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_save">Save</string>
+    <string name="button_paste">Paste</string>
 
     <!-- Permissions -->
     <string name="grant">Grant</string>
@@ -95,9 +96,19 @@
     <string name="delete_toast_single_second_part">item.</string>
     <string name="delete_toast_multiple_second_part">items.</string>
 
+    <!-- File/Dir copy/move strings -->
+    <string name="action_copy">Copy</string>
+    <string name="action_move">Move</string>
+    <string name="action_copy_move_items">items</string>
+    <string name="action_copy_move_item">item</string>
+
     <!-- Error -->
     <string name="error_access_to_root_folder">ERROR: You don\'t have to permission to access this location</string>
     <string name="error_generic">ERROR: Something went wrong…</string>
+    <string name="error_copy_move_same_location">ERROR: Origin and destination location can\'t be the same</string>
+    <string name="error_check_permissions">Please make sure you have granted the "File and media" permission to the application</string>
 
+    <!-- Utils -->
+    <string name="string_placeholder">Lorem ipsum…</string>
 
 </resources>

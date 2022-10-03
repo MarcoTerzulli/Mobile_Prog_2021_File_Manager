@@ -42,5 +42,19 @@
         <item name="android:textColor">@color/dark_grey</item>
     </style>
 
+    <style name="Theme.TerzulliFileManager.CopyMoveBar" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="Theme.TerzulliFileManager.ButtonColored" parent="Widget.AppCompat.Button">
+        <item name="android:background">@color/primary_500_light</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Theme.TerzulliFileManager.ButtonOutlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:background">@color/white</item>
+        <item name="android:textColor">@color/primary_500_light</item>
+    </style>
+
 
 </resources>

@@ -349,10 +349,10 @@ public class MainActivity extends PermissionsActivity
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_copy_to:
-                Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                ItemsAdapter.copyMoveSelection(true);
                 break;
             case R.id.menu_move_to:
-                Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                ItemsAdapter.copyMoveSelection(false);
                 break;
             case R.id.menu_compress:
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();

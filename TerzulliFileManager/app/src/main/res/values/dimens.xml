@@ -10,6 +10,7 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <!-- Items and activity padding sizes -->
+    <dimen name="padding_tiniest">1dp</dimen>
     <dimen name="padding_tiny">2dp</dimen>
     <dimen name="padding_small">4dp</dimen>
     <dimen name="padding_normal">8dp</dimen>

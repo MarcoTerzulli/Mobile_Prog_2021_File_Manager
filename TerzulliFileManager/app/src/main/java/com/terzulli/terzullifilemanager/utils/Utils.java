@@ -350,12 +350,30 @@ public class Utils {
     }
 
     public static boolean validateDirectoryName(String name) {
-        return name.matches("^.?[a-zA-Z0-9-_. ]*$");
+        return name.matches("^.?[a-zA-Z0-9-_.()\\[\\] ]*$");
     }
 
     public static boolean validateFileName(String name) {
-        return name.matches("^[a-zA-Z0-9-_ ]*(\\.[a-zA-Z0-9]+)+$");
+        return name.matches("^[a-zA-Z0-9-_()\\[\\] ]*(\\.[a-zA-Z0-9]+)+$");
     }
+
+    /*public static String stringAddEscapeForRegex(String str) {
+        str = str.replace("(", "\\(");
+        str = str.replace(")", "\\)");
+        str = str.replace("[", "\\[");
+        str = str.replace("]", "\\]");
+
+        return str;
+    }
+
+    public static String stringRemoveEscapeForRegex(String str) {
+        str = str.replace("\\(", "(");
+        str = str.replace("\\)", ")");
+        str = str.replace("\\[", "[");
+        str = str.replace("\\]", "]");
+
+        return str;
+    }*/
 
     public static boolean validateGenericFileName(File file, String name) {
         if (file.isDirectory())
