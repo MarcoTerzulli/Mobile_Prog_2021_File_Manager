@@ -1,6 +1,7 @@
 package com.terzulli.terzullifilemanager.activities;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -39,6 +40,7 @@ public class MainActivity extends PermissionsActivity
     private static Menu toolbarMenu;
     private static Fragment navHostFragment;
     private static int menuActualCase;
+    private static SharedPreferences sharedPreferences;
     private AppBarConfiguration AppBarConfiguration;
     private ActivityMainBinding binding;
     private DrawerLayout drawer;
@@ -137,8 +139,8 @@ public class MainActivity extends PermissionsActivity
 
         // nascondo il resto
         toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
+        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
         toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
         toolbarMenu.findItem(R.id.menu_open_with).setVisible(true);
         toolbarMenu.findItem(R.id.menu_share).setVisible(false);
@@ -173,15 +175,14 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_rename).setVisible(true);
         toolbarMenu.findItem(R.id.menu_get_info).setVisible(true);
 
-        // todo mostrare cestino e bottone condividi
         toolbarMenu.findItem(R.id.menu_share).setVisible(true);
         toolbarMenu.findItem(R.id.menu_delete).setVisible(true);
         toolbarMenu.findItem(R.id.menu_search).setVisible(false);
 
         // nascondo il resto
         toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
+        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
         toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
         toolbarMenu.findItem(R.id.menu_extract).setVisible(false);
     }
@@ -259,9 +260,8 @@ public class MainActivity extends PermissionsActivity
             toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
         }
 
-        // TODO gestione file nascosti
-        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
+        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
 
         // setup search view
         searchView = (SearchView) toolbarMenu.findItem(R.id.menu_search).getActionView();
@@ -274,6 +274,8 @@ public class MainActivity extends PermissionsActivity
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        sharedPreferences = getSharedPreferences("TerzulliFileManager", MODE_PRIVATE);
 
         // setup layout
         setSupportActionBar(findViewById(R.id.main_toolbar));
@@ -328,7 +330,8 @@ public class MainActivity extends PermissionsActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         // TODO eventuale controllo fragment ?
 
-        // TODO implementazione azioni
+        SharedPreferences.Editor sharedPrefEditor = sharedPreferences.edit();
+
         switch (item.getItemId()) {
             case R.id.menu_search:
                 // TODO
@@ -366,12 +369,14 @@ public class MainActivity extends PermissionsActivity
                 ItemsAdapter.infoSelectedFile();
                 break;
             case R.id.menu_show_hidden:
-                // TODO
-                Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                sharedPrefEditor.putBoolean("showHidden", true);
+                sharedPrefEditor.apply();
+                MainFragment.refreshList();
                 break;
             case R.id.menu_dont_show_hidden:
-                // TODO
-                Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                sharedPrefEditor.putBoolean("showHidden", false);
+                sharedPrefEditor.apply();
+                MainFragment.refreshList();
                 break;
             case R.id.menu_rename:
                 ItemsAdapter.renameSelectedFile();

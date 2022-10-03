@@ -18,6 +18,7 @@ import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Utils {
@@ -450,7 +451,7 @@ public class Utils {
         if (filesAndDirs == null)
             return null;
 
-        List<File> fileList = Arrays.asList(filesAndDirs);
+        List<File> fileList = new LinkedList<File>(Arrays.asList(filesAndDirs));
         List<File> filetoRemoveList = new ArrayList<>();
 
         for(File file : fileList){

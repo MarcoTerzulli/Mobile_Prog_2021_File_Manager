@@ -1,10 +1,12 @@
 package com.terzulli.terzullifilemanager.fragments;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.isSelectionModeEnabled;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatDateDetailsFull;
 import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
 import static com.terzulli.terzullifilemanager.utils.Utils.humanReadableByteCountSI;
+import static com.terzulli.terzullifilemanager.utils.Utils.removeHiddenFilesFromArray;
 import static com.terzulli.terzullifilemanager.utils.Utils.strFileApplication;
 import static com.terzulli.terzullifilemanager.utils.Utils.strFileDirectory;
 import static com.terzulli.terzullifilemanager.utils.Utils.strSortDate;
@@ -15,6 +17,7 @@ import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileNa
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -80,6 +83,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static String lastActionBarTitle;
     private static long timeBackPressed;
     private static Activity activityReference;
+    private static SharedPreferences sharedPreferences;
 
     public MainFragment() {
         // Required empty public constructor
@@ -127,10 +131,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             File[] filesAndDirs = rootFile.listFiles();
             Utils.sortFileAndFoldersList(filesAndDirs, sortBy, sortAscending);
 
-            // todo rimozione file nascosti se si è scelto di non visualizzarli (iniziano col .)
-            // todo controllare nelle shared preferences cosa è stato scelto
-            /*if (....)
-                filesAndDirs = removeHiddenFilesFromArray(filesAndDirs);*/
+            // rimozione file nascosti (iniziano col .)
+            if (!sharedPreferences.getBoolean("showHidden", false))
+                filesAndDirs = removeHiddenFilesFromArray(filesAndDirs);
 
             // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
             initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
@@ -537,9 +540,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             refreshList();
         });
 
-        String[] items = {recyclerView.getContext().getResources().getString(R.string.sort_name),
-                recyclerView.getContext().getResources().getString(R.string.sort_size),
-                recyclerView.getContext().getResources().getString(R.string.sort_date_last_modified)};
+        String[] items = {activityReference.getResources().getString(R.string.sort_name),
+                activityReference.getResources().getString(R.string.sort_size),
+                activityReference.getResources().getString(R.string.sort_date_last_modified)};
         int checkedItem = 0;
         alertBuilder.setSingleChoiceItems(items, checkedItem, (dialog, which) -> {
             switch (which) {
@@ -569,8 +572,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         String fileSize = humanReadableByteCountSI(file.length());
         String fileName = file.getName();
 
-        String message = "<br><b>" + recyclerView.getContext().getResources().getString(R.string.prop_name) + "</b>: " + fileName +
-                "<br><br><b>" + recyclerView.getContext().getResources().getString(R.string.prop_type) + "</b>: ";
+        String message = "<br><b>" + activityReference.getResources().getString(R.string.prop_name) + "</b>: " + fileName +
+                "<br><br><b>" + activityReference.getResources().getString(R.string.prop_type) + "</b>: ";
 
         switch (fileType) {
             case strFileDirectory:
@@ -582,8 +585,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
 
         message += " " + fileType +
-                "<br><br><b>" + recyclerView.getContext().getResources().getString(R.string.sort_size) + "</b>: " + fileSize +
-                "<br><br><b>" + recyclerView.getContext().getResources().getString(R.string.sort_date_last_modified) + "</b>: " + fileLastModified;
+                "<br><br><b>" + activityReference.getResources().getString(R.string.sort_size) + "</b>: " + fileSize +
+                "<br><br><b>" + activityReference.getResources().getString(R.string.sort_date_last_modified) + "</b>: " + fileLastModified;
 
         if (fileType.equals(strFileDirectory)) {
             int nItems = 0;
@@ -592,7 +595,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             if (listFiles != null)
                 nItems = listFiles.length;
 
-            message += "<br><br><b>" + recyclerView.getContext().getResources().getString(R.string.prop_n_items) + "</b>: " + nItems;
+            message += "<br><br><b>" + activityReference.getResources().getString(R.string.prop_n_items) + "</b>: " + nItems;
         }
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
@@ -638,6 +641,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         breadcrumbsView = view.findViewById(R.id.fragment_main_breadcrumbs);
         copyMoveBar = view.findViewById(R.id.items_copy_move_bar);
         activityReference = requireActivity();
+        sharedPreferences = activityReference.getSharedPreferences("TerzulliFileManager", MODE_PRIVATE);
 
         pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
         pathRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
