@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
@@ -81,6 +82,17 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFiles == null)
             return false;
         return !selectedFiles.isEmpty();
+    }
+
+    public static void selectAll() {
+        clearSelection();
+        selectedFiles.addAll(Arrays.asList(filesAndDirs));
+        MainFragment.refreshList();
+    }
+
+    public static void deselectAll() {
+        clearSelection();
+        MainFragment.refreshList();
     }
 
     public static void copyMoveSelection(boolean isCopy) {

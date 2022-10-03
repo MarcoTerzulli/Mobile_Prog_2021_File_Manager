@@ -331,22 +331,25 @@ public class MainActivity extends PermissionsActivity
         // TODO implementazione azioni
         switch (item.getItemId()) {
             case R.id.menu_search:
+                // TODO
                 Toast.makeText(MainActivity.this, "Menu search", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_new_folder:
                 ItemsAdapter.createNewDirectory();
                 break;
             case R.id.menu_open_with:
+                // TODO
                 Toast.makeText(MainActivity.this, "Menu open with", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_sort_by:
+                // TODO
                 Toast.makeText(MainActivity.this, "Menu sort by", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_select_all:
-                Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                ItemsAdapter.selectAll();
                 break;
             case R.id.menu_deselect_all:
-                Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                ItemsAdapter.deselectAll();
                 break;
             case R.id.menu_copy_to:
                 ItemsAdapter.copyMoveSelection(true);
@@ -355,18 +358,22 @@ public class MainActivity extends PermissionsActivity
                 ItemsAdapter.copyMoveSelection(false);
                 break;
             case R.id.menu_compress:
+                // TODO
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;
             /*case R.id.menu_decompress:
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;*/
             case R.id.menu_get_info:
+                // TODO
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_show_hidden:
+                // TODO
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_dont_show_hidden:
+                // TODO
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_rename:
