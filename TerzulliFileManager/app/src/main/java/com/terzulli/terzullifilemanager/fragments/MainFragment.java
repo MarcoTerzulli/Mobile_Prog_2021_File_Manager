@@ -547,7 +547,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
 
         alertBuilder.show();
-
     }
 
     private static void executeCopyMoveOperationOnThread(boolean isCopy) {

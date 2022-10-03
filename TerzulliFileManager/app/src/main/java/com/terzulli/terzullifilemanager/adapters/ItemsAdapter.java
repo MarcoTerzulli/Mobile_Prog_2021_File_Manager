@@ -1,6 +1,5 @@
 package com.terzulli.terzullifilemanager.adapters;
 
-import static androidx.core.content.ContextCompat.startActivity;
 import static com.terzulli.terzullifilemanager.activities.MainActivity.updateMenuItems;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.resetActionBarTitle;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionBarTitle;
@@ -394,6 +393,28 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         // TODO gestione zip
 
         return 0; // non dovremmo mai arrivare qui
+    }
+
+    public static void openWithSelectedFile() {
+        if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
+            if (selectedFiles.size() == 1) {
+                File file = selectedFiles.get(0);
+
+                MimeTypeMap map = MimeTypeMap.getSingleton();
+                String ext = Utils.getFileExtension(file);
+                String type = map.getMimeTypeFromExtension(ext);
+
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    Uri data = Uri.parse(file.getAbsolutePath());
+
+                    intent.setDataAndType(data, type);
+                    context.startActivity(Intent.createChooser(intent, context.getResources().getString(R.string.action_open_with)));
+                } catch (Exception e) {
+                    Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     @NonNull

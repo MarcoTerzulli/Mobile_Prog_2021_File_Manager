@@ -338,8 +338,7 @@ public class MainActivity extends PermissionsActivity
                 ItemsAdapter.createNewDirectory();
                 break;
             case R.id.menu_open_with:
-                // TODO
-                Toast.makeText(MainActivity.this, "Menu open with", Toast.LENGTH_SHORT).show();
+                ItemsAdapter.openWithSelectedFile();
                 break;
             case R.id.menu_sort_by:
                 MainFragment.displaySortByDialog();
