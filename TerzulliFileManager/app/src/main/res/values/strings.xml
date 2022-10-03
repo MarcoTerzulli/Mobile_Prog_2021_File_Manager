@@ -106,6 +106,13 @@
     <string name="action_copy_move_completed_second_part">items to</string>
     <string name="action_copy_move_completed_third_part">completed</string>
 
+    <!-- File/Dir sort-->
+    <string name="sort_ascending">Ascending</string>
+    <string name="sort_descending">Descending</string>
+    <string name="sort_name">Name</string>
+    <string name="sort_size">Size</string>
+    <string name="sort_date_last_modified">Last modified</string>
+
     <!-- Error -->
     <string name="error_access_to_root_folder">ERROR: You don\'t have to permission to access this location</string>
     <string name="error_generic">ERROR: Something went wrong…</string>

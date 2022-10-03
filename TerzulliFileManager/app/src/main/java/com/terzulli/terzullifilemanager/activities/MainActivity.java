@@ -342,8 +342,7 @@ public class MainActivity extends PermissionsActivity
                 Toast.makeText(MainActivity.this, "Menu open with", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_sort_by:
-                // TODO
-                Toast.makeText(MainActivity.this, "Menu sort by", Toast.LENGTH_SHORT).show();
+                MainFragment.displaySortByDialog();
                 break;
             case R.id.menu_select_all:
                 ItemsAdapter.selectAll();

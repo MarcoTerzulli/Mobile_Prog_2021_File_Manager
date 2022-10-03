@@ -40,6 +40,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import moe.feng.common.view.breadcrumbs.BreadcrumbsView;
 import moe.feng.common.view.breadcrumbs.DefaultBreadcrumbsCallback;
@@ -58,7 +59,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static View view;
     private static String currentPath;
     private static String sortBy;
-    private static boolean ascending;
+    private static boolean sortAscending;
     private static String pathHome;
     private static String pathRoot;
     private static String pathHomeFriendlyName;
@@ -112,7 +113,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         new Handler().postDelayed(() -> {
             File rootFile = new File(path);
             File[] filesAndDirs = rootFile.listFiles();
-            Utils.sortFileAndFoldersList(filesAndDirs, sortBy, ascending);
+            Utils.sortFileAndFoldersList(filesAndDirs, sortBy, sortAscending);
 
             // todo rimozione file nascosti se si è scelto di non visualizzarli (iniziano col .)
             // todo controllare nelle shared preferences cosa è stato scelto
@@ -505,6 +506,50 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
     }
 
+    public static void displaySortByDialog() {
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
+        alertBuilder.setTitle(R.string.action_sort_by);
+
+        AtomicBoolean noItemCliked = new AtomicBoolean(true);
+
+        alertBuilder.setPositiveButton(R.string.sort_ascending, (dialog, whichButton) -> {
+            sortAscending = true;
+            if (noItemCliked.get())
+                sortBy = "NAME";
+            refreshList();
+        });
+        alertBuilder.setNegativeButton(R.string.sort_descending, (dialog, whichButton) -> {
+            sortAscending = false;
+            if (noItemCliked.get())
+                sortBy = "NAME";
+            refreshList();
+        });
+
+        String[] items = {recyclerView.getContext().getResources().getString(R.string.sort_name),
+                recyclerView.getContext().getResources().getString(R.string.sort_size),
+                recyclerView.getContext().getResources().getString(R.string.sort_date_last_modified)};
+        int checkedItem = 0;
+        alertBuilder.setSingleChoiceItems(items, checkedItem, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    sortBy = "NAME";
+                    noItemCliked.set(false);
+                    break;
+                case 1:
+                    sortBy = "SIZE";
+                    noItemCliked.set(false);
+                    break;
+                case 2:
+                    sortBy = "DATE";
+                    noItemCliked.set(false);
+                    break;
+            }
+        });
+
+        alertBuilder.show();
+
+    }
+
     private static void executeCopyMoveOperationOnThread(boolean isCopy) {
         activityReference.runOnUiThread(() -> {
             ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath, ItemsAdapter.getSelectedFilestoCopyMove());
@@ -521,7 +566,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         setHasOptionsMenu(true);
 
         sortBy = "NAME";
-        ascending = true;
+        sortAscending = true;
     }
 
     @Override
