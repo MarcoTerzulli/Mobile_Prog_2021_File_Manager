@@ -363,8 +363,7 @@ public class MainActivity extends PermissionsActivity
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;*/
             case R.id.menu_get_info:
-                // TODO
-                Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                ItemsAdapter.infoSelectedFile();
                 break;
             case R.id.menu_show_hidden:
                 // TODO

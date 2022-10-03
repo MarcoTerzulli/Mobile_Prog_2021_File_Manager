@@ -22,6 +22,21 @@ import java.util.List;
 
 public class Utils {
 
+    // string constants
+    public static final String strSortName = "NAME";
+    public static final String strSortSize = "SIZE";
+    public static final String strSortDate = "DATE";
+    public static final String strFileDocument = "Document";
+    public static final String strFileSpreadsheet = "Spreadsheet";
+    public static final String strFileVideo = "Video";
+    public static final String strFileImage = "Image";
+    public static final String strFileAudio = "Audio";
+    public static final String strFileArchive = "Archive";
+    public static final String strFileDirectory = "Folder";
+    public static final String strFilePresentation = "Presentation";
+    public static final String strFileApplication = "Android application";
+    public static final String strFileGeneric = "File";
+
     public static boolean isDeviceInLandscapeOrientation(Activity activity) {
         return activity.getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
@@ -129,13 +144,13 @@ public class Utils {
 
     public static File[] sortFileAndFoldersList(File[] filesAndDirs, final String sortBy, final boolean ascending) {
         switch (sortBy) {
-            case "NAME":
+            case strSortName:
                 Utils.sortByName(filesAndDirs, ascending);
                 break;
-            case "SIZE":
+            case strSortSize:
                 Utils.sortBySize(filesAndDirs, ascending);
                 break;
-            case "DATE":
+            case strSortDate:
                 Utils.sortByDate(filesAndDirs, ascending);
                 break;
             default:
@@ -153,13 +168,15 @@ public class Utils {
         String formattedUsedSpace = humanReadableByteCountSI(fileSize);
 
         Date lastModified = new Date(file.lastModified());
-        String formattedDateString = formatDateDetails(lastModified);
+        String formattedDateString = formatDateDetailsShort(lastModified);
 
-        String mimeType = getReadableMimeType(getMimeType(Uri.fromFile(file)));
+        //String mimeType = getReadableMimeType(getMimeType(Uri.fromFile(file)));
+        String mimeType = getReadableMimeTypeAndExtension(file);
 
         details = formattedDateString + ", " + formattedUsedSpace;
         if (!mimeType.equals(""))
             details +=  ", " + mimeType;
+            //details +=  ", " + getFileType(file);
         else
             details +=  ", BIN file";
 
@@ -167,7 +184,7 @@ public class Utils {
     }
 
     @SuppressLint("SimpleDateFormat")
-    public static String formatDateDetails(Date date) {
+    public static String formatDateDetailsShort(Date date) {
         Date todayDate = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yy");
 
@@ -176,6 +193,14 @@ public class Utils {
         } else if (todayDate.getYear() == date.getYear()) {
             formatter = new SimpleDateFormat("dd MMM");
         }
+
+        return formatter.format(date);
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    public static String formatDateDetailsFull(Date date) {
+        Date todayDate = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yy, HH:mm");
 
         return formatter.format(date);
     }
@@ -220,6 +245,25 @@ public class Utils {
         return extension + " " + mediaType;
     }
 
+    public static String getReadableMimeTypeAndExtension(File file) {
+        String mimeType = getMimeType(Uri.fromFile(file));
+
+        if (mimeType == null)
+            return "";
+
+        if (mimeType.length() == 0 || mimeType.split("/").length != 2) {
+            return mimeType;
+        }
+
+        String mediaType = mimeType.split("/")[0];
+        mediaType = getFileType(file);
+
+        String extension = mimeType.split("/")[1];
+        extension = extension.toUpperCase();
+
+        return extension + " " + mediaType;
+    }
+
     public static boolean fileIsImage(File file) {
         switch (MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file)))) {
             case "png":
@@ -243,7 +287,6 @@ public class Utils {
             case "jpeg":
             case "gif":
             case "bmp":
-                // TODO preview immagine
                 return R.drawable.ic_file_image;
 
             case "mp3":
@@ -302,6 +345,77 @@ public class Utils {
 
             default:
                 return R.drawable.ic_file_generic;
+        }
+    }
+
+    public static String getFileType(File file) {
+        if (file.isDirectory())
+            return strFileDirectory;
+
+        switch(MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file)))) {
+            case "png":
+            case "jpg":
+            case "jpeg":
+            case "gif":
+            case "bmp":
+                return strFileImage;
+
+            case "mp3":
+            case "wav":
+            case "ogg":
+            case "midi":
+                return strFileAudio;
+
+            case "mp4":
+            case "rmvb":
+            case "avi":
+            case "flv":
+            case "3gp":
+                return strFileVideo;
+
+            case "jsp":
+            case "html":
+            case "htm":
+            case "js":
+            case "php":
+            case "c":
+            case "cpp":
+            case "py":
+            case "json":
+                return strFileGeneric;
+
+            case "txt":
+            case "xml":
+            case "log":
+                return strFileDocument;
+
+            case "xls":
+            case "xlsx":
+                return strFileSpreadsheet;
+
+            case "doc":
+            case "docx":
+                return strFileDocument;
+
+            case "ppt":
+            case "pptx":
+                return strFilePresentation;
+
+            case "pdf":
+                return strFileDocument;
+
+            case "jar":
+            case "zip":
+            case "rar":
+            case "gz":
+            case "7z":
+                return strFileArchive;
+
+            case "apk":
+                return strFileApplication;
+
+            default:
+                return strFileGeneric;
         }
     }
 

@@ -113,6 +113,14 @@
     <string name="sort_size">Size</string>
     <string name="sort_date_last_modified">Last modified</string>
 
+    <!-- File/Dir properties-->
+    <string name="prop_properties">Properties</string>
+    <string name="prop_name">Name</string>
+    <string name="prop_size">Name</string>
+    <string name="prop_last_modified">Last Modified</string>
+    <string name="prop_type">Type</string>
+    <string name="prop_n_items">Number of items</string>
+
     <!-- Error -->
     <string name="error_access_to_root_folder">ERROR: You don\'t have to permission to access this location</string>
     <string name="error_generic">ERROR: Something went wrong…</string>

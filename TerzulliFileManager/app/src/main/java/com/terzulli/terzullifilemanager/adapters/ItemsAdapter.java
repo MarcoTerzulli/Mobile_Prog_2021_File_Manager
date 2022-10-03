@@ -1,9 +1,13 @@
 package com.terzulli.terzullifilemanager.adapters;
 
 import static com.terzulli.terzullifilemanager.activities.MainActivity.updateMenuItems;
+import static com.terzulli.terzullifilemanager.fragments.MainFragment.displayPropertiesDialog;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.resetActionBarTitle;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionBarTitle;
+import static com.terzulli.terzullifilemanager.utils.Utils.formatDateDetailsFull;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
+import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
+import static com.terzulli.terzullifilemanager.utils.Utils.humanReadableByteCountSI;
 
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +42,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Objects;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
@@ -94,6 +99,12 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         MainFragment.refreshList();
     }
 
+    public static void infoSelectedFile() {
+        if (isSelectionModeEnabled() && selectedFiles.size() == 1) {
+            displayPropertiesDialog(selectedFiles.get(0));
+        }
+    }
+
     public static void copyMoveSelection(boolean isCopy) {
         if (selectedFiles == null)
             return;
@@ -116,7 +127,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         File newLocation = new File(copyPath);
         if (newLocation.exists()) {
-            if (!newLocation.getPath().equals(filestoCopyMove.get(0).getParent())) {
+            //if (!newLocation.getPath().equals(filestoCopyMove.get(0).getParent())) {
                 // copy
                 for (File fileToMove : filestoCopyMove) {
 
@@ -134,9 +145,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                         deleteRecursive(fileToMove);
                     }
                 }
-            } else {
+            /*} else {
                 Toast.makeText(context, R.string.error_copy_move_same_location, Toast.LENGTH_SHORT).show();
-            }
+            }*/
         }
 
         if (MainFragment.getCurrentPath().equals(copyPath))

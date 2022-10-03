@@ -2,19 +2,30 @@ package com.terzulli.terzullifilemanager.fragments;
 
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.isSelectionModeEnabled;
+import static com.terzulli.terzullifilemanager.utils.Utils.formatDateDetailsFull;
+import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
+import static com.terzulli.terzullifilemanager.utils.Utils.humanReadableByteCountSI;
+import static com.terzulli.terzullifilemanager.utils.Utils.strFileApplication;
+import static com.terzulli.terzullifilemanager.utils.Utils.strFileDirectory;
+import static com.terzulli.terzullifilemanager.utils.Utils.strSortDate;
+import static com.terzulli.terzullifilemanager.utils.Utils.strSortName;
+import static com.terzulli.terzullifilemanager.utils.Utils.strSortSize;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateDirectoryName;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileName;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -38,6 +49,7 @@ import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -515,13 +527,13 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.setPositiveButton(R.string.sort_ascending, (dialog, whichButton) -> {
             sortAscending = true;
             if (noItemCliked.get())
-                sortBy = "NAME";
+                sortBy = strSortName;
             refreshList();
         });
         alertBuilder.setNegativeButton(R.string.sort_descending, (dialog, whichButton) -> {
             sortAscending = false;
             if (noItemCliked.get())
-                sortBy = "NAME";
+                sortBy = strSortName;
             refreshList();
         });
 
@@ -532,18 +544,64 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.setSingleChoiceItems(items, checkedItem, (dialog, which) -> {
             switch (which) {
                 case 0:
-                    sortBy = "NAME";
+                    sortBy = strSortName;
                     noItemCliked.set(false);
                     break;
                 case 1:
-                    sortBy = "SIZE";
+                    sortBy = strSortSize;
                     noItemCliked.set(false);
                     break;
                 case 2:
-                    sortBy = "DATE";
+                    sortBy = strSortDate;
                     noItemCliked.set(false);
                     break;
             }
+        });
+
+        alertBuilder.show();
+    }
+
+    public static void displayPropertiesDialog(File file) {
+
+        // attributi file
+        String fileType = getFileType(file);
+        String fileLastModified = formatDateDetailsFull(new Date(file.lastModified()));
+        String fileSize = humanReadableByteCountSI(file.length());
+        String fileName = file.getName();
+
+        String message = "<br><b>" + recyclerView.getContext().getResources().getString(R.string.prop_name) + "</b>: " + fileName +
+                "<br><br><b>" + recyclerView.getContext().getResources().getString(R.string.prop_type) + "</b>: ";
+
+        switch (fileType) {
+            case strFileDirectory:
+            case strFileApplication:
+                break;
+            default:
+                message += MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file))).toUpperCase();
+                break;
+        }
+
+        message += " " + fileType +
+                "<br><br><b>" + recyclerView.getContext().getResources().getString(R.string.sort_size) + "</b>: " + fileSize +
+                "<br><br><b>" + recyclerView.getContext().getResources().getString(R.string.sort_date_last_modified) + "</b>: " + fileLastModified;
+
+        if (fileType.equals(strFileDirectory)) {
+            int nItems = 0;
+            File listFiles[] = file.listFiles();
+
+            if (listFiles != null)
+                nItems = listFiles.length;
+
+            message += "<br><br><b>" + recyclerView.getContext().getResources().getString(R.string.prop_n_items) + "</b>: " + nItems;
+        }
+
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
+        alertBuilder.setTitle(R.string.prop_properties);
+        alertBuilder.setMessage(Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY));
+
+
+        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> {
+            // non si fa niente
         });
 
         alertBuilder.show();
@@ -564,7 +622,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        sortBy = "NAME";
+        sortBy = strSortName;
         sortAscending = true;
     }
 
