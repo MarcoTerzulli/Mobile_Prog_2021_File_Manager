@@ -6,6 +6,7 @@ import static com.terzulli.terzullifilemanager.utils.Utils.validateDirectoryName
 import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileName;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -65,6 +66,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static BreadcrumbsView breadcrumbsView;
     private static String lastActionBarTitle;
     private static long timeBackPressed;
+    private static Activity activityReference;
 
     public MainFragment() {
         // Required empty public constructor
@@ -495,9 +497,17 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
 
         btnPaste.setOnClickListener(view -> {
-            new Handler().postDelayed(() -> {
+            executeCopyMoveOperationOnThread(isCopy);
+
+            /*new Handler().postDelayed(() -> {
                 ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath);
-            }, 10);
+            }, 10);*/
+        });
+    }
+
+    private static void executeCopyMoveOperationOnThread(boolean isCopy) {
+        activityReference.runOnUiThread(() -> {
+            ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath, ItemsAdapter.getSelectedFilestoCopyMove());
         });
     }
 
@@ -525,6 +535,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         recyclerView = view.findViewById(R.id.fragment_main_list_view);
         breadcrumbsView = view.findViewById(R.id.fragment_main_breadcrumbs);
         copyMoveBar = view.findViewById(R.id.items_copy_move_bar);
+        activityReference = requireActivity();
 
         pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
         pathRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -575,6 +586,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         else
             setActionBarTitle(lastActionBarTitle);
 
+        activityReference = requireActivity();
         refreshList();
     }
 

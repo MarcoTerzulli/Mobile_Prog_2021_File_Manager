@@ -66,6 +66,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         selectedFilestoCopyMove.addAll(selectedFiles);
     }
 
+    public static ArrayList<File> getSelectedFilestoCopyMove() {
+        return selectedFilestoCopyMove;
+    }
+
     public static void clearSelection() {
         selectedFiles.clear();
     }
@@ -87,7 +91,57 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         MainFragment.displayCopyMoveBar(isCopy, selectedFilestoCopyMove.size());
     }
 
-    public static void copyMoveSelectionOperation(boolean isCopy, String copyPath) {
+    public static void copyMoveSelectionOperation(boolean isCopy, String copyPath,
+                                                  ArrayList<File> filestoCopyMove) {
+        if (filestoCopyMove == null || filestoCopyMove.size() == 0)
+            return;
+
+        clearSelection();
+        selectedFilestoCopyMove = new ArrayList<>();
+        MainFragment.hideCopyMoveBar();
+
+        File newLocation = new File(copyPath);
+        if (newLocation.exists()) {
+            if (!newLocation.getPath().equals(filestoCopyMove.get(0).getParent())) {
+                // copy
+                for (File fileToMove : filestoCopyMove) {
+
+                    try {
+                        copyFileLowLevelOperation(fileToMove, newLocation);
+                    } catch (IOException e) {
+                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                // delete if the operation is move
+                if (!isCopy) {
+                    for (File fileToMove : filestoCopyMove) {
+                        deleteRecursive(fileToMove);
+                    }
+                }
+            } else {
+                Toast.makeText(context, R.string.error_copy_move_same_location, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        if (MainFragment.getCurrentPath().equals(copyPath))
+            MainFragment.refreshList();
+        else {
+            String toastMessage = "";
+            if (isCopy)
+                toastMessage = context.getResources().getString(R.string.action_copy_completed_first_part);
+            else
+                toastMessage = context.getResources().getString(R.string.action_move_completed_first_part);
+
+            toastMessage += filestoCopyMove.size()
+                    + context.getResources().getString(R.string.action_copy_move_completed_second_part)
+                    + copyPath + context.getResources().getString(R.string.action_copy_move_completed_third_part);
+            Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /*public static void copyMoveSelectionOperation(boolean isCopy, String copyPath) {
         if (selectedFilestoCopyMove == null)
             return;
 
@@ -120,7 +174,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         selectedFilestoCopyMove = new ArrayList<>();
         MainFragment.refreshList();
         MainFragment.hideCopyMoveBar();
-    }
+    }*/
 
     public static void renameSelectedFile() {
         // controllo se c'è esattamente un file / cartella selezionato
@@ -166,7 +220,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         for (retries = 1; retries < maxRetries; retries++) {
             outFile = new File(targetLocation, newName);
 
-            if(outFile.exists()) {
+            if (outFile.exists()) {
                 if (outFile.isDirectory())
                     newName = originalName + " (" + retries + ")";
                 else
