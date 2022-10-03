@@ -467,7 +467,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.setMessage(message);
 
         alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> {
-            new Handler().postDelayed(() -> {
+            executeDeleteOperationOnThread(selectedFilesQt);
+            /*new Handler().postDelayed(() -> {
                 String toastMessage = view.getResources().getString(R.string.delete_toast_first_part) + " " + selectedFilesQt + " ";
                 if (selectedFilesQt == 1)
                     toastMessage += view.getResources().getString(R.string.delete_toast_single_second_part);
@@ -476,11 +477,24 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                 Toast.makeText(view.getContext(), toastMessage, Toast.LENGTH_SHORT).show();
                 ItemsAdapter.deleteSelectedFilesOperation();
-            }, 10);
+            }, 10);*/
         });
         alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {});
 
         alertBuilder.show();
+    }
+
+    private static void executeDeleteOperationOnThread(int selectedFilesQt) {
+        activityReference.runOnUiThread(() -> {
+            String toastMessage = view.getResources().getString(R.string.delete_toast_first_part) + " " + selectedFilesQt + " ";
+            if (selectedFilesQt == 1)
+                toastMessage += view.getResources().getString(R.string.delete_toast_single_second_part);
+            else
+                toastMessage += view.getResources().getString(R.string.delete_toast_multiple_second_part);
+
+            Toast.makeText(view.getContext(), toastMessage, Toast.LENGTH_SHORT).show();
+            ItemsAdapter.deleteSelectedFilesOperation(currentPath);
+        });
     }
 
     public static void displayCopyMoveBar(boolean isCopy, int selectedItemsQt) {
@@ -612,7 +626,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     private static void executeCopyMoveOperationOnThread(boolean isCopy) {
         activityReference.runOnUiThread(() -> {
-            ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath, ItemsAdapter.getSelectedFilestoCopyMove());
+            ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath);
         });
     }
 

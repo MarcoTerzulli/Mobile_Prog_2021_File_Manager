@@ -276,6 +276,7 @@ public class MainActivity extends PermissionsActivity
         setContentView(binding.getRoot());
 
         sharedPreferences = getSharedPreferences("TerzulliFileManager", MODE_PRIVATE);
+        initializePreferences();
 
         // setup layout
         setSupportActionBar(findViewById(R.id.main_toolbar));
@@ -285,6 +286,15 @@ public class MainActivity extends PermissionsActivity
         menuActualCase = 0;
 
         checkForSystemPermissions();
+    }
+
+    private void initializePreferences() {
+        SharedPreferences.Editor sharedPrefEditor = sharedPreferences.edit();
+
+        if(!sharedPreferences.contains("showHidden"))
+            sharedPrefEditor.putBoolean("showHidden", false);
+
+        sharedPrefEditor.apply();
     }
 
     private void setupUiItems() {

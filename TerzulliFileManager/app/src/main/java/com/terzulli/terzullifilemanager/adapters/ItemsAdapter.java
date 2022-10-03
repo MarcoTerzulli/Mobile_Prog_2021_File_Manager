@@ -116,8 +116,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         MainFragment.displayCopyMoveBar(isCopy, selectedFilestoCopyMove.size());
     }
 
-    public static void copyMoveSelectionOperation(boolean isCopy, String copyPath,
-                                                  ArrayList<File> filestoCopyMove) {
+    public static void copyMoveSelectionOperation(boolean isCopy, String copyPath) {
+        ArrayList<File> filestoCopyMove = new ArrayList<>(selectedFilestoCopyMove.size());
+        filestoCopyMove.addAll(selectedFilestoCopyMove);
+
         if (filestoCopyMove == null || filestoCopyMove.size() == 0)
             return;
 
@@ -212,13 +214,18 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             MainFragment.displayNewFolderDialog();
     }
 
-    public static void deleteSelectedFilesOperation() {
+    public static void deleteSelectedFilesOperation(String originalPath) {
         if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
-            for (File file : selectedFiles) {
+            ArrayList<File> filestoDelete = new ArrayList<>(selectedFiles.size());
+            filestoDelete.addAll(selectedFiles);
+            clearSelection();
+
+            for (File file : filestoDelete) {
                 deleteRecursive(file);
             }
-            clearSelection();
-            MainFragment.refreshList();
+
+            if (MainFragment.getCurrentPath().equals(originalPath))
+                MainFragment.refreshList();
         }
     }
 
