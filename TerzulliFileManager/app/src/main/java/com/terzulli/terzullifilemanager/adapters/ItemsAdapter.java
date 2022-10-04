@@ -42,8 +42,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
-import moe.feng.common.view.breadcrumbs.BuildConfig;
-
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
     private static ArrayList<File> selectedFiles;
     private static ArrayList<File> selectedFilesToCopyMove;
@@ -353,7 +351,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             for (File file : selectedFiles) {
                 //intentShareFile.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + file.getAbsolutePath()));
                 intentShareFile.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context,
-                        BuildConfig.APPLICATION_ID +".provider", file));
+                        context.getPackageName() +".provider", file));
             }
 
             intentShareFile.putExtra(Intent.EXTRA_SUBJECT,"Sharing File...");
