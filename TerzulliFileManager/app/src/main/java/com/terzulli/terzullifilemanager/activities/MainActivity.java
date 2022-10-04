@@ -1,16 +1,21 @@
 package com.terzulli.terzullifilemanager.activities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -30,20 +35,25 @@ import com.terzulli.terzullifilemanager.fragments.ImagesFragment;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.fragments.RecentsFragment;
 import com.terzulli.terzullifilemanager.fragments.VideosFragment;
+import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.util.List;
 
 public class MainActivity extends PermissionsActivity
         implements PermissionsActivity.OnPermissionGranted {
 
+    @SuppressLint("StaticFieldLeak")
     private static SearchView searchView;
     private static Menu toolbarMenu;
     private static Fragment navHostFragment;
     private static int menuActualCase;
     private static SharedPreferences sharedPreferences;
+    private static DrawerLayout drawer;
+    private static ActionBarDrawerToggle actionBarDrawerToggle;
+    @SuppressLint("StaticFieldLeak")
+    private static Activity activity;
     private AppBarConfiguration AppBarConfiguration;
     private ActivityMainBinding binding;
-    private DrawerLayout drawer;
     private Toolbar toolbar;
 
     // TODO
@@ -268,12 +278,63 @@ public class MainActivity extends PermissionsActivity
         setupSearchView();
     }
 
+    public static void setActionBarToggleDefault() {
+        Drawable drawerIcon = ResourcesCompat.getDrawable(activity.getResources(), R.drawable.ic_menu, activity.getTheme());
+
+        actionBarDrawerToggle.setHomeAsUpIndicator(drawerIcon);
+
+        actionBarDrawerToggle.setToolbarNavigationClickListener(v -> {
+            if (drawer.isDrawerVisible(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            } else {
+                drawer.openDrawer(GravityCompat.START);
+            }
+        });
+
+        drawer.addDrawerListener(actionBarDrawerToggle);
+    }
+
+    public static void setActionBarToggleCloseButton() {
+        Drawable drawerIcon = ResourcesCompat.getDrawable(activity.getResources(), R.drawable.ic_menu_close, activity.getTheme());
+
+        actionBarDrawerToggle.setHomeAsUpIndicator(drawerIcon);
+
+        actionBarDrawerToggle.setToolbarNavigationClickListener(v -> {
+            if (getForegroundFragment() != null && getForegroundFragment() instanceof MainFragment) {
+                if (MainFragment.goBack())
+                    activity.finish();
+                else
+                    setActionBarToggleDefault();
+            }
+        });
+
+        drawer.addDrawerListener(actionBarDrawerToggle);
+    }
+
+    public static void setActionBarToggleBackButton() {
+        Drawable drawerIcon = ResourcesCompat.getDrawable(activity.getResources(), R.drawable.ic_menu_arrow_back, activity.getTheme());
+
+        actionBarDrawerToggle.setHomeAsUpIndicator(drawerIcon);
+
+        actionBarDrawerToggle.setToolbarNavigationClickListener(v -> {
+            if (getForegroundFragment() != null && getForegroundFragment() instanceof MainFragment) {
+                if (MainFragment.goBack())
+                    activity.finish();
+                else
+                    setActionBarToggleDefault();
+            }
+        });
+
+        drawer.addDrawerListener(actionBarDrawerToggle);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        activity = this;
 
         sharedPreferences = getSharedPreferences("TerzulliFileManager", MODE_PRIVATE);
         initializePreferences();
@@ -285,6 +346,9 @@ public class MainActivity extends PermissionsActivity
         setupUiItems();
         menuActualCase = 0;
 
+        initializeActionBarDrawerToggle();
+        setActionBarToggleDefault();
+
         checkForSystemPermissions();
     }
 
@@ -293,6 +357,12 @@ public class MainActivity extends PermissionsActivity
 
         if(!sharedPreferences.contains("showHidden"))
             sharedPrefEditor.putBoolean("showHidden", false);
+
+        if(!sharedPreferences.contains("sortBy"))
+            sharedPrefEditor.putString("sortBy", Utils.strSortByName);
+
+        if(!sharedPreferences.contains("sortOrderAscending"))
+            sharedPrefEditor.putBoolean("sortOrderAscending", true);
 
         sharedPrefEditor.apply();
     }
@@ -414,7 +484,6 @@ public class MainActivity extends PermissionsActivity
         return super.onPrepareOptionsMenu(menu);
     }
 
-
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.main_fragment_content);
@@ -455,6 +524,26 @@ public class MainActivity extends PermissionsActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             requestAllFilesAccess(this);
         }
+    }
+
+    private void initializeActionBarDrawerToggle() {
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawer,
+                toolbar, R.string.app_name, R.string.app_name) {
+            public void onDrawerClosed(View view)
+            {
+                //getActionBar().setTitle(mTitle);
+                // calling onPrepareOptionsMenu() to show action bar icons
+                invalidateOptionsMenu();
+            }
+
+            public void onDrawerOpened(View drawerView) {
+                //setActionBar().setTitle("Settings");
+                // calling onPrepareOptionsMenu() to hide action bar icons
+                invalidateOptionsMenu();
+            }
+        };
+
+        actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
     }
 
 

@@ -24,9 +24,9 @@ import java.util.List;
 public class Utils {
 
     // string constants
-    public static final String strSortName = "NAME";
-    public static final String strSortSize = "SIZE";
-    public static final String strSortDate = "DATE";
+    public static final String strSortByName = "NAME";
+    public static final String strSortBySize = "SIZE";
+    public static final String strSortByDate = "DATE";
     public static final String strFileDocument = "Document";
     public static final String strFileSpreadsheet = "Spreadsheet";
     public static final String strFileVideo = "Video";
@@ -145,13 +145,13 @@ public class Utils {
 
     public static File[] sortFileAndFoldersList(File[] filesAndDirs, final String sortBy, final boolean ascending) {
         switch (sortBy) {
-            case strSortName:
+            case strSortByName:
                 Utils.sortByName(filesAndDirs, ascending);
                 break;
-            case strSortSize:
+            case strSortBySize:
                 Utils.sortBySize(filesAndDirs, ascending);
                 break;
-            case strSortDate:
+            case strSortByDate:
                 Utils.sortByDate(filesAndDirs, ascending);
                 break;
             default:

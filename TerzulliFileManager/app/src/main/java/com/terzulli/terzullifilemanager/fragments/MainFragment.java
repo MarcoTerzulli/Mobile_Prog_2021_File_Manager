@@ -9,9 +9,9 @@ import static com.terzulli.terzullifilemanager.utils.Utils.humanReadableByteCoun
 import static com.terzulli.terzullifilemanager.utils.Utils.removeHiddenFilesFromArray;
 import static com.terzulli.terzullifilemanager.utils.Utils.strFileApplication;
 import static com.terzulli.terzullifilemanager.utils.Utils.strFileDirectory;
-import static com.terzulli.terzullifilemanager.utils.Utils.strSortDate;
-import static com.terzulli.terzullifilemanager.utils.Utils.strSortName;
-import static com.terzulli.terzullifilemanager.utils.Utils.strSortSize;
+import static com.terzulli.terzullifilemanager.utils.Utils.strSortByDate;
+import static com.terzulli.terzullifilemanager.utils.Utils.strSortByName;
+import static com.terzulli.terzullifilemanager.utils.Utils.strSortBySize;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateDirectoryName;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileName;
 
@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -55,7 +56,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import moe.feng.common.view.breadcrumbs.BreadcrumbsView;
 import moe.feng.common.view.breadcrumbs.DefaultBreadcrumbsCallback;
@@ -66,6 +67,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     private static final int backPressedInterval = 2000;
     private static RecyclerView recyclerView;
+    @SuppressLint("StaticFieldLeak")
     private static RelativeLayout copyMoveBar;
     @SuppressLint("StaticFieldLeak")
     private static SwipeRefreshLayout swipeRefreshLayout;
@@ -73,8 +75,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     @SuppressLint("StaticFieldLeak")
     private static View view;
     private static String currentPath;
-    private static String sortBy;
-    private static boolean sortAscending;
     private static String pathHome;
     private static String pathRoot;
     private static String pathHomeFriendlyName;
@@ -82,6 +82,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static BreadcrumbsView breadcrumbsView;
     private static String lastActionBarTitle;
     private static long timeBackPressed;
+    @SuppressLint("StaticFieldLeak")
     private static Activity activityReference;
     private static SharedPreferences sharedPreferences;
 
@@ -129,7 +130,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         new Handler().postDelayed(() -> {
             File rootFile = new File(path);
             File[] filesAndDirs = rootFile.listFiles();
-            Utils.sortFileAndFoldersList(filesAndDirs, sortBy, sortAscending);
+
+            String sortBy = sharedPreferences.getString("sortBy", strSortByName);
+            boolean sortOrderAscending = sharedPreferences.getBoolean("sortOrderAscending", true);
+
+            Utils.sortFileAndFoldersList(filesAndDirs, sortBy, sortOrderAscending);
 
             // rimozione file nascosti (iniziano col .)
             if (!sharedPreferences.getBoolean("showHidden", false))
@@ -285,11 +290,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             return;
 
         File dir = file.getParentFile();
-        if(dir != null && dir.exists()){
+        if (dir != null && dir.exists()) {
             File from = new File(dir, file.getName());
             File to = new File(dir, newName);
 
-            if(from.exists()) {
+            if (from.exists()) {
                 from.renameTo(to);
                 refreshList();
                 ItemsAdapter.clearSelection();
@@ -310,7 +315,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.setView(editText);
 
         alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> renameFile(file, editText.getText().toString()));
-        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {});
+        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {
+        });
 
         AlertDialog alertDialog = alertBuilder.show();
 
@@ -324,7 +330,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 if (button != null) {
                     button.setEnabled(isNameValid && !alreadyExists);
 
-                    if(isNameValid && !alreadyExists)
+                    if (isNameValid && !alreadyExists)
                         editText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.black));
                     else
                         editText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.error_text_color));
@@ -359,7 +365,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         for (i = 1; i < maxRetries; i++) {
             newDir = new File(currentDirectory, newDirectoryName);
 
-            if(newDir.exists())
+            if (newDir.exists())
                 newDirectoryName = originalName + " (" + i + ")";
             else
                 break;
@@ -368,8 +374,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (i == maxRetries) {
             Toast.makeText(view.getContext(), R.string.error_generic, Toast.LENGTH_SHORT).show();
         } else {
-            newDir.mkdirs();
-            refreshList();
+            if(!newDir.mkdirs())
+                Toast.makeText(view.getContext(), R.string.error_generic, Toast.LENGTH_SHORT).show();
+            else
+                refreshList();
         }
     }
 
@@ -385,7 +393,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.setView(editText);
 
         alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> createDirectory(currentDirectory, editText.getText().toString()));
-        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {});
+        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {
+        });
 
         AlertDialog alertDialog = alertBuilder.show();
 
@@ -398,7 +407,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 if (button != null) {
                     button.setEnabled(isNameValid);
 
-                    if(isNameValid)
+                    if (isNameValid)
                         editText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.black));
                     else
                         editText.setTextColor(ContextCompat.getColor(view.getContext(), R.color.error_text_color));
@@ -422,23 +431,20 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     /**
-     *
-     * @param selectionType tipologia di selezione:
-     *                      - 1: singola directory
-     *                      - 2: singolo file
-     *                      - 3: multiple directory
-     *                      - 4: multipli file
-     *                      - 5: multipla generica
-     *
-     * @param fileName nome dell'eventuale file (solo per selezione singola)
+     * @param selectionType   tipologia di selezione:
+     *                        - 1: singola directory
+     *                        - 2: singolo file
+     *                        - 3: multiple directory
+     *                        - 4: multipli file
+     *                        - 5: multipla generica
+     * @param fileName        nome dell'eventuale file (solo per selezione singola)
      * @param selectedFilesQt numero di file selezionati
-     *
      */
     public static void displayDeleteSelectionDialog(int selectionType, String fileName, int selectedFilesQt) {
         if (fileName == null)
             return;
 
-        String message = "";
+        String message;
         switch (selectionType) {
             case 1:
                 message = view.getResources().getString(R.string.delete_single_dir_first_part) + " \"" + fileName +
@@ -479,7 +485,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 ItemsAdapter.deleteSelectedFilesOperation();
             }, 10);*/
         });
-        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {});
+        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {
+        });
 
         alertBuilder.show();
     }
@@ -504,16 +511,16 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         Button btnPaste = view.findViewById(R.id.items_btn_paste);
         TextView txtOpDescr = view.findViewById(R.id.items_operation_descr);
 
-        String descr = "";
+        String descr;
 
-        if(isCopy)
+        if (isCopy)
             descr = view.getResources().getString(R.string.action_copy);
         else
             descr = view.getResources().getString(R.string.action_move);
 
         descr += " " + selectedItemsQt;
 
-        if(selectedItemsQt == 1)
+        if (selectedItemsQt == 1)
             descr += " " + view.getResources().getString(R.string.action_copy_move_item);
         else
             descr += " " + view.getResources().getString(R.string.action_copy_move_items);
@@ -539,38 +546,52 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
         alertBuilder.setTitle(R.string.action_sort_by);
 
-        AtomicBoolean noItemCliked = new AtomicBoolean(true);
+        AtomicReference<String> sortBy = new AtomicReference<>(sharedPreferences.getString("sortBy", strSortByName));
+        SharedPreferences.Editor sharedPrefEditor = sharedPreferences.edit();
 
-        alertBuilder.setPositiveButton(R.string.sort_ascending, (dialog, whichButton) -> {
-            sortAscending = true;
-            if (noItemCliked.get())
-                sortBy = strSortName;
+        alertBuilder.setPositiveButton(R.string.sort_ascending, (dialog, which) -> {
+            sharedPrefEditor.putString("sortBy", sortBy.get());
+            sharedPrefEditor.putBoolean("sortOrderAscending", true);
+            sharedPrefEditor.apply();
+
             refreshList();
         });
-        alertBuilder.setNegativeButton(R.string.sort_descending, (dialog, whichButton) -> {
-            sortAscending = false;
-            if (noItemCliked.get())
-                sortBy = strSortName;
+
+        alertBuilder.setNegativeButton(R.string.sort_descending, (dialog, which) -> {
+            sharedPrefEditor.putString("sortBy", sortBy.get());
+            sharedPrefEditor.putBoolean("sortOrderAscending", false);
+            sharedPrefEditor.apply();
+
             refreshList();
         });
 
         String[] items = {activityReference.getResources().getString(R.string.sort_name),
                 activityReference.getResources().getString(R.string.sort_size),
                 activityReference.getResources().getString(R.string.sort_date_last_modified)};
+
         int checkedItem = 0;
+        switch (sortBy.get()) {
+            case strSortByName:
+                break;
+            case strSortBySize:
+                checkedItem = 1;
+                break;
+            case strSortByDate:
+                checkedItem = 2;
+                break;
+            default:
+        }
+
         alertBuilder.setSingleChoiceItems(items, checkedItem, (dialog, which) -> {
             switch (which) {
                 case 0:
-                    sortBy = strSortName;
-                    noItemCliked.set(false);
+                    sortBy.set(strSortByName);
                     break;
                 case 1:
-                    sortBy = strSortSize;
-                    noItemCliked.set(false);
+                    sortBy.set(strSortBySize);
                     break;
                 case 2:
-                    sortBy = strSortDate;
-                    noItemCliked.set(false);
+                    sortBy.set(strSortByDate);
                     break;
             }
         });
@@ -604,7 +625,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         if (fileType.equals(strFileDirectory)) {
             int nItems = 0;
-            File listFiles[] = file.listFiles();
+            File[] listFiles = file.listFiles();
 
             if (listFiles != null)
                 nItems = listFiles.length;
@@ -616,7 +637,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.setTitle(R.string.prop_properties);
         alertBuilder.setMessage(Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY));
 
-
         alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> {
             // non si fa niente
         });
@@ -625,9 +645,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private static void executeCopyMoveOperationOnThread(boolean isCopy) {
-        activityReference.runOnUiThread(() -> {
-            ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath);
-        });
+        activityReference.runOnUiThread(() -> ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath));
     }
 
     public static void hideCopyMoveBar() {
@@ -638,9 +656,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
-        sortBy = strSortName;
-        sortAscending = true;
     }
 
     @Override

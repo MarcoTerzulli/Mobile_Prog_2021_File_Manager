@@ -9,6 +9,10 @@
     <dimen name="nav_header_text">24sp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
+    <!-- Drawer and toobar -->
+    <dimen name="design_navigation_icon_size" tools:override="true">24dp</dimen>
+    <dimen name="drawer_icon_size">24dp</dimen>
+
     <!-- Items and activity padding sizes -->
     <dimen name="padding_tiniest">1dp</dimen>
     <dimen name="padding_tiny">2dp</dimen>

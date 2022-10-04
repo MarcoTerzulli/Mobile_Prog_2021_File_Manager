@@ -4,11 +4,9 @@ import static com.terzulli.terzullifilemanager.activities.MainActivity.updateMen
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.displayPropertiesDialog;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.resetActionBarTitle;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionBarTitle;
-import static com.terzulli.terzullifilemanager.utils.Utils.formatDateDetailsFull;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
-import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
-import static com.terzulli.terzullifilemanager.utils.Utils.humanReadableByteCountSI;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -29,8 +27,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.terzulli.terzullifilemanager.BuildConfig;
 import com.terzulli.terzullifilemanager.R;
+import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
@@ -42,14 +40,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Objects;
+
+import moe.feng.common.view.breadcrumbs.BuildConfig;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
     private static ArrayList<File> selectedFiles;
-    private static ArrayList<File> selectedFilestoCopyMove;
+    private static ArrayList<File> selectedFilesToCopyMove;
     private static File[] filesAndDirs = null;
     private static boolean isCurrentDirAnArchive;
+    @SuppressLint("StaticFieldLeak")
     private static Context context;
 
     public ItemsAdapter(Context context, File[] filesAndFolders, boolean isCurrentDirAnArchive) {
@@ -60,22 +60,22 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFiles == null)
             selectedFiles = new ArrayList<>();
 
-        if (selectedFilestoCopyMove == null)
-            selectedFilestoCopyMove = new ArrayList<>();
+        if (selectedFilesToCopyMove == null)
+            selectedFilesToCopyMove = new ArrayList<>();
     }
 
     public static void recoverSelectionFromCopyMove() {
-        selectedFiles = new ArrayList<>(selectedFilestoCopyMove.size());
-        selectedFiles.addAll(selectedFilestoCopyMove);
+        selectedFiles = new ArrayList<>(selectedFilesToCopyMove.size());
+        selectedFiles.addAll(selectedFilesToCopyMove);
     }
 
     public static void saveSelectionFromCopyMove() {
-        selectedFilestoCopyMove = new ArrayList<>(selectedFiles.size());
-        selectedFilestoCopyMove.addAll(selectedFiles);
+        selectedFilesToCopyMove = new ArrayList<>(selectedFiles.size());
+        selectedFilesToCopyMove.addAll(selectedFiles);
     }
 
-    public static ArrayList<File> getSelectedFilestoCopyMove() {
-        return selectedFilestoCopyMove;
+    public static ArrayList<File> getSelectedFilesToCopyMove() {
+        return selectedFilesToCopyMove;
     }
 
     public static void clearSelection() {
@@ -113,25 +113,25 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         clearSelection();
         MainFragment.refreshList();
 
-        MainFragment.displayCopyMoveBar(isCopy, selectedFilestoCopyMove.size());
+        MainFragment.displayCopyMoveBar(isCopy, selectedFilesToCopyMove.size());
     }
 
     public static void copyMoveSelectionOperation(boolean isCopy, String copyPath) {
-        ArrayList<File> filestoCopyMove = new ArrayList<>(selectedFilestoCopyMove.size());
-        filestoCopyMove.addAll(selectedFilestoCopyMove);
+        ArrayList<File> filesToCopyMove = new ArrayList<>(selectedFilesToCopyMove.size());
+        filesToCopyMove.addAll(selectedFilesToCopyMove);
 
-        if (filestoCopyMove == null || filestoCopyMove.size() == 0)
+        if (filesToCopyMove.size() == 0)
             return;
 
         clearSelection();
-        selectedFilestoCopyMove = new ArrayList<>();
+        selectedFilesToCopyMove = new ArrayList<>();
         MainFragment.hideCopyMoveBar();
 
         File newLocation = new File(copyPath);
         if (newLocation.exists()) {
-            //if (!newLocation.getPath().equals(filestoCopyMove.get(0).getParent())) {
+            //if (!newLocation.getPath().equals(filesToCopyMove.get(0).getParent())) {
                 // copy
-                for (File fileToMove : filestoCopyMove) {
+                for (File fileToMove : filesToCopyMove) {
 
                     try {
                         copyFileLowLevelOperation(fileToMove, newLocation);
@@ -143,7 +143,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
                 // delete if the operation is move
                 if (!isCopy) {
-                    for (File fileToMove : filestoCopyMove) {
+                    for (File fileToMove : filesToCopyMove) {
                         deleteRecursive(fileToMove);
                     }
                 }
@@ -155,13 +155,13 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (MainFragment.getCurrentPath().equals(copyPath))
             MainFragment.refreshList();
         else {
-            String toastMessage = "";
+            String toastMessage;
             if (isCopy)
                 toastMessage = context.getResources().getString(R.string.action_copy_completed_first_part);
             else
                 toastMessage = context.getResources().getString(R.string.action_move_completed_first_part);
 
-            toastMessage += filestoCopyMove.size()
+            toastMessage += filesToCopyMove.size()
                     + context.getResources().getString(R.string.action_copy_move_completed_second_part)
                     + copyPath + context.getResources().getString(R.string.action_copy_move_completed_third_part);
             Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
@@ -587,8 +587,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         // aggiorno il titolo della toolbar in base al numero di elementi selezionati
         if (!selectedFiles.isEmpty()) {
             setActionBarTitle(selectedFiles.size() + " " + context.getResources().getString(R.string.selected_file_lowercase));
+            MainActivity.setActionBarToggleCloseButton();
         } else {
             resetActionBarTitle();
+            MainActivity.setActionBarToggleDefault();
         }
         updateMenuItems(checkSelectedFilesType());
     }
