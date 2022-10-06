@@ -170,8 +170,6 @@ public abstract class PermissionsActivity extends AppCompatActivity
         return grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
     }
 
-    //public abstract boolean onNavigationItemSelected(MenuItem item);
-
     private boolean isNightModeEnabled() {
         int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
 

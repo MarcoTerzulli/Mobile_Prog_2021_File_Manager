@@ -7,6 +7,7 @@ import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionB
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -128,23 +129,23 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         File newLocation = new File(copyPath);
         if (newLocation.exists()) {
             //if (!newLocation.getPath().equals(filesToCopyMove.get(0).getParent())) {
-                // copy
+            // copy
+            for (File fileToMove : filesToCopyMove) {
+
+                try {
+                    copyFileLowLevelOperation(fileToMove, newLocation);
+                } catch (IOException e) {
+                    Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                }
+            }
+
+            // delete if the operation is move
+            if (!isCopy) {
                 for (File fileToMove : filesToCopyMove) {
-
-                    try {
-                        copyFileLowLevelOperation(fileToMove, newLocation);
-                    } catch (IOException e) {
-                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
-                    }
+                    deleteRecursive(fileToMove);
                 }
-
-                // delete if the operation is move
-                if (!isCopy) {
-                    for (File fileToMove : filesToCopyMove) {
-                        deleteRecursive(fileToMove);
-                    }
-                }
+            }
             /*} else {
                 Toast.makeText(context, R.string.error_copy_move_same_location, Toast.LENGTH_SHORT).show();
             }*/
@@ -351,10 +352,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             for (File file : selectedFiles) {
                 //intentShareFile.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + file.getAbsolutePath()));
                 intentShareFile.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context,
-                        context.getPackageName() +".provider", file));
+                        context.getPackageName() + ".provider", file));
             }
 
-            intentShareFile.putExtra(Intent.EXTRA_SUBJECT,"Sharing File...");
+            intentShareFile.putExtra(Intent.EXTRA_SUBJECT, "Sharing File...");
             intentShareFile.putExtra(Intent.EXTRA_TEXT, "Sharing File...");
 
             context.startActivity(Intent.createChooser(intentShareFile, "Share File"));
@@ -510,10 +511,14 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
             // TODO gestione apertura zip
 
-            // TODO gestione installazione apk e richiesta permessi
-
             if (type == null)
                 Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
+            else if (type.equals("application/vnd.android.package-archive")
+                    || type.equals("application/zip") || type.equals("application/java-archive")) {
+
+                // TODO verificare se serve richiedere i permessi per installare
+                installApplication(selectedFile);
+            }
             else {
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -525,6 +530,22 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                     Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+    }
+
+    private static void installApplication(File file) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+        intent.setDataAndType(FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file),
+                "application/vnd.android.package-archive");
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(context, R.string.error_package_install, Toast.LENGTH_SHORT).show();
         }
     }
 

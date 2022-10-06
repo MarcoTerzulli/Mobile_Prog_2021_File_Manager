@@ -70,7 +70,7 @@ public class Utils {
                     return 1;
 
                 // both files or both directories
-                return t.getName().compareTo(t1.getName());
+                return t.getName().toLowerCase().compareTo(t1.getName().toLowerCase()); // aggiunto lower
             });
         } else {
             Arrays.sort(files, (t, t1) -> {
@@ -80,7 +80,7 @@ public class Utils {
                     return 1;
 
                 // both files or both directories
-                return t1.getName().compareTo(t.getName());
+                return t1.getName().toLowerCase().compareTo(t.getName().toLowerCase());
             });
         }
     }
