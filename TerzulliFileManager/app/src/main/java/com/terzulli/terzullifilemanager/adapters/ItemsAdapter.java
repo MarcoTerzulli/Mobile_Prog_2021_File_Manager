@@ -204,13 +204,14 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     public static void renameSelectedFile() {
         // controllo se c'è esattamente un file / cartella selezionato
-        if (checkSelectedFilesType() == 1 || checkSelectedFilesType() == 2)
+        if (checkSelectedFilesType() == 1 || checkSelectedFilesType() == 2
+                || checkSelectedFilesType() == 11 || checkSelectedFilesType() == 12)
             MainFragment.displayRenameDialog(selectedFiles.get(0));
     }
 
     public static void createNewDirectory() {
         if (!isSelectionModeEnabled())
-            MainFragment.displayNewFolderDialog();
+            MainFragment.displayNewDirectoryDialog();
     }
 
     public static void deleteSelectedFilesOperation(String originalPath) {
@@ -304,22 +305,29 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
             switch (checkSelectedFilesType()) {
                 case 1:
+                case 11:
+                    // 2: singolo file
                     selectionType = 2;
                     fileName = selectedFiles.get(0).getName();
                     break;
                 case 2:
+                case 12:
+                    // 1: singola directory
                     selectionType = 1;
                     fileName = selectedFiles.get(0).getName();
                     break;
                 case 3:
+                    // 4: multipli file
                     selectionType = 4;
                     break;
                 case 4:
+                    // 3: multiple directory
                     selectionType = 3;
                     break;
                 case 5:
                 case 6:
                 case 7:
+                    // 5: multipla generica
                     selectionType = 5;
                     break;
             }
@@ -376,6 +384,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
      * - 8: selezione generica dentro zip
      * - 9: selezione completa dentro zip
      * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
+     * - 11: selezione completa (generica) ma c'è un solo file
+     * - 12: selezione completa (generica) ma c'è una sola cartella
      */
     private static int checkSelectedFilesType() {
         if (selectedFiles.isEmpty())
@@ -392,6 +402,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             }
         }
 
+        if (filesAndDirs.length == foundFileCount && filesAndDirs.length == 1)
+            return 11;
+        if (filesAndDirs.length == foundDirsCount && filesAndDirs.length == 1)
+            return 12;
         if (filesAndDirs.length == foundFileCount)
             return 7;
         if (selectedFiles.size() == filesAndDirs.length)
@@ -431,6 +445,22 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                     Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+    }
+
+    private static void installApplication(File file) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+        intent.setDataAndType(FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file),
+                "application/vnd.android.package-archive");
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(context, R.string.error_package_install, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -530,22 +560,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                     Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
                 }
             }
-        }
-    }
-
-    private static void installApplication(File file) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-
-        intent.setDataAndType(FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file),
-                "application/vnd.android.package-archive");
-
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        try {
-            context.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(context, R.string.error_package_install, Toast.LENGTH_SHORT).show();
         }
     }
 

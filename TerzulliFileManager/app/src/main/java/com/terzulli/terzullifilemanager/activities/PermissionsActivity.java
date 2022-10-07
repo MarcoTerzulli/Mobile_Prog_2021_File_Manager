@@ -42,7 +42,7 @@ public abstract class PermissionsActivity extends AppCompatActivity
                                    @NonNull final AlertDialog.Builder rationaleDialog,
                                    boolean isFirstStart) {
 
-        Utils.disableScreenRotation(this);
+        //Utils.disableScreenRotation(this);
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
             rationaleDialog
@@ -148,7 +148,7 @@ public abstract class PermissionsActivity extends AppCompatActivity
         switch (requestCode) {
             case PERMISSION_CODE_STORAGE:
                 if (permissionIsGranted(grantResults)) {
-                    Utils.enableScreenRotation(this);
+                    //Utils.enableScreenRotation(this);
 
                     onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE].onPermissionGranted();
                     onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE] = null;

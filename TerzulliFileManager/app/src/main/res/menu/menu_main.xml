@@ -25,7 +25,7 @@
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
-        android:id="@+id/menu_new_folder"
+        android:id="@+id/menu_new_directory"
         android:title="@string/action_new_folder"
         app:showAsAction="never" />
 

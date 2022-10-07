@@ -143,7 +143,7 @@ public class Utils {
     }
 
 
-    public static File[] sortFileAndFoldersList(File[] filesAndDirs, final String sortBy, final boolean ascending) {
+    public static File[] sortFileAndDirectoriesList(File[] filesAndDirs, final String sortBy, final boolean ascending) {
         switch (sortBy) {
             case strSortByName:
                 Utils.sortByName(filesAndDirs, ascending);
@@ -175,7 +175,7 @@ public class Utils {
         String mimeType = getReadableMimeTypeAndExtension(file);
 
         details = formattedDateString + ", " + formattedUsedSpace;
-        if (!mimeType.equals(""))
+        if (!mimeType.equals("") && !mimeType.equals(strFileGeneric))
             details +=  ", " + mimeType;
             //details +=  ", " + getFileType(file);
         else
@@ -256,13 +256,16 @@ public class Utils {
             return mimeType;
         }
 
-        String mediaType = mimeType.split("/")[0];
-        mediaType = getFileType(file);
+        String mediaType = getFileType(file);
 
         String extension = mimeType.split("/")[1];
         extension = extension.toUpperCase();
 
-        return extension + " " + mediaType;
+        if(extension.contains("VND"))
+            return MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file))).toUpperCase()
+                    + " " + mediaType;
+        else
+            return extension + " " + mediaType;
     }
 
     public static boolean fileIsImage(File file) {
@@ -303,6 +306,7 @@ public class Utils {
             case "3gp":
                 return R.drawable.ic_file_video;
 
+            case "java":
             case "jsp":
             case "html":
             case "htm":
@@ -375,16 +379,17 @@ public class Utils {
                 return strFileVideo;
 
             case "jsp":
-            case "html":
-            case "htm":
-            case "js":
             case "php":
-            case "c":
+                return strFileGeneric;
+
+            case "java":
             case "cpp":
             case "py":
             case "json":
-                return strFileGeneric;
-
+            case "c":
+            case "htm":
+            case "html":
+            case "js":
             case "txt":
             case "xml":
             case "log":
@@ -469,7 +474,7 @@ public class Utils {
     }
 
     public static boolean validateFileName(String name) {
-        return name.matches("^[a-zA-Z0-9-_()\\[\\] ]*(\\.[a-zA-Z0-9]+)+$");
+        return name.matches("^[a-zA-Z0-9-_()\\[\\] ]*(\\.[a-zA-Z0-9_]+)+$");
     }
 
     /*public static String stringAddEscapeForRegex(String str) {

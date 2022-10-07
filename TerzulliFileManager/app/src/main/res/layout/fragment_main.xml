@@ -37,7 +37,7 @@
 
 
         <RelativeLayout
-            android:id="@+id/items_empty_folder_placeholder"
+            android:id="@+id/items_empty_directory_placeholder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"

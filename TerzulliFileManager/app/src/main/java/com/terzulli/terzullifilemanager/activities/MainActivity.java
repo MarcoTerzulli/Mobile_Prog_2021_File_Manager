@@ -90,6 +90,8 @@ public class MainActivity extends PermissionsActivity
      * - 8: selezione generica dentro zip
      * - 9: selezione completa dentro zip
      * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
+     * - 11: selezione completa (generica) ma c'è un solo file
+     * - 12: selezione completa (generica) ma c'è una sola cartella
      * - default: cartella generica
      *
      * @param menuCase casistica scelta
@@ -104,7 +106,7 @@ public class MainActivity extends PermissionsActivity
                 break;
             case 2:
                 // 1 directory selezionata
-                setMenuItemsOneFolderSelected();
+                setMenuItemsOneDirectorySelected();
                 break;
             case 3:
                 // molteplici file selezionati
@@ -128,12 +130,20 @@ public class MainActivity extends PermissionsActivity
                 setMenuItemsOneSelectedInsideZip();
                 break;
             case 9:
-                // selezione dentro zip
+                // selezione completa dentro zip
                 setMenuItemsAllSelectedInsideZip();
                 break;
             case 10:
                 // nessuna seleazione ma siamo dentro uno zip
                 setMenuItemsZip();
+                break;
+            case 11:
+                //  selezione completa (generica) ma c'è un solo file
+                setMenuItemsAllSelectedOneFile();
+                break;
+            case 12:
+                // - 12: selezione completa (generica) ma c'è una sola cartella
+                setMenuItemsAllSelectedOneDirectory();
                 break;
             default:
                 setMenuItemsDefault();
@@ -149,9 +159,11 @@ public class MainActivity extends PermissionsActivity
 
         // nascondo il resto
         toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
-        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
-        toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
+        //toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
+        //toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
+        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
         toolbarMenu.findItem(R.id.menu_open_with).setVisible(true);
         toolbarMenu.findItem(R.id.menu_share).setVisible(false);
         toolbarMenu.findItem(R.id.menu_delete).setVisible(false);
@@ -172,7 +184,7 @@ public class MainActivity extends PermissionsActivity
 
     private static void setMenuItemsZip() {
         setMenuItemsDefault();
-        toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
     }
 
     private static void setMenuItemsOneFileSelected() {
@@ -191,13 +203,15 @@ public class MainActivity extends PermissionsActivity
 
         // nascondo il resto
         toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
-        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
-        toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
+        //toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
+        //toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
+        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
         toolbarMenu.findItem(R.id.menu_extract).setVisible(false);
     }
 
-    private static void setMenuItemsOneFolderSelected() {
+    private static void setMenuItemsOneDirectorySelected() {
         // sono sostanzialmente gli stessi...
         setMenuItemsOneFileSelected();
 
@@ -224,6 +238,22 @@ public class MainActivity extends PermissionsActivity
     private static void setMenuItemsAllSelected() {
         // sono sostanzialmente gli stessi...
         setMenuItemsMultipleGenericSelected();
+
+        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
+    }
+
+    private static void setMenuItemsAllSelectedOneFile() {
+        // sono sostanzialmente gli stessi...
+        setMenuItemsOneFileSelected();
+
+        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(true);
+        toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
+    }
+
+    private static void setMenuItemsAllSelectedOneDirectory() {
+        // sono sostanzialmente gli stessi...
+        setMenuItemsOneDirectorySelected();
 
         toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(true);
         toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
@@ -259,7 +289,7 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_get_info).setVisible(true);
 
         if (currentFragment instanceof MainFragment) {
-            toolbarMenu.findItem(R.id.menu_new_folder).setVisible(true);
+            toolbarMenu.findItem(R.id.menu_new_directory).setVisible(true);
 
         } else if (currentFragment instanceof RecentsFragment ||
                 currentFragment instanceof AudioFragment ||
@@ -267,7 +297,7 @@ public class MainActivity extends PermissionsActivity
                 currentFragment instanceof ImagesFragment ||
                 currentFragment instanceof VideosFragment) {
 
-            toolbarMenu.findItem(R.id.menu_new_folder).setVisible(false);
+            toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
         }
 
         toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
@@ -417,7 +447,7 @@ public class MainActivity extends PermissionsActivity
                 // TODO
                 Toast.makeText(MainActivity.this, "Menu search", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.menu_new_folder:
+            case R.id.menu_new_directory:
                 ItemsAdapter.createNewDirectory();
                 break;
             case R.id.menu_open_with:
@@ -506,14 +536,13 @@ public class MainActivity extends PermissionsActivity
 
     @Override
     public void onPermissionGranted() {
-        // TODO bisogna ricaricare il contenuto della home ora che abbiamo i permessi per lo storage
         Fragment currentFragment = getForegroundFragment();
 
+        // ricarico il contenuto ora che ho i permessi per lo storage
         if (currentFragment instanceof MainFragment) {
-            return;
+            MainFragment.refreshList();
         }
 
-        MainFragment.refreshList();
 
     }
 

@@ -36,7 +36,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -98,7 +97,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     public static void initializeEmptyDirectoryLayout(boolean showEmptyLayout) {
-        RelativeLayout itemsEmptyPlaceHolder = view.findViewById(R.id.items_empty_folder_placeholder);
+        RelativeLayout itemsEmptyPlaceHolder = view.findViewById(R.id.items_empty_directory_placeholder);
 
         if (showEmptyLayout) {
             itemsEmptyPlaceHolder.setVisibility(View.VISIBLE);
@@ -115,7 +114,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (isPathProtected(path)) {
             // stiamo tentando di accedere a file di root
             updateBreadCrumbList(currentPath, null);
-            Toast.makeText(view.getContext(), R.string.error_access_to_root_folder, Toast.LENGTH_SHORT).show();
+            Toast.makeText(view.getContext(), R.string.error_access_to_root_directory, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -134,7 +133,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             String sortBy = sharedPreferences.getString("sortBy", strSortByName);
             boolean sortOrderAscending = sharedPreferences.getBoolean("sortOrderAscending", true);
 
-            Utils.sortFileAndFoldersList(filesAndDirs, sortBy, sortOrderAscending);
+            Utils.sortFileAndDirectoriesList(filesAndDirs, sortBy, sortOrderAscending);
 
             // rimozione file nascosti (iniziano col .)
             if (!sharedPreferences.getBoolean("showHidden", false))
@@ -381,7 +380,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    public static void displayNewFolderDialog() {
+    public static void displayNewDirectoryDialog() {
         File currentDirectory = new File(currentPath);
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
@@ -674,6 +673,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
         pathRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+
         if (currentPath == null)
             currentPath = pathHome;
         if (pathHomeFriendlyName == null)

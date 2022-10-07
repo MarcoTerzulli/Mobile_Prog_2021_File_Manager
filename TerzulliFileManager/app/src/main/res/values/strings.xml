@@ -122,7 +122,7 @@
     <string name="prop_n_items">Number of items</string>
 
     <!-- Error -->
-    <string name="error_access_to_root_folder">You don\'t have to permission to access this location</string>
+    <string name="error_access_to_root_directory">You don\'t have to permission to access this location</string>
     <string name="error_generic">Something went wrong…</string>
     <string name="error_copy_move_same_location">Origin and destination location can\'t be the same</string>
     <string name="error_cannot_open_file_in_archive">Cannot open files in archives</string>
