@@ -82,14 +82,17 @@ public class MainActivity extends PermissionsActivity
      * - 4 e 5: molteplici file o directory selezionati
      * - 6: selezione completa (generica)
      * - 7: selezione completa ma di soli file
-     * - 8: selezione generica dentro zip
-     * - 9: selezione completa dentro zip
-     * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
      * - 11: selezione completa (generica) ma c'è un solo file
      * - 12: selezione completa (generica) ma c'è una sola cartella
      * - default: cartella generica
      *
      * @param menuCase casistica scelta
+     */
+    /* vecchio
+
+     * - 8: selezione generica dentro zip
+     * - 9: selezione completa dentro zip
+     * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
      */
     public static void updateMenuItems(int menuCase) {
 
@@ -124,7 +127,7 @@ public class MainActivity extends PermissionsActivity
                 // selezione completa ma di soli file
                 setMenuItemsAllSelectedOnlyFiles();
                 break;
-            case 8:
+            /*case 8:
                 // selezione dentro zip
                 setMenuItemsOneSelectedInsideZip();
                 break;
@@ -135,7 +138,7 @@ public class MainActivity extends PermissionsActivity
             case 10:
                 // nessuna seleazione ma siamo dentro uno zip
                 setMenuItemsZip();
-                break;
+                break;*/
             case 11:
                 //  selezione completa (generica) ma c'è un solo file
                 setMenuItemsAllSelectedOneFile();
@@ -594,15 +597,27 @@ public class MainActivity extends PermissionsActivity
             switch (destination.getId()) {
                 case R.id.nav_recents:
                     // TODO
+                    // TODO cambio titolo toolbar
+                    // TODO caricamento file con ricerca recenti
+                    MainFragment.loadPathInternal();
                     break;
                 case R.id.nav_images:
                     // TODO
+                    // TODO cambio titolo toolbar
+                    // TODO caricamento file con ricerca immagini
+                    MainFragment.loadPathInternal();
                     break;
                 case R.id.nav_videos:
                     // TODO
+                    // TODO cambio titolo toolbar
+                    // TODO caricamento file con ricerca video
+                    MainFragment.loadPathInternal();
                     break;
                 case R.id.nav_audio:
                     // TODO
+                    // TODO cambio titolo toolbar
+                    // TODO caricamento file con ricerca audio
+                    MainFragment.loadPathInternal();
                     break;
                 case R.id.nav_download:
                     MainFragment.loadPathDownload();

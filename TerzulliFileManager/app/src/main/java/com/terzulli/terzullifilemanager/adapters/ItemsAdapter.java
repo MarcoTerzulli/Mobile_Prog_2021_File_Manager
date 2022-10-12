@@ -1,6 +1,7 @@
 package com.terzulli.terzullifilemanager.adapters;
 
 import static com.terzulli.terzullifilemanager.activities.MainActivity.updateMenuItems;
+import static com.terzulli.terzullifilemanager.fragments.MainFragment.displayExtractToBar;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.displayPropertiesDialog;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.resetActionBarTitle;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionBarTitle;
@@ -13,6 +14,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +36,8 @@ import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
+import net.lingala.zip4j.ZipFile;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,6 +47,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
     private static ArrayList<File> selectedFiles;
@@ -51,6 +58,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     @SuppressLint("StaticFieldLeak")
     private static Context context;
     private static boolean copyMoveOperationTypeIsCopy = false;
+    private static File fileToExtract = null;
 
     public ItemsAdapter(Context context, File[] filesAndFolders, boolean isCurrentDirAnArchive) {
         ItemsAdapter.context = context;
@@ -129,6 +137,12 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         }
     }
 
+    public static void recoverEventuallyActiveExtractOperation() {
+        if (fileToExtract != null) {
+            MainFragment.displayExtractToBar(fileToExtract);
+        }
+    }
+
     public static void copyMoveSelectionOperation(boolean isCopy, String copyPath) {
         ArrayList<File> filesToCopyMove = new ArrayList<>(selectedFilesToCopyMove.size());
         filesToCopyMove.addAll(selectedFilesToCopyMove);
@@ -138,7 +152,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         clearSelection();
         selectedFilesToCopyMove = new ArrayList<>();
-        MainFragment.hideCopyMoveBar();
+        MainFragment.hideCopyMoveExtractBar();
 
         File newLocation = new File(copyPath);
         if (newLocation.exists()) {
@@ -191,6 +205,112 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     public static void createNewDirectory() {
         if (!isSelectionModeEnabled())
             MainFragment.displayNewDirectoryDialog();
+    }
+
+    public static void extractSelectedFile() {
+        if (fileToExtract != null) {
+            // caso in cui apriamo un file direttamente con il click
+            //extractSelectedFilesOperation(fileToDeCompress, fileToDeCompress.getParent());
+            displayExtractToBar(fileToExtract);
+        }
+    }
+
+    public static void executeExtractOperationOnThread(File fileToExtract, String extractPath) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        executor.execute(() -> {
+
+            //Background work here
+            extractSelectedFileOperation(fileToExtract, extractPath);
+
+            handler.post(() -> {
+                //UI Thread work here
+                if (MainFragment.getCurrentPath().equals(extractPath))
+                    MainFragment.refreshList();
+            });
+        });
+
+
+
+        //AsyncTask.execute(() -> ItemsAdapter.extractSelectedFilesOperation(fileToExtract, currentPath));
+        // todo la funzione sopra manda in crash l'app --> gestire esecuzione background con eventuale update GUI
+
+        //activityReference.runOnUiThread(() -> ItemsAdapter.extractSelectedFilesOperation(fileToExtract, MainFragment.currentPath));
+    }
+
+    /**
+     * Funzione interna per l'estrazione di un archivio zip
+     * @param fileToExtract archivio da estrarre
+     * @param extractPath path in cui estrarre l'archivio
+     * @return codice di esecuzione:
+     *  - 1: estrazione andata a buon fine
+     *  - -1: errore durante la creazione della cartella di estrazione. Nome duplicato (superati tentativi max) o mancanza permessi storage
+     *  - -2: errore durante l'estrazione dello zip
+     *  - -3: archivio protetto da password
+     */
+    private static int extractSelectedFileOperation(File fileToExtract, String extractPath) {
+        if (fileToExtract != null) {
+            String fileNameWithoutExtension = fileToExtract.getName().substring(0, fileToExtract.getName().length() - ".zip".length());
+
+            //File extractLocation = new File(extractPath, fileNameWithoutExtension);
+
+            //if(!extractLocation.exists() ) {
+                String newName = fileNameWithoutExtension;
+                String originalName = newName;
+                File extractLocation = new File(extractPath, newName);
+                int i, maxRetries = 10000;
+
+                // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
+                for (i = 1; i < maxRetries; i++) {
+                    extractLocation = new File(extractPath, newName);
+
+                    if (extractLocation.exists())
+                        newName = originalName + " (" + i + ")";
+                    else
+                        break;
+                }
+
+                if (i == maxRetries || !extractLocation.mkdirs()) {
+                    Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                    ItemsAdapter.fileToExtract = null;
+                    return;
+                }
+            //}
+
+            try {
+                ZipFile zipFile = new ZipFile(fileToExtract.getPath());
+                if (zipFile.isEncrypted()) {
+                    Toast.makeText(context, R.string.error_check_password_not_supported, Toast.LENGTH_SHORT).show();
+                    ItemsAdapter.fileToExtract = null;
+                    return;
+                }
+
+                zipFile.extractAll(extractLocation.getPath());
+
+            } catch (Exception e) {
+                Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                ItemsAdapter.fileToExtract = null;
+                return;
+            }
+
+            ItemsAdapter.fileToExtract = null;
+
+            // refresh del fragment se siamo ancora nella stessa direcotry
+
+            /*if (MainFragment.getCurrentPath().equals(extractPath))
+                MainFragment.refreshList();*/
+
+            Toast.makeText(context, R.string.action_extract_completed, Toast.LENGTH_SHORT).show();
+
+            //MainFragment.refreshList();
+        }
+    }
+
+    public static void compressSelectedFiles() {
+
     }
 
     public static void deleteSelectedFilesOperation(String originalPath) {
@@ -358,12 +478,16 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
      * - 5: molteplici file o directory selezionati
      * - 6: selezione completa (generica)
      * - 7: selezione completa ma di soli file
-     * - 8: selezione generica dentro zip
-     * - 9: selezione completa dentro zip
-     * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
      * - 11: selezione completa (generica) ma c'è un solo file
      * - 12: selezione completa (generica) ma c'è una sola cartella
      */
+
+    /* vecchio
+    *
+     * - 8: selezione generica dentro zip
+     * - 9: selezione completa dentro zip
+     * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
+    * */
     private static int checkSelectedFilesType() {
         if (selectedFiles.isEmpty())
             return 0;
@@ -397,8 +521,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             return 2;
         if (foundFileCount > 1)
             return 3;
-
-        // TODO gestione zip
 
         return 0; // non dovremmo mai arrivare qui
     }
@@ -513,20 +635,19 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             String ext = Utils.getFileExtension(selectedFile);
             String type = map.getMimeTypeFromExtension(ext);
 
-            //if (type == null)
-            //type = "*/*";
-
-            // TODO gestione apertura zip
-
-            if (type == null)
+            if (type == null) {
                 Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
+            } else if (ext.equals("zip")) {
+                // TODO gestione apertura zip
+                fileToExtract = selectedFile;
+                extractSelectedFile();
+            }
             else if (type.equals("application/vnd.android.package-archive")
                     || type.equals("application/zip") || type.equals("application/java-archive")) {
 
                 // TODO verificare se serve richiedere i permessi per installare
                 installApplication(selectedFile);
-            }
-            else {
+            } else {
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     Uri data = Uri.parse(selectedFile.getAbsolutePath());

@@ -59,6 +59,7 @@
     <string name="button_cancel">Cancel</string>
     <string name="button_save">Save</string>
     <string name="button_paste">Paste</string>
+    <string name="button_extract">Extract</string>
 
     <!-- Permissions -->
     <string name="grant">Grant</string>
@@ -105,6 +106,9 @@
     <string name="action_move_completed_first_part">Copy of</string>
     <string name="action_copy_move_completed_second_part">items to</string>
     <string name="action_copy_move_completed_third_part">completed</string>
+    <string name="action_extract_here">Extract here</string>
+    <string name="action_extract_completed">Extraction Completed</string>
+    <string name="action_compress_completed">Compression Completed</string>
 
     <!-- File/Dir sort-->
     <string name="sort_ascending">Ascending</string>
@@ -121,13 +125,24 @@
     <string name="prop_type">Type</string>
     <string name="prop_n_items">Number of items</string>
 
+    <!-- File/Dir Compression / Extraction -->
+    <string name="zip_compression_started">Compressing the selected files…</string>
+    <string name="zip_compression_completed">Compression completed</string>
+    <string name="zip_extraction_started">Extracting the selected files…</string>
+    <string name="zip_extraction_completed">Extraction completed</string>
+    <string name="zip_insert_password_dialog_descr">The selected archive seems to be protected by a password.</string>
+    <string name="zip_insert_password_dialog_insert">Password:</string>
+    <string name="zip_protected">Protected Archive</string>
+
     <!-- Error -->
     <string name="error_access_to_root_directory">You don\'t have to permission to access this location</string>
     <string name="error_generic">Something went wrong…</string>
     <string name="error_copy_move_same_location">Origin and destination location can\'t be the same</string>
     <string name="error_cannot_open_file_in_archive">Cannot open files in archives</string>
-    <string name="error_package_install">There was a problem parsing the package.</string>
+    <string name="error_package_install">There was a problem parsing the package</string>
     <string name="error_check_permissions">Please make sure you have granted the "File and media" permission to the application</string>
+    <string name="error_check_password">Maybe the password was incorrect.</string>
+    <string name="error_check_password_not_supported">The extraction of archives protected by a password is unsopported</string>
 
     <!-- Utils -->
     <string name="string_placeholder">Lorem ipsum…</string>

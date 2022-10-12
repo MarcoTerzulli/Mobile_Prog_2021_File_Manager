@@ -73,7 +73,7 @@
             android:theme="@style/Theme.TerzulliFileManager.CopyMoveBar">
 
             <TextView
-                android:id="@+id/items_operation_descr"
+                android:id="@+id/items_copy_move_operation_descr"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -83,11 +83,11 @@
                 android:theme="@style/Theme.TerzulliFileManager.ItemNameColor" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/items_btn_cancel_operation"
+                android:id="@+id/items_copy_move_btn_cancel_operation"
                 style="@style/Theme.TerzulliFileManager.ButtonOutlined"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toStartOf="@+id/items_btn_paste"
+                android:layout_toStartOf="@+id/items_btn_confirm_operation"
                 android:enabled="true"
                 android:text="@string/button_cancel"
                 android:textSize="@dimen/text_medium"
@@ -97,7 +97,7 @@
                 tools:ignore="RelativeOverlap" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/items_btn_paste"
+                android:id="@+id/items_btn_confirm_operation"
                 style="@style/Theme.TerzulliFileManager.ButtonColored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

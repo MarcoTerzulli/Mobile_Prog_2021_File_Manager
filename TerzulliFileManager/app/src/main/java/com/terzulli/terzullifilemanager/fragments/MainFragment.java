@@ -2,6 +2,7 @@ package com.terzulli.terzullifilemanager.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeExtractOperationOnThread;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.isSelectionModeEnabled;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatDateDetailsFull;
 import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
@@ -19,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -65,7 +67,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static final int backPressedInterval = 2000;
     private static RecyclerView recyclerView;
     @SuppressLint("StaticFieldLeak")
-    private static RelativeLayout copyMoveBar;
+    private static RelativeLayout copyMoveExtractBar;
     @SuppressLint("StaticFieldLeak")
     private static SwipeRefreshLayout swipeRefreshLayout;
     @SuppressLint("StaticFieldLeak")
@@ -147,6 +149,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             swipeRefreshLayout.setRefreshing(false);
 
             ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
+            ItemsAdapter.recoverEventuallyActiveExtractOperation();
         }, 10);
 
     }
@@ -432,6 +435,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
     }
 
+
+
+
+
     /**
      * @param selectionType   tipologia di selezione:
      *                        - 1: singola directory
@@ -494,11 +501,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     public static void displayCopyMoveBar(boolean isCopy, int selectedItemsQt) {
-        copyMoveBar.setVisibility(View.VISIBLE);
+        copyMoveExtractBar.setVisibility(View.VISIBLE);
 
-        Button btnCancel = view.findViewById(R.id.items_btn_cancel_operation);
-        Button btnPaste = view.findViewById(R.id.items_btn_paste);
-        TextView txtOpDescr = view.findViewById(R.id.items_operation_descr);
+        Button btnCancel = view.findViewById(R.id.items_copy_move_btn_cancel_operation);
+        Button btnConfirm = view.findViewById(R.id.items_btn_confirm_operation);
+        TextView txtOpDescr = view.findViewById(R.id.items_copy_move_operation_descr);
 
         String descr;
 
@@ -514,15 +521,41 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         else
             descr += " " + view.getResources().getString(R.string.action_copy_move_items);
 
+        btnConfirm.setText(R.string.button_paste);
+
+
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
-            hideCopyMoveBar();
+            hideCopyMoveExtractBar();
             ItemsAdapter.recoverSelectionFromCopyMove();
             refreshList();
         });
 
-        btnPaste.setOnClickListener(view -> executeCopyMoveOperationOnThread(isCopy));
+        btnConfirm.setOnClickListener(view -> executeCopyMoveOperationOnThread(isCopy));
+    }
+
+    public static void displayExtractToBar(File fileToExtract) {
+        copyMoveExtractBar.setVisibility(View.VISIBLE);
+
+        Button btnCancel = view.findViewById(R.id.items_copy_move_btn_cancel_operation);
+        Button btnConfirm = view.findViewById(R.id.items_btn_confirm_operation);
+        TextView txtOpDescr = view.findViewById(R.id.items_copy_move_operation_descr);
+
+        btnConfirm.setText(R.string.button_extract);
+
+        String descr = view.getResources().getString(R.string.action_extract_here);
+        txtOpDescr.setText(descr);
+
+        btnCancel.setOnClickListener(view -> {
+            hideCopyMoveExtractBar();
+            refreshList();
+        });
+
+        btnConfirm.setOnClickListener(view -> {
+            hideCopyMoveExtractBar();
+            executeExtractOperationOnThread(fileToExtract, getCurrentPath());
+        });
     }
 
     public static void displaySortByDialog() {
@@ -634,8 +667,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         activityReference.runOnUiThread(() -> ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath));
     }
 
-    public static void hideCopyMoveBar() {
-        copyMoveBar.setVisibility(View.GONE);
+    public static void hideCopyMoveExtractBar() {
+        copyMoveExtractBar.setVisibility(View.GONE);
     }
 
     public static void loadPathDownload() {
@@ -668,7 +701,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         swipeRefreshLayout = view.findViewById(R.id.fragment_main_swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.fragment_main_list_view);
         breadcrumbsView = view.findViewById(R.id.fragment_main_breadcrumbs);
-        copyMoveBar = view.findViewById(R.id.items_copy_move_bar);
+        copyMoveExtractBar = view.findViewById(R.id.items_copy_move_bar);
         activityReference = requireActivity();
         sharedPreferences = activityReference.getSharedPreferences("TerzulliFileManager", MODE_PRIVATE);
 
@@ -685,7 +718,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         swipeRefreshLayout.setOnRefreshListener(this);
         setActionBarTitle(getCurrentDirectoryName());
-        copyMoveBar.setVisibility(View.GONE);
+        copyMoveExtractBar.setVisibility(View.GONE);
 
         breadcrumbsView.setCallback(new DefaultBreadcrumbsCallback<BreadcrumbItem>() {
             @Override
