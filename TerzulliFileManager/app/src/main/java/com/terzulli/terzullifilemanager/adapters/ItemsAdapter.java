@@ -222,12 +222,31 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         executor.execute(() -> {
 
             //Background work here
-            extractSelectedFileOperation(fileToExtract, extractPath);
+            int returnCode = extractSelectedFileOperation(fileToExtract, extractPath);
+            ItemsAdapter.fileToExtract = null;
 
             handler.post(() -> {
                 //UI Thread work here
-                if (MainFragment.getCurrentPath().equals(extractPath))
-                    MainFragment.refreshList();
+
+                switch (returnCode) {
+                    case 1:
+                        Toast.makeText(context, R.string.action_extract_completed, Toast.LENGTH_SHORT).show();
+                        if (MainFragment.getCurrentPath().equals(extractPath))
+                            MainFragment.refreshList();
+                        break;
+                    case -1:
+                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                        break;
+                    case -2:
+                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                        break;
+                    case -3:
+                        Toast.makeText(context, R.string.error_check_password_not_supported, Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        break;
+                }
             });
         });
 
@@ -245,8 +264,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
      * @param extractPath path in cui estrarre l'archivio
      * @return codice di esecuzione:
      *  - 1: estrazione andata a buon fine
-     *  - -1: errore durante la creazione della cartella di estrazione. Nome duplicato (superati tentativi max) o mancanza permessi storage
-     *  - -2: errore durante l'estrazione dello zip
+     *  - -1: errore durante l'estrazione dello zip
+     *  - -2: errore durante la creazione della cartella di estrazione. Nome duplicato (superati tentativi max) o mancanza permessi storage
      *  - -3: archivio protetto da password
      */
     private static int extractSelectedFileOperation(File fileToExtract, String extractPath) {
@@ -272,41 +291,39 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 }
 
                 if (i == maxRetries || !extractLocation.mkdirs()) {
-                    Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                    Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
-                    ItemsAdapter.fileToExtract = null;
-                    return;
+                    /*Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();*/
+                    return -2;
                 }
             //}
 
             try {
                 ZipFile zipFile = new ZipFile(fileToExtract.getPath());
                 if (zipFile.isEncrypted()) {
-                    Toast.makeText(context, R.string.error_check_password_not_supported, Toast.LENGTH_SHORT).show();
-                    ItemsAdapter.fileToExtract = null;
-                    return;
+                    //Toast.makeText(context, R.string.error_check_password_not_supported, Toast.LENGTH_SHORT).show();
+                    return -3;
                 }
 
                 zipFile.extractAll(extractLocation.getPath());
 
             } catch (Exception e) {
-                Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
-                ItemsAdapter.fileToExtract = null;
-                return;
+                /*Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();*/
+                return -1;
             }
 
-            ItemsAdapter.fileToExtract = null;
+            return 1;
 
             // refresh del fragment se siamo ancora nella stessa direcotry
 
             /*if (MainFragment.getCurrentPath().equals(extractPath))
                 MainFragment.refreshList();*/
 
-            Toast.makeText(context, R.string.action_extract_completed, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, R.string.action_extract_completed, Toast.LENGTH_SHORT).show();
 
             //MainFragment.refreshList();
         }
+        return -1;
     }
 
     public static void compressSelectedFiles() {
