@@ -50,6 +50,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     private static boolean isCurrentDirAnArchive;
     @SuppressLint("StaticFieldLeak")
     private static Context context;
+    private static boolean copyMoveOperationTypeIsCopy = false;
 
     public ItemsAdapter(Context context, File[] filesAndFolders, boolean isCurrentDirAnArchive) {
         ItemsAdapter.context = context;
@@ -61,16 +62,19 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         if (selectedFilesToCopyMove == null)
             selectedFilesToCopyMove = new ArrayList<>();
+
     }
 
     public static void recoverSelectionFromCopyMove() {
         selectedFiles = new ArrayList<>(selectedFilesToCopyMove.size());
         selectedFiles.addAll(selectedFilesToCopyMove);
+        selectedFilesToCopyMove.clear();
     }
 
     public static void saveSelectionFromCopyMove() {
         selectedFilesToCopyMove = new ArrayList<>(selectedFiles.size());
         selectedFilesToCopyMove.addAll(selectedFiles);
+        selectedFiles.clear();
     }
 
     public static ArrayList<File> getSelectedFilesToCopyMove() {
@@ -101,6 +105,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     public static void infoSelectedFile() {
         if (isSelectionModeEnabled() && selectedFiles.size() == 1) {
             displayPropertiesDialog(selectedFiles.get(0));
+        } else if (!isSelectionModeEnabled()) {
+            displayPropertiesDialog(new File(MainFragment.getCurrentPath()));
         }
     }
 
@@ -108,11 +114,19 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFiles == null)
             return;
 
+        copyMoveOperationTypeIsCopy = isCopy;
         saveSelectionFromCopyMove();
         clearSelection();
         MainFragment.refreshList();
 
         MainFragment.displayCopyMoveBar(isCopy, selectedFilesToCopyMove.size());
+    }
+
+    public static void recoverEventuallyActiveCopyMoveOperation() {
+
+        if (selectedFilesToCopyMove.size() != 0) {
+            MainFragment.displayCopyMoveBar(copyMoveOperationTypeIsCopy, selectedFilesToCopyMove.size());
+        }
     }
 
     public static void copyMoveSelectionOperation(boolean isCopy, String copyPath) {

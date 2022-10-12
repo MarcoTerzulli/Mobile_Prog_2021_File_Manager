@@ -7,31 +7,31 @@
 
     <fragment
         android:id="@+id/nav_recents"
-        android:name="com.terzulli.terzullifilemanager.fragments.RecentsFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.MainFragment"
         android:label="@string/drawer_menu_recent"
         tools:layout="@layout/fragment_recents" />
 
     <fragment
         android:id="@+id/nav_images"
-        android:name="com.terzulli.terzullifilemanager.fragments.ImagesFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.MainFragment"
         android:label="@string/drawer_menu_media_images"
         tools:layout="@layout/fragment_images" />
 
     <fragment
         android:id="@+id/nav_videos"
-        android:name="com.terzulli.terzullifilemanager.fragments.VideosFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.MainFragment"
         android:label="@string/drawer_menu_media_videos"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_audio"
-        android:name="com.terzulli.terzullifilemanager.fragments.AudioFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.MainFragment"
         android:label="@string/drawer_menu_media_audio"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_download"
-        android:name="com.terzulli.terzullifilemanager.fragments.DownloadFragment"
+        android:name="com.terzulli.terzullifilemanager.fragments.MainFragment"
         android:label="@string/drawer_menu_download"
         tools:layout="@layout/fragment_home" />
 

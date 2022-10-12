@@ -97,6 +97,10 @@ public class MainActivity extends PermissionsActivity
      * @param menuCase casistica scelta
      */
     public static void updateMenuItems(int menuCase) {
+
+        if (toolbarMenu == null || toolbarMenu.findItem(R.id.menu_search) == null)
+            return;
+
         menuActualCase = menuCase;
 
         switch (menuActualCase) {
@@ -291,14 +295,14 @@ public class MainActivity extends PermissionsActivity
         if (currentFragment instanceof MainFragment) {
             toolbarMenu.findItem(R.id.menu_new_directory).setVisible(true);
 
-        } else if (currentFragment instanceof RecentsFragment ||
+        } /*else if (currentFragment instanceof RecentsFragment ||
                 currentFragment instanceof AudioFragment ||
                 currentFragment instanceof DownloadFragment ||
                 currentFragment instanceof ImagesFragment ||
                 currentFragment instanceof VideosFragment) {
 
             toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
-        }
+        }*/
 
         toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
         toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
@@ -411,6 +415,7 @@ public class MainActivity extends PermissionsActivity
         NavController navController = Navigation.findNavController(this, R.id.main_fragment_content);
         NavigationUI.setupActionBarWithNavController(this, navController, AppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+        initializeDrawerDestionations(navController);
 
         // search view
         toolbar = findViewById(R.id.main_toolbar);
@@ -502,6 +507,9 @@ public class MainActivity extends PermissionsActivity
                 return false;
         }
 
+        /* R.id.nav_recents, R.id.nav_images, R.id.nav_videos, R.id.nav_audio, R.id.nav_download,
+                R.id.nav_internal_storage, R.id.nav_sd_card, R.id.nav_external_storage */
+
         return super.onOptionsItemSelected(item);
 
     }
@@ -509,6 +517,10 @@ public class MainActivity extends PermissionsActivity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         //setMenuItemsDefault();
+        if (toolbarMenu == null) {
+            toolbarMenu = ((Toolbar) findViewById(R.id.main_toolbar)).getMenu();
+        }
+
         updateMenuItems(menuActualCase);
 
         return super.onPrepareOptionsMenu(menu);
@@ -573,6 +585,62 @@ public class MainActivity extends PermissionsActivity
         };
 
         actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
+    }
+
+    private void initializeDrawerDestionations(NavController navController) {
+
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+
+
+        /* R.id.nav_recents, R.id.nav_images, R.id.nav_videos, R.id.nav_audio, R.id.nav_download,
+                R.id.nav_internal_storage, R.id.nav_sd_card, R.id.nav_external_storage */
+
+
+            switch (destination.getId()) {
+                case R.id.nav_recents:
+                    // TODO
+                    break;
+                case R.id.nav_images:
+                    // TODO
+                    break;
+                case R.id.nav_videos:
+                    // TODO
+                    break;
+                case R.id.nav_audio:
+                    // TODO
+                    break;
+                case R.id.nav_download:
+                    MainFragment.loadPathDownload();
+                    break;
+                case R.id.nav_internal_storage:
+                    MainFragment.loadPathInternal();
+                    break;
+                case R.id.nav_sd_card:
+                    /*
+                    L'accesso alla sd card non è stato implementato per ragioni tempistiche.
+                    Ho scelto di non rimuovere la struttura sottostante, che ho disabilitato
+                    (nascondendo gli elementi corrispondendit)
+                    */
+                    break;
+                case R.id.nav_external_storage:
+                    /*
+                    L'accesso allo storage esterno non è stato implementato per ragioni tempistiche.
+                    Ho scelto di non rimuovere la struttura sottostante, che ho disabilitato
+                    (nascondendo gli elementi corrispondendit)
+                    */
+                    break;
+                default:
+                    break;
+            }
+
+            /*if(destination.getId() == R.id.nav_recents) {
+                toolbar.setVisibility(View.GONE);
+                bottomNavigationView.setVisibility(View.GONE);
+            } else {
+                toolbar.setVisibility(View.VISIBLE);
+                bottomNavigationView.setVisibility(View.VISIBLE);
+            }*/
+        });
     }
 
 

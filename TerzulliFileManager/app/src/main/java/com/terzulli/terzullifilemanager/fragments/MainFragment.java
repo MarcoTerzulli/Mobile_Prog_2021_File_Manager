@@ -151,12 +151,26 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 updateBreadCrumbList(path, oldPath);
 
             swipeRefreshLayout.setRefreshing(false);
+
+            ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
         }, 10);
 
     }
 
     public static void resetActionBarTitle() {
         setActionBarTitle(getCurrentDirectoryName());
+    }
+
+    private static void reloadBreadCrumb(String newPath) {
+        if (breadcrumbsView != null) {
+            emptyBreadcrumb();
+
+            String[] pathArr = newPath.split("/");
+            if (pathArr.length > 0) {
+                for (int i = 1; i < pathArr.length; i++)
+                    breadcrumbsView.addItem(new BreadcrumbItem(Collections.singletonList(pathArr[i])));
+            }
+        }
     }
 
     private static void updateBreadCrumbList(String newPath, String oldPath) {
@@ -166,14 +180,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         } else {
 
             if (oldPath == null || oldPath.length() == 0 || breadcrumbsView.getItems().size() == 0) {// || (newPath.split("/").length != breadcrumbsView.getItems().size())) {
-
-                emptyBreadcrumb();
-
-                String[] pathArr = newPath.split("/");
-                if (pathArr.length > 0) {
-                    for (int i = 1; i < pathArr.length; i++)
-                        breadcrumbsView.addItem(new BreadcrumbItem(Collections.singletonList(pathArr[i])));
-                }
+                reloadBreadCrumb(newPath);
             } else {
 
                 if (!newPath.equals(oldPath)) {
@@ -205,12 +212,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private static void emptyBreadcrumb() {
-        // clean breadcrumb
-        List<IBreadcrumbItem> currentItemsList = breadcrumbsView.getItems();
-        int listSize = currentItemsList.size();
+        if (breadcrumbsView != null) {
+            // clean breadcrumb
+            List<IBreadcrumbItem> currentItemsList = breadcrumbsView.getItems();
+            int listSize = currentItemsList.size();
 
-        for (int i = 0; i < listSize; i++) {
-            breadcrumbsView.removeLastItem();
+            for (int i = 0; i < listSize; i++) {
+                breadcrumbsView.removeLastItem();
+            }
         }
     }
 
@@ -618,9 +627,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 break;
         }
 
-        message += " " + fileType +
-                "<br><br><b>" + activityReference.getResources().getString(R.string.sort_size) + "</b>: " + fileSize +
-                "<br><br><b>" + activityReference.getResources().getString(R.string.sort_date_last_modified) + "</b>: " + fileLastModified;
+        message += " " + fileType;
+
+        if (!fileType.equals(strFileDirectory))
+            message += "<br><br><b>" + activityReference.getResources().getString(R.string.sort_size) + "</b>: " + fileSize;
+
+        message += "<br><br><b>" + activityReference.getResources().getString(R.string.sort_date_last_modified) + "</b>: " + fileLastModified;
 
         if (fileType.equals(strFileDirectory)) {
             int nItems = 0;
@@ -651,6 +663,20 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         copyMoveBar.setVisibility(View.GONE);
     }
 
+    public static void loadPathDownload() {
+        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+
+        loadPath(path, true);
+        reloadBreadCrumb(path);
+    }
+
+    public static void loadPathInternal() {
+        String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+        loadPath(path, true);
+        reloadBreadCrumb(path);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -661,6 +687,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_main, container, false);
+        setHasOptionsMenu(true);
 
         supportActionBar = ((MainActivity) requireActivity()).getSupportActionBar();
         mainFragmentViewModel = new ViewModelProvider(this).get(MainFragmentViewModel.class);
