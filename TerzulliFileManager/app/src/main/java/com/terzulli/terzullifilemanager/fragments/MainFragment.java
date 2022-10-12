@@ -3,6 +3,7 @@ package com.terzulli.terzullifilemanager.fragments;
 import static android.content.Context.MODE_PRIVATE;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearFileToExtractSelection;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeCompressOperationOnThread;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeCopyMoveOperationOnThread;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeExtractOperationOnThread;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.isSelectionModeEnabled;
@@ -22,7 +23,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -152,6 +152,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
             ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
             ItemsAdapter.recoverEventuallyActiveExtractOperation();
+            ItemsAdapter.recoverEventuallyActiveCompressOperation();
         }, 10);
 
     }
@@ -257,18 +258,18 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return currentPath;
     }
 
-    public static void setCurrentPath(String path) {
+    /*public static void setCurrentPath(String path) {
         currentPath = path;
-    }
+    }*/
 
     public static boolean isInHomePath() {
         // se siamo già nella root
         return Objects.equals(currentPath, pathHome);
     }
 
-    public static void setHomePath(String path) {
+    /*public static void setHomePath(String path) {
         pathHome = path;
-    }
+    }*/
 
     public static boolean goBack() {
 
@@ -524,8 +525,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             descr += " " + view.getResources().getString(R.string.action_copy_move_items);
 
         btnConfirm.setText(R.string.button_paste);
-
-
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
@@ -559,6 +558,32 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             hideCopyMoveExtractBar();
             executeExtractOperationOnThread(getCurrentPath());
         });
+    }
+
+    public static void displayCompressToBar(int selectedItemsQt) {
+        copyMoveExtractBar.setVisibility(View.VISIBLE);
+
+        Button btnCancel = view.findViewById(R.id.items_copy_move_btn_cancel_operation);
+        Button btnConfirm = view.findViewById(R.id.items_btn_confirm_operation);
+        TextView txtOpDescr = view.findViewById(R.id.items_copy_move_operation_descr);
+
+        String descr = view.getResources().getString(R.string.action_compress) + " " + selectedItemsQt;
+
+        if (selectedItemsQt == 1)
+            descr += " " + view.getResources().getString(R.string.action_copy_move_item);
+        else
+            descr += " " + view.getResources().getString(R.string.action_copy_move_items);
+
+        btnConfirm.setText(R.string.button_compress);
+        txtOpDescr.setText(descr);
+
+        btnCancel.setOnClickListener(view -> {
+            hideCopyMoveExtractBar();
+            ItemsAdapter.recoverSelectionFromCompress();
+            refreshList();
+        });
+
+        btnConfirm.setOnClickListener(view -> executeCompressOperationOnThread(currentPath));
     }
 
     public static void displaySortByDialog() {

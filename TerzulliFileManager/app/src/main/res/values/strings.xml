@@ -60,6 +60,7 @@
     <string name="button_save">Save</string>
     <string name="button_paste">Paste</string>
     <string name="button_extract">Extract</string>
+    <string name="button_compress">Compress</string>
 
     <!-- Permissions -->
     <string name="grant">Grant</string>
@@ -112,6 +113,7 @@
     <string name="action_copy_started">Copying…</string>
     <string name="action_move_started">Moving…</string>
     <string name="action_extraction_started">Extracting…</string>
+    <string name="action_compression_started">Compressing…</string>
 
     <!-- File/Dir sort-->
     <string name="sort_ascending">Ascending</string>

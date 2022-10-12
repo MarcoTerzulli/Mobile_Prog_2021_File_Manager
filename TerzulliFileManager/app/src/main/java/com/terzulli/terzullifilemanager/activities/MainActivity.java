@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,7 +18,6 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -31,8 +29,6 @@ import com.terzulli.terzullifilemanager.adapters.ItemsAdapter;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
-
-import java.util.List;
 
 public class MainActivity extends PermissionsActivity
         implements PermissionsActivity.OnPermissionGranted {
@@ -153,7 +149,7 @@ public class MainActivity extends PermissionsActivity
         }
     }
 
-    private static void setMenuItemsOneSelectedInsideZip() {
+    /*private static void setMenuItemsOneSelectedInsideZip() {
         toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
         toolbarMenu.findItem(R.id.menu_select_all).setVisible(true);
         toolbarMenu.findItem(R.id.menu_extract).setVisible(true);
@@ -174,10 +170,9 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_move_to).setVisible(false);
         toolbarMenu.findItem(R.id.menu_compress).setVisible(false);
         toolbarMenu.findItem(R.id.menu_rename).setVisible(false);
+    }*/
 
-    }
-
-    private static void setMenuItemsAllSelectedInsideZip() {
+    /*private static void setMenuItemsAllSelectedInsideZip() {
         setMenuItemsOneSelectedInsideZip();
 
         toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
@@ -187,7 +182,7 @@ public class MainActivity extends PermissionsActivity
     private static void setMenuItemsZip() {
         setMenuItemsDefault();
         toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
-    }
+    }*/
 
     private static void setMenuItemsOneFileSelected() {
         toolbarMenu.findItem(R.id.menu_open_with).setVisible(true);
@@ -420,7 +415,7 @@ public class MainActivity extends PermissionsActivity
 
     }
 
-    public Fragment getVisibleFragment() {
+    /*public Fragment getVisibleFragment() {
         FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
         List<Fragment> fragmentsList = fragmentManager.getFragments();
 
@@ -429,7 +424,7 @@ public class MainActivity extends PermissionsActivity
                 return fragment;
         }
         return null;
-    }
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -472,8 +467,7 @@ public class MainActivity extends PermissionsActivity
                 ItemsAdapter.copyMoveSelection(false);
                 break;
             case R.id.menu_compress:
-                // TODO
-                Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                ItemsAdapter.compressSelection();
                 break;
             /*case R.id.menu_decompress:
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
@@ -585,6 +579,7 @@ public class MainActivity extends PermissionsActivity
         actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
     }
 
+    @SuppressLint("NonConstantResourceId")
     private void initializeDrawerDestionations(NavController navController) {
 
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {

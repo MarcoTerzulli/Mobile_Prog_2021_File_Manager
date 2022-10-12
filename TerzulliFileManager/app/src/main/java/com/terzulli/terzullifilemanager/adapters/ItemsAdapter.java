@@ -54,6 +54,7 @@ import java.util.concurrent.Executors;
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
     private static ArrayList<File> selectedFiles;
     private static ArrayList<File> selectedFilesToCopyMove;
+    private static ArrayList<File> selectedFilesToCompress;
     private static File[] filesAndDirs = null;
     private static boolean isCurrentDirAnArchive;
     @SuppressLint("StaticFieldLeak")
@@ -72,6 +73,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFilesToCopyMove == null)
             selectedFilesToCopyMove = new ArrayList<>();
 
+        if (selectedFilesToCompress == null)
+            selectedFilesToCompress = new ArrayList<>();
+
     }
 
     public static void clearFileToExtractSelection() {
@@ -87,6 +91,18 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     public static void saveSelectionFromCopyMove() {
         selectedFilesToCopyMove = new ArrayList<>(selectedFiles.size());
         selectedFilesToCopyMove.addAll(selectedFiles);
+        selectedFiles.clear();
+    }
+
+    public static void recoverSelectionFromCompress() {
+        selectedFiles = new ArrayList<>(selectedFilesToCompress.size());
+        selectedFiles.addAll(selectedFilesToCompress);
+        selectedFilesToCompress.clear();
+    }
+
+    public static void saveSelectionFromCompress() {
+        selectedFilesToCompress = new ArrayList<>(selectedFiles.size());
+        selectedFilesToCompress.addAll(selectedFiles);
         selectedFiles.clear();
     }
 
@@ -135,8 +151,18 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         MainFragment.displayCopyMoveBar(isCopy, selectedFilesToCopyMove.size());
     }
 
-    public static void recoverEventuallyActiveCopyMoveOperation() {
+    public static void compressSelection() {
+        if (selectedFiles == null)
+            return;
 
+        saveSelectionFromCompress();
+        clearSelection();
+        MainFragment.refreshList();
+
+        MainFragment.displayCompressToBar(selectedFilesToCompress.size());
+    }
+
+    public static void recoverEventuallyActiveCopyMoveOperation() {
         if (selectedFilesToCopyMove.size() != 0) {
             MainFragment.displayCopyMoveBar(copyMoveOperationTypeIsCopy, selectedFilesToCopyMove.size());
         }
@@ -147,6 +173,13 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             MainFragment.displayExtractToBar();
         }
     }
+
+    public static void recoverEventuallyActiveCompressOperation() {
+        if (selectedFilesToCompress.size() != 0) {
+            MainFragment.displayCompressToBar(selectedFilesToCompress.size());
+        }
+    }
+
 
     /**
      * FUnzione interna per la copia o spostamento di file e cartelle (ricorsiva)
@@ -226,7 +259,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
             //Background work here
             int returnCode = copyMoveSelectionOperation(isCopy, destinationPath);
-            ItemsAdapter.fileToExtract = null;
             int nItems = selectedFilesToCopyMove.size();
 
             handler.post(() -> {
@@ -296,7 +328,42 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                     MainFragment.refreshList();
             });
         });
+    }
 
+    public static void executeCompressOperationOnThread(String compressPath) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        MainFragment.hideCopyMoveExtractBar();
+        Toast.makeText(context, R.string.action_compression_started, Toast.LENGTH_SHORT).show();
+
+        executor.execute(() -> {
+
+            //Background work here
+            int returnCode = compressSelectedFilesOperation(compressPath);
+
+            handler.post(() -> {
+                //UI Thread work here
+
+                switch (returnCode) {
+                    case 1:
+                        Toast.makeText(context, R.string.action_compress_completed, Toast.LENGTH_SHORT).show();
+                        break;
+                    case -1:
+                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                        break;
+                    case -2:
+                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                        break;
+                    default:
+                        break;
+                }
+
+                if (MainFragment.getCurrentPath().equals(compressPath))
+                    MainFragment.refreshList();
+            });
+        });
     }
 
     /**
@@ -314,9 +381,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (fileToExtract != null) {
             ItemsAdapter.fileToExtract = null;
 
-            String fileNameWithoutExtension = fileToExtract.getName().substring(0, fileToExtract.getName().length() - ".zip".length());
-
-            String newName = fileNameWithoutExtension;
+            String newName = fileToExtract.getName().substring(0, fileToExtract.getName().length() - ".zip".length());
             String originalName = newName;
             File extractLocation = new File(extractPath, newName);
             int i, maxRetries = 10000;
@@ -353,8 +418,50 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         return -1;
     }
 
-    public static void compressSelectedFiles() {
+    /**
+     * Funzione interna per la compressione di file in un archivio zip
+     *
+     * @param compressPath path in cui creare l'archivio
+     * @return codice di esecuzione:
+     * - 1: estrazione andata a buon fine
+     * - -1: errore durante la creazione dello zip
+     * - -2: errore Nome archivio duplicato (superati tentativi max) o mancanza permessi storage
+     */
+    private static int compressSelectedFilesOperation(String compressPath) {
+        ArrayList<File> filesToCompress = new ArrayList<>(selectedFilesToCompress.size());
+        filesToCompress.addAll(selectedFilesToCompress);
 
+        if (filesToCompress.size() == 0)
+            return -1;
+
+        clearSelection();
+        selectedFilesToCompress = new ArrayList<>();
+
+        String newName = "archive";
+        String originalName = newName;
+        File extractLocation = new File(compressPath, newName + ".zip");
+        int i, maxRetries = 10000;
+
+        // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
+        for (i = 1; i < maxRetries; i++) {
+            extractLocation = new File(compressPath, newName + ".zip");
+
+            if (extractLocation.exists())
+                newName = originalName + " (" + i + ")";
+            else
+                break;
+        }
+
+        if (i == maxRetries) {
+            return -2;
+        }
+
+        try {
+            new ZipFile(extractLocation.getPath()).addFiles(filesToCompress);
+        } catch (Exception e) {
+            return -1;
+        }
+        return 1;
     }
 
     public static void deleteSelectedFilesOperation(String originalPath) {
