@@ -1,7 +1,9 @@
 package com.terzulli.terzullifilemanager.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearFileToExtractSelection;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeCopyMoveOperationOnThread;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeExtractOperationOnThread;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.isSelectionModeEnabled;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatDateDetailsFull;
@@ -532,10 +534,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             refreshList();
         });
 
-        btnConfirm.setOnClickListener(view -> executeCopyMoveOperationOnThread(isCopy));
+        btnConfirm.setOnClickListener(view -> executeCopyMoveOperationOnThread(isCopy, currentPath));
     }
 
-    public static void displayExtractToBar(File fileToExtract) {
+    public static void displayExtractToBar() {
         copyMoveExtractBar.setVisibility(View.VISIBLE);
 
         Button btnCancel = view.findViewById(R.id.items_copy_move_btn_cancel_operation);
@@ -548,13 +550,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
+            clearFileToExtractSelection();
             hideCopyMoveExtractBar();
             refreshList();
         });
 
         btnConfirm.setOnClickListener(view -> {
             hideCopyMoveExtractBar();
-            executeExtractOperationOnThread(fileToExtract, getCurrentPath());
+            executeExtractOperationOnThread(getCurrentPath());
         });
     }
 
@@ -661,10 +664,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
 
         alertBuilder.show();
-    }
-
-    private static void executeCopyMoveOperationOnThread(boolean isCopy) {
-        activityReference.runOnUiThread(() -> ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath));
     }
 
     public static void hideCopyMoveExtractBar() {

@@ -16,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,6 +72,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFilesToCopyMove == null)
             selectedFilesToCopyMove = new ArrayList<>();
 
+    }
+
+    public static void clearFileToExtractSelection() {
+        fileToExtract = null;
     }
 
     public static void recoverSelectionFromCopyMove() {
@@ -139,22 +144,30 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     public static void recoverEventuallyActiveExtractOperation() {
         if (fileToExtract != null) {
-            MainFragment.displayExtractToBar(fileToExtract);
+            MainFragment.displayExtractToBar();
         }
     }
 
-    public static void copyMoveSelectionOperation(boolean isCopy, String copyPath) {
+    /**
+     * FUnzione interna per la copia o spostamento di file e cartelle (ricorsiva)
+     *
+     * @param isCopy          indica se l'operazione è di copia (true) o spostamento (false)
+     * @param destinationPath path di destinazione
+     * @return codice di esecuzione:
+     * - 1: operazione completata con successo
+     * - -1: generata eccezione durante l'operazione
+     */
+    public static int copyMoveSelectionOperation(boolean isCopy, String destinationPath) {
         ArrayList<File> filesToCopyMove = new ArrayList<>(selectedFilesToCopyMove.size());
         filesToCopyMove.addAll(selectedFilesToCopyMove);
 
         if (filesToCopyMove.size() == 0)
-            return;
+            return -1;
 
         clearSelection();
         selectedFilesToCopyMove = new ArrayList<>();
-        MainFragment.hideCopyMoveExtractBar();
 
-        File newLocation = new File(copyPath);
+        File newLocation = new File(destinationPath);
         if (newLocation.exists()) {
             //if (!newLocation.getPath().equals(filesToCopyMove.get(0).getParent())) {
             // copy
@@ -163,8 +176,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 try {
                     copyFileLowLevelOperation(fileToMove, newLocation);
                 } catch (IOException e) {
-                    Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                    Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                    return -1;
                 }
             }
 
@@ -174,25 +186,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                     deleteRecursive(fileToMove);
                 }
             }
-            /*} else {
-                Toast.makeText(context, R.string.error_copy_move_same_location, Toast.LENGTH_SHORT).show();
-            }*/
         }
 
-        if (MainFragment.getCurrentPath().equals(copyPath))
-            MainFragment.refreshList();
-        else {
-            String toastMessage;
-            if (isCopy)
-                toastMessage = context.getResources().getString(R.string.action_copy_completed_first_part);
-            else
-                toastMessage = context.getResources().getString(R.string.action_move_completed_first_part);
-
-            toastMessage += filesToCopyMove.size()
-                    + context.getResources().getString(R.string.action_copy_move_completed_second_part)
-                    + copyPath + context.getResources().getString(R.string.action_copy_move_completed_third_part);
-            Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
-        }
+        return 1;
     }
 
     public static void renameSelectedFile() {
@@ -211,19 +207,69 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (fileToExtract != null) {
             // caso in cui apriamo un file direttamente con il click
             //extractSelectedFilesOperation(fileToDeCompress, fileToDeCompress.getParent());
-            displayExtractToBar(fileToExtract);
+            displayExtractToBar();
         }
     }
 
-    public static void executeExtractOperationOnThread(File fileToExtract, String extractPath) {
+    public static void executeCopyMoveOperationOnThread(boolean isCopy, String destinationPath) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
+
+        MainFragment.hideCopyMoveExtractBar();
+
+        if (isCopy)
+            Toast.makeText(context, R.string.action_copy_started, Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(context, R.string.action_move_started, Toast.LENGTH_SHORT).show();
 
         executor.execute(() -> {
 
             //Background work here
-            int returnCode = extractSelectedFileOperation(fileToExtract, extractPath);
+            int returnCode = copyMoveSelectionOperation(isCopy, destinationPath);
             ItemsAdapter.fileToExtract = null;
+            int nItems = selectedFilesToCopyMove.size();
+
+            handler.post(() -> {
+                //UI Thread work here
+
+                switch (returnCode) {
+                    case 1:
+                        String toastMessage;
+                        if (isCopy)
+                            toastMessage = context.getResources().getString(R.string.action_copy_completed_first_part);
+                        else
+                            toastMessage = context.getResources().getString(R.string.action_move_completed_first_part);
+
+                        toastMessage += nItems
+                                + context.getResources().getString(R.string.action_copy_move_completed_second_part)
+                                + destinationPath + context.getResources().getString(R.string.action_copy_move_completed_third_part);
+                        Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
+
+                        break;
+                    case -1:
+                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        break;
+                }
+
+                if (MainFragment.getCurrentPath().equals(destinationPath))
+                    MainFragment.refreshList();
+            });
+        });
+    }
+
+    public static void executeExtractOperationOnThread(String extractPath) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        MainFragment.hideCopyMoveExtractBar();
+        Toast.makeText(context, R.string.action_extraction_started, Toast.LENGTH_SHORT).show();
+
+        executor.execute(() -> {
+
+            //Background work here
+            int returnCode = extractSelectedFileOperation(new File(fileToExtract.getPath()), extractPath);
 
             handler.post(() -> {
                 //UI Thread work here
@@ -231,8 +277,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 switch (returnCode) {
                     case 1:
                         Toast.makeText(context, R.string.action_extract_completed, Toast.LENGTH_SHORT).show();
-                        if (MainFragment.getCurrentPath().equals(extractPath))
-                            MainFragment.refreshList();
                         break;
                     case -1:
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
@@ -247,81 +291,64 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                     default:
                         break;
                 }
+
+                if (MainFragment.getCurrentPath().equals(extractPath))
+                    MainFragment.refreshList();
             });
         });
 
-
-
-        //AsyncTask.execute(() -> ItemsAdapter.extractSelectedFilesOperation(fileToExtract, currentPath));
-        // todo la funzione sopra manda in crash l'app --> gestire esecuzione background con eventuale update GUI
-
-        //activityReference.runOnUiThread(() -> ItemsAdapter.extractSelectedFilesOperation(fileToExtract, MainFragment.currentPath));
     }
 
     /**
      * Funzione interna per l'estrazione di un archivio zip
+     *
      * @param fileToExtract archivio da estrarre
-     * @param extractPath path in cui estrarre l'archivio
+     * @param extractPath   path in cui estrarre l'archivio
      * @return codice di esecuzione:
-     *  - 1: estrazione andata a buon fine
-     *  - -1: errore durante l'estrazione dello zip
-     *  - -2: errore durante la creazione della cartella di estrazione. Nome duplicato (superati tentativi max) o mancanza permessi storage
-     *  - -3: archivio protetto da password
+     * - 1: estrazione andata a buon fine
+     * - -1: errore durante l'estrazione dello zip
+     * - -2: errore durante la creazione della cartella di estrazione. Nome duplicato (superati tentativi max) o mancanza permessi storage
+     * - -3: archivio protetto da password
      */
     private static int extractSelectedFileOperation(File fileToExtract, String extractPath) {
         if (fileToExtract != null) {
+            ItemsAdapter.fileToExtract = null;
+
             String fileNameWithoutExtension = fileToExtract.getName().substring(0, fileToExtract.getName().length() - ".zip".length());
 
-            //File extractLocation = new File(extractPath, fileNameWithoutExtension);
+            String newName = fileNameWithoutExtension;
+            String originalName = newName;
+            File extractLocation = new File(extractPath, newName);
+            int i, maxRetries = 10000;
 
-            //if(!extractLocation.exists() ) {
-                String newName = fileNameWithoutExtension;
-                String originalName = newName;
-                File extractLocation = new File(extractPath, newName);
-                int i, maxRetries = 10000;
+            // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
+            for (i = 1; i < maxRetries; i++) {
+                extractLocation = new File(extractPath, newName);
 
-                // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
-                for (i = 1; i < maxRetries; i++) {
-                    extractLocation = new File(extractPath, newName);
+                if (extractLocation.exists())
+                    newName = originalName + " (" + i + ")";
+                else
+                    break;
+            }
 
-                    if (extractLocation.exists())
-                        newName = originalName + " (" + i + ")";
-                    else
-                        break;
-                }
-
-                if (i == maxRetries || !extractLocation.mkdirs()) {
-                    /*Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                    Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();*/
-                    return -2;
-                }
-            //}
+            if (i == maxRetries || !extractLocation.mkdirs()) {
+                return -2;
+            }
 
             try {
                 ZipFile zipFile = new ZipFile(fileToExtract.getPath());
                 if (zipFile.isEncrypted()) {
-                    //Toast.makeText(context, R.string.error_check_password_not_supported, Toast.LENGTH_SHORT).show();
                     return -3;
                 }
 
                 zipFile.extractAll(extractLocation.getPath());
 
             } catch (Exception e) {
-                /*Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();*/
+                Log.w("DEBUG", e.toString());
                 return -1;
             }
 
             return 1;
-
-            // refresh del fragment se siamo ancora nella stessa direcotry
-
-            /*if (MainFragment.getCurrentPath().equals(extractPath))
-                MainFragment.refreshList();*/
-
-            //Toast.makeText(context, R.string.action_extract_completed, Toast.LENGTH_SHORT).show();
-
-            //MainFragment.refreshList();
         }
         return -1;
     }
@@ -500,11 +527,11 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
      */
 
     /* vecchio
-    *
+     *
      * - 8: selezione generica dentro zip
      * - 9: selezione completa dentro zip
      * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
-    * */
+     * */
     private static int checkSelectedFilesType() {
         if (selectedFiles.isEmpty())
             return 0;
@@ -658,8 +685,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 // TODO gestione apertura zip
                 fileToExtract = selectedFile;
                 extractSelectedFile();
-            }
-            else if (type.equals("application/vnd.android.package-archive")
+            } else if (type.equals("application/vnd.android.package-archive")
                     || type.equals("application/zip") || type.equals("application/java-archive")) {
 
                 // TODO verificare se serve richiedere i permessi per installare

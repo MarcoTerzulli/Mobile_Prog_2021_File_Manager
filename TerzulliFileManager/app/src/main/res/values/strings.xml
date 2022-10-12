@@ -109,6 +109,9 @@
     <string name="action_extract_here">Extract here</string>
     <string name="action_extract_completed">Extraction Completed</string>
     <string name="action_compress_completed">Compression Completed</string>
+    <string name="action_copy_started">Copying…</string>
+    <string name="action_move_started">Moving…</string>
+    <string name="action_extraction_started">Extracting…</string>
 
     <!-- File/Dir sort-->
     <string name="sort_ascending">Ascending</string>
