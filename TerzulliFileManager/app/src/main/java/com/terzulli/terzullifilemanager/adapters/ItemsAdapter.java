@@ -77,9 +77,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         selectedFiles.clear();
     }
 
-    public static ArrayList<File> getSelectedFilesToCopyMove() {
+    /*public static ArrayList<File> getSelectedFilesToCopyMove() {
         return selectedFilesToCopyMove;
-    }
+    }*/
 
     public static void clearSelection() {
         selectedFiles.clear();
@@ -181,41 +181,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         }
     }
 
-    /*public static void copyMoveSelectionOperation(boolean isCopy, String copyPath) {
-        if (selectedFilestoCopyMove == null)
-            return;
-
-        File newLocation = new File(copyPath);
-        if (newLocation.exists()) {
-            if (!newLocation.getPath().equals(selectedFilestoCopyMove.get(0).getParent())) {
-                // copy
-                for (File fileToMove : selectedFilestoCopyMove) {
-
-                    try {
-                        copyFileLowLevelOperation(fileToMove, newLocation);
-                    } catch (IOException e) {
-                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                // delete if the operation is move
-                if (!isCopy) {
-                    for (File fileToMove : selectedFilestoCopyMove) {
-                        deleteRecursive(fileToMove);
-                    }
-                }
-            } else {
-                Toast.makeText(context, R.string.error_copy_move_same_location, Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        clearSelection();
-        selectedFilestoCopyMove = new ArrayList<>();
-        MainFragment.refreshList();
-        MainFragment.hideCopyMoveBar();
-    }*/
-
     public static void renameSelectedFile() {
         // controllo se c'è esattamente un file / cartella selezionato
         if (checkSelectedFilesType() == 1 || checkSelectedFilesType() == 2
@@ -290,8 +255,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
             for (int i = 0; i < Objects.requireNonNull(children).length; i++) {
                 // copia ricorsiva
-                /*copyFileLowLevelOperation(new File(sourceLocation, children[i]),
-                        new File(outFile, children[i]));*/
                 copyFileLowLevelOperation(new File(sourceLocation, children[i]),
                         outFile);
             }

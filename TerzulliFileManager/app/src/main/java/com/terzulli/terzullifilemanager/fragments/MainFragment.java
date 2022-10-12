@@ -68,7 +68,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static RelativeLayout copyMoveBar;
     @SuppressLint("StaticFieldLeak")
     private static SwipeRefreshLayout swipeRefreshLayout;
-    //private static MainFragmentViewModel mainFragmentViewModel;
     @SuppressLint("StaticFieldLeak")
     private static View view;
     private static String currentPath;
@@ -105,9 +104,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     public static void loadPath(final String path, boolean updateBreadcrumb) {
-        /*if (mainFragmentViewModel == null) {
-            return;
-        }*/
 
         if (isPathProtected(path)) {
             // stiamo tentando di accedere a file di root
@@ -478,21 +474,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
         alertBuilder.setMessage(message);
 
-        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> {
-            executeDeleteOperationOnThread(selectedFilesQt);
-            /*new Handler().postDelayed(() -> {
-                String toastMessage = view.getResources().getString(R.string.delete_toast_first_part) + " " + selectedFilesQt + " ";
-                if (selectedFilesQt == 1)
-                    toastMessage += view.getResources().getString(R.string.delete_toast_single_second_part);
-                else
-                    toastMessage += view.getResources().getString(R.string.delete_toast_multiple_second_part);
-
-                Toast.makeText(view.getContext(), toastMessage, Toast.LENGTH_SHORT).show();
-                ItemsAdapter.deleteSelectedFilesOperation();
-            }, 10);*/
-        });
-        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {
-        });
+        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> executeDeleteOperationOnThread(selectedFilesQt));
+        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {});
 
         alertBuilder.show();
     }
@@ -539,13 +522,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             refreshList();
         });
 
-        btnPaste.setOnClickListener(view -> {
-            executeCopyMoveOperationOnThread(isCopy);
-
-            /*new Handler().postDelayed(() -> {
-                ItemsAdapter.copyMoveSelectionOperation(isCopy, currentPath);
-            }, 10);*/
-        });
+        btnPaste.setOnClickListener(view -> executeCopyMoveOperationOnThread(isCopy));
     }
 
     public static void displaySortByDialog() {
@@ -688,7 +665,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         setHasOptionsMenu(true);
 
         supportActionBar = ((MainActivity) requireActivity()).getSupportActionBar();
-        //mainFragmentViewModel = new ViewModelProvider(this).get(MainFragmentViewModel.class);
         swipeRefreshLayout = view.findViewById(R.id.fragment_main_swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.fragment_main_list_view);
         breadcrumbsView = view.findViewById(R.id.fragment_main_breadcrumbs);
@@ -702,7 +678,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (currentPath == null)
             currentPath = pathHome;
         if (pathHomeFriendlyName == null)
-            setPathRootFriendlyName(getContext().getResources().getString(R.string.drawer_menu_storage_internal));
+            setPathRootFriendlyName(breadcrumbsView.getContext().getResources().getString(R.string.drawer_menu_storage_internal));
         lastActionBarTitle = "";
 
         // inizializzazione layoyt
@@ -726,11 +702,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 //updateBreadCrumbList(currentPath, null);
             }
         });
-
-        /*if (savedInstanceState == null) {
-            updateBreadCrumbList(pathHome);
-            loadPath(pathHome);
-        }*/
 
         loadPath(currentPath, true);
 
