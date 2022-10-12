@@ -39,7 +39,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -47,7 +46,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.adapters.ItemsAdapter;
-import com.terzulli.terzullifilemanager.fragments.data.MainFragmentViewModel;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
@@ -70,7 +68,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static RelativeLayout copyMoveBar;
     @SuppressLint("StaticFieldLeak")
     private static SwipeRefreshLayout swipeRefreshLayout;
-    private static MainFragmentViewModel mainFragmentViewModel;
+    //private static MainFragmentViewModel mainFragmentViewModel;
     @SuppressLint("StaticFieldLeak")
     private static View view;
     private static String currentPath;
@@ -107,9 +105,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     public static void loadPath(final String path, boolean updateBreadcrumb) {
-        if (mainFragmentViewModel == null) {
+        /*if (mainFragmentViewModel == null) {
             return;
-        }
+        }*/
 
         if (isPathProtected(path)) {
             // stiamo tentando di accedere a file di root
@@ -690,7 +688,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         setHasOptionsMenu(true);
 
         supportActionBar = ((MainActivity) requireActivity()).getSupportActionBar();
-        mainFragmentViewModel = new ViewModelProvider(this).get(MainFragmentViewModel.class);
+        //mainFragmentViewModel = new ViewModelProvider(this).get(MainFragmentViewModel.class);
         swipeRefreshLayout = view.findViewById(R.id.fragment_main_swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.fragment_main_list_view);
         breadcrumbsView = view.findViewById(R.id.fragment_main_breadcrumbs);

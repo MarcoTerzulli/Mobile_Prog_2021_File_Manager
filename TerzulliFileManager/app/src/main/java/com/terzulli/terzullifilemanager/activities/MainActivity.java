@@ -29,12 +29,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.adapters.ItemsAdapter;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
-import com.terzulli.terzullifilemanager.fragments.AudioFragment;
-import com.terzulli.terzullifilemanager.fragments.DownloadFragment;
-import com.terzulli.terzullifilemanager.fragments.ImagesFragment;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
-import com.terzulli.terzullifilemanager.fragments.RecentsFragment;
-import com.terzulli.terzullifilemanager.fragments.VideosFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.util.List;
