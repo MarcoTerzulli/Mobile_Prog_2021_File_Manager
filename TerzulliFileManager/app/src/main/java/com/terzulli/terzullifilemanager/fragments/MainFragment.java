@@ -17,7 +17,6 @@ import static com.terzulli.terzullifilemanager.utils.Utils.removeHiddenFilesFrom
 import static com.terzulli.terzullifilemanager.utils.Utils.strFileApplication;
 import static com.terzulli.terzullifilemanager.utils.Utils.strFileDirectory;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationAudioFriendlyName;
-import static com.terzulli.terzullifilemanager.utils.Utils.strLocationDownloadsFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationImagesFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationInternalFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationRecentsFriendlyName;

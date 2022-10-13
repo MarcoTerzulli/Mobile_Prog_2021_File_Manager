@@ -8,7 +8,6 @@ import static com.terzulli.terzullifilemanager.fragments.MainFragment.displayPro
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.resetActionBarTitle;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionBarTitle;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
-import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
 import static com.terzulli.terzullifilemanager.utils.Utils.isFileAZipArchive;
 
 import android.annotation.SuppressLint;
@@ -52,7 +51,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -156,12 +154,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     public static void clearSelection() {
         selectedFiles.clear();
-    }
-
-    public static void clearSelectionAndActiveOperations() {
-        selectedFiles.clear();
-        selectedFilesToCompress.clear();
-        selectedFilesToCopyMove.clear();
     }
 
     public static boolean isSelectionModeEnabled() {
