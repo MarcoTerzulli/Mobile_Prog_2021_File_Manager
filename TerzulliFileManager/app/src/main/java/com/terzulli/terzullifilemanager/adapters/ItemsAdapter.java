@@ -272,9 +272,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                         else
                             toastMessage = context.getResources().getString(R.string.action_move_completed_first_part);
 
-                        toastMessage += nItems
-                                + context.getResources().getString(R.string.action_copy_move_completed_second_part)
-                                + destinationPath + context.getResources().getString(R.string.action_copy_move_completed_third_part);
+                        /*toastMessage += " " + nItems + " "
+                                + context.getResources().getString(R.string.action_copy_move_completed_second_part) + " "
+                                + destinationPath + context.getResources().getString(R.string.action_copy_move_completed_third_part); */
+                        toastMessage += " " + nItems + " " + context.getResources().getString(R.string.action_copy_move_completed_third_part);
                         Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
 
                         break;
@@ -456,10 +457,22 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             return -2;
         }
 
-        try {
+        /*try {
             new ZipFile(extractLocation.getPath()).addFiles(filesToCompress);
         } catch (Exception e) {
             return -1;
+        }*/
+        ZipFile zipFile = new ZipFile(extractLocation.getPath());
+
+        for (File fileToCompress : filesToCompress) {
+            try {
+                if (fileToCompress.isDirectory())
+                    zipFile.addFolder(fileToCompress);
+                else
+                    zipFile.addFile(fileToCompress);
+            } catch (Exception e) {
+                return -1;
+            }
         }
         return 1;
     }
@@ -789,7 +802,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             if (type == null) {
                 Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
             } else if (ext.equals("zip")) {
-                // TODO gestione apertura zip
                 fileToExtract = selectedFile;
                 extractSelectedFile();
             } else if (type.equals("application/vnd.android.package-archive")
