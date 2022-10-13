@@ -1,6 +1,5 @@
 package com.terzulli.terzullifilemanager.activities;
 
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelectionAndActiveOperations;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.submitSearchQuery;
 
 import android.annotation.SuppressLint;
@@ -13,7 +12,6 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.SearchView;
@@ -647,37 +645,38 @@ public class MainActivity extends PermissionsActivity
 
             switch (destination.getId()) {
                 case R.id.nav_recents:
-                    // TODO
-                    // TODO cambio titolo toolbar
-                    // TODO caricamento file con ricerca recenti
-                    MainFragment.loadPathInternal();
+                    // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
+                    // venga caricato correttamente ed evita che la recycler view possa dare problemi
+                    // e far crashare l'app
+                    MainFragment.loadPathInternal(false);
+                    MainFragment.displayRecentsFiles();
                     break;
                 case R.id.nav_images:
                     // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
                     // venga caricato correttamente ed evita che la recycler view possa dare problemi
                     // e far crashare l'app
-                    MainFragment.loadPathInternal();
+                    MainFragment.loadPathInternal(false);
                     MainFragment.displayImagesFiles();
                     break;
                 case R.id.nav_videos:
                     // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
                     // venga caricato correttamente ed evita che la recycler view possa dare problemi
                     // e far crashare l'app
-                    MainFragment.loadPathInternal();
+                    MainFragment.loadPathInternal(false);
                     MainFragment.displayVideosFiles();
                     break;
                 case R.id.nav_audio:
                     // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
                     // venga caricato correttamente ed evita che la recycler view possa dare problemi
                     // e far crashare l'app
-                    MainFragment.loadPathInternal();
+                    MainFragment.loadPathInternal(false);
                     MainFragment.displayAudioFiles();
                     break;
                 case R.id.nav_download:
                     MainFragment.loadPathDownload();
                     break;
                 case R.id.nav_internal_storage:
-                    MainFragment.loadPathInternal();
+                    MainFragment.loadPathInternal(true);
                     break;
                 case R.id.nav_sd_card:
                     /*

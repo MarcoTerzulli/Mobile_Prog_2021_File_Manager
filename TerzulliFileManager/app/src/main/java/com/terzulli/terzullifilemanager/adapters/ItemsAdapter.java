@@ -1,5 +1,6 @@
 package com.terzulli.terzullifilemanager.adapters;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.terzulli.terzullifilemanager.activities.MainActivity.closeSearchView;
 import static com.terzulli.terzullifilemanager.activities.MainActivity.updateMenuItems;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.displayExtractToBar;
@@ -8,6 +9,7 @@ import static com.terzulli.terzullifilemanager.fragments.MainFragment.resetActio
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionBarTitle;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
 import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
+import static com.terzulli.terzullifilemanager.utils.Utils.isFileAZipArchive;
 
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
@@ -37,6 +39,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
+import com.terzulli.terzullifilemanager.utils.RecentsFilesManager;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import net.lingala.zip4j.ZipFile;
@@ -851,15 +854,22 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
             if (type == null) {
                 Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
-            } else if (ext.equals("zip")) {
+            } else if (isFileAZipArchive(selectedFile)) {
                 fileToExtract = selectedFile;
                 extractSelectedFile();
+
+                RecentsFilesManager recentsFilesManager = new RecentsFilesManager(context.getSharedPreferences("TerzulliFileManager", MODE_PRIVATE));
+                recentsFilesManager.addFileToRecentsFilesList(selectedFile);
             } else if (type.equals("application/vnd.android.package-archive")
                     || type.equals("application/zip") || type.equals("application/java-archive")) {
 
                 // TODO verificare se serve richiedere i permessi per installare
                 installApplication(selectedFile);
             } else {
+
+                RecentsFilesManager recentsFilesManager = new RecentsFilesManager(context.getSharedPreferences("TerzulliFileManager", MODE_PRIVATE));
+                recentsFilesManager.addFileToRecentsFilesList(selectedFile);
+
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     Uri data = Uri.parse(selectedFile.getAbsolutePath());

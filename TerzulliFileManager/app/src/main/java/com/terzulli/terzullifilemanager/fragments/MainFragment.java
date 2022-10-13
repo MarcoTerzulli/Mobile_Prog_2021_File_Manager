@@ -1,7 +1,6 @@
 package com.terzulli.terzullifilemanager.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.terzulli.terzullifilemanager.activities.MainActivity.closeSearchView;
 import static com.terzulli.terzullifilemanager.activities.MainActivity.isSearchActive;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearFileToExtractSelection;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
@@ -58,6 +57,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.adapters.ItemsAdapter;
+import com.terzulli.terzullifilemanager.utils.RecentsFilesManager;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
@@ -125,10 +125,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             boolean sortOrderAscending = sharedPreferences.getBoolean("sortOrderAscending", true);
 
             Utils.sortFileAndDirectoriesList(filesAndDirs, sortBy, sortOrderAscending);
-
-            // rimozione file nascosti (iniziano col .)
-            /*if (!sharedPreferences.getBoolean("showHidden", false))
-                filesAndDirs = removeHiddenFilesFromArray(filesAndDirs);*/
 
             // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
             initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
@@ -280,7 +276,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         switch (pathHomeFriendlyName) {
             case strLocationRecentsFriendlyName:
-                loadPath(currentPath, true);
+                displayRecentsFiles();
                 break;
             case strLocationAudioFriendlyName:
                 displayAudioFiles();
@@ -446,7 +442,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (i == maxRetries) {
             Toast.makeText(view.getContext(), R.string.error_generic, Toast.LENGTH_SHORT).show();
         } else {
-            if(!newDir.mkdirs())
+            if (!newDir.mkdirs())
                 Toast.makeText(view.getContext(), R.string.error_generic, Toast.LENGTH_SHORT).show();
             else
                 refreshList();
@@ -503,9 +499,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
 
-
-
-
     /**
      * @param selectionType   tipologia di selezione:
      *                        - 1: singola directory
@@ -549,7 +542,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.setMessage(message);
 
         alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> executeDeleteOperationOnThread(selectedFilesQt));
-        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {});
+        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {
+        });
 
         alertBuilder.show();
     }
@@ -779,12 +773,123 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         reloadBreadCrumb(path);
     }
 
-    public static void loadPathInternal() {
+    public static void loadPathInternal(boolean updateBreadCrumb) {
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
         pathHomeFriendlyName = strLocationInternalFriendlyName;
 
-        loadPath(path, true);
+        loadPath(path, updateBreadCrumb);
         reloadBreadCrumb(path);
+    }
+
+    public static void displayVideosFiles() {
+        ArrayList<File> searchedResults = new ArrayList<>();
+        pathHomeFriendlyName = strLocationVideosFriendlyName;
+        findVideosFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
+
+        File[] searchedResultsArr = new File[searchedResults.size()];
+        int i = 0;
+        for (File file : searchedResults)
+            searchedResultsArr[i++] = file;
+
+        MainFragment.loadSelection(searchedResultsArr);
+        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_videos));
+    }
+
+    public static void displayAudioFiles() {
+        pathHomeFriendlyName = strLocationAudioFriendlyName;
+        ArrayList<File> searchedResults = new ArrayList<>();
+        findAudioFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
+
+        File[] searchedResultsArr = new File[searchedResults.size()];
+        int i = 0;
+        for (File file : searchedResults)
+            searchedResultsArr[i++] = file;
+
+        loadSelection(searchedResultsArr);
+        pathHomeFriendlyName = strLocationAudioFriendlyName;
+        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_audio));
+    }
+
+    public static void displayImagesFiles() {
+        pathHomeFriendlyName = strLocationImagesFriendlyName;
+        ArrayList<File> searchedResults = new ArrayList<>();
+        findImagesFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
+
+        File[] searchedResultsArr = new File[searchedResults.size()];
+        int i = 0;
+        for (File file : searchedResults)
+            searchedResultsArr[i++] = file;
+
+        loadSelection(searchedResultsArr);
+        pathHomeFriendlyName = strLocationImagesFriendlyName;
+        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_images));
+    }
+
+    public static void displayRecentsFiles() {
+        pathHomeFriendlyName = strLocationImagesFriendlyName;
+
+        RecentsFilesManager recentsFilesManager = new RecentsFilesManager(sharedPreferences);
+        ArrayList<File> recentsFiles = recentsFilesManager.getRecentsFilesList();
+
+        File[] recentsFilesArr = new File[recentsFiles.size()];
+        int i = 0;
+        for (File file : recentsFiles)
+            recentsFilesArr[i++] = file;
+
+        loadSelection(recentsFilesArr);
+        pathHomeFriendlyName = strLocationRecentsFriendlyName;
+        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_recent));
+    }
+
+    private static void findVideosFiles(File dir, ArrayList<File> fileList) {
+        if (dir == null || dir.listFiles() == null)
+            return;
+
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if (file.isHidden())
+                continue;
+
+            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
+                findVideosFiles(file, fileList);
+            else if (getFileType(file).equals(Utils.strFileVideo))
+                fileList.add(file);
+        }
+    }
+
+    /*public void setPathRootFriendlyName(String friendlyName) {
+        pathHomeFriendlyName = friendlyName;
+    }*/
+
+    private static void findImagesFiles(File dir, ArrayList<File> fileList) {
+        if (dir == null || dir.listFiles() == null)
+            return;
+
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if (file.isHidden())
+                continue;
+
+            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
+                findImagesFiles(file, fileList);
+            else if (getFileType(file).equals(Utils.strFileImage))
+                fileList.add(file);
+        }
+    }
+
+    private static void findAudioFiles(File dir, ArrayList<File> fileList) {
+        if (dir == null || dir.listFiles() == null)
+            return;
+
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if (file.isHidden())
+                continue;
+
+            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
+                findAudioFiles(file, fileList);
+            else if (getFileType(file).equals(Utils.strFileAudio)) {
+
+                fileList.add(file);
+            }
+        }
     }
 
     @Override
@@ -856,7 +961,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             setActionBarTitle(lastActionBarTitle);
 
         activityReference = requireActivity();
-        if(!isSearchActive())
+        if (!isSearchActive())
             refreshList();
     }
 
@@ -873,102 +978,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return sb.toString();
     }
 
-    /*public void setPathRootFriendlyName(String friendlyName) {
-        pathHomeFriendlyName = friendlyName;
-    }*/
-
     @Override
     public void onRefresh() {
         refreshList();
-    }
-
-    public static void displayVideosFiles() {ArrayList<File> searchedResults = new ArrayList<>();
-        pathHomeFriendlyName = strLocationVideosFriendlyName;
-        findVideosFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
-
-        File[] searchedResultsArr = new File[searchedResults.size()];
-        int i = 0;
-        for (File file : searchedResults)
-            searchedResultsArr[i++] = file;
-
-        MainFragment.loadSelection(searchedResultsArr);
-        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_videos));
-    }
-
-    public static void displayAudioFiles() {
-        pathHomeFriendlyName = strLocationAudioFriendlyName;
-        ArrayList<File> searchedResults = new ArrayList<>();
-        findAudioFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
-
-        File[] searchedResultsArr = new File[searchedResults.size()];
-        int i = 0;
-        for (File file : searchedResults)
-            searchedResultsArr[i++] = file;
-
-        loadSelection(searchedResultsArr);
-        pathHomeFriendlyName = strLocationAudioFriendlyName;
-        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_audio));
-    }
-
-    public static void displayImagesFiles() {
-        pathHomeFriendlyName = strLocationImagesFriendlyName;
-        ArrayList<File> searchedResults = new ArrayList<>();
-        findImagesFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
-
-        File[] searchedResultsArr = new File[searchedResults.size()];
-        int i = 0;
-        for (File file : searchedResults)
-            searchedResultsArr[i++] = file;
-
-        loadSelection(searchedResultsArr);
-        pathHomeFriendlyName = strLocationImagesFriendlyName;
-        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_images));
-    }
-
-    private static void findVideosFiles(File dir, ArrayList<File> fileList){
-        if(dir == null || dir.listFiles() == null)
-            return;
-
-        for (File file : Objects.requireNonNull(dir.listFiles())) {
-            if(file.isHidden())
-                continue;
-
-            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
-                findVideosFiles(file, fileList);
-            else if(getFileType(file).equals(Utils.strFileVideo))
-                fileList.add(file);
-        }
-    }
-
-    private static void findImagesFiles(File dir, ArrayList<File> fileList){
-        if(dir == null || dir.listFiles() == null)
-            return;
-
-        for (File file : Objects.requireNonNull(dir.listFiles())) {
-            if(file.isHidden())
-                continue;
-
-            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
-                findImagesFiles(file, fileList);
-            else if(getFileType(file).equals(Utils.strFileImage))
-                fileList.add(file);
-        }
-    }
-
-    private static void findAudioFiles(File dir, ArrayList<File> fileList){
-        if(dir == null || dir.listFiles() == null)
-            return;
-
-        for (File file : Objects.requireNonNull(dir.listFiles())) {
-            if(file.isHidden())
-                continue;
-
-            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
-                findAudioFiles(file, fileList);
-            else if(getFileType(file).equals(Utils.strFileAudio)) {
-
-                fileList.add(file);
-            }
-        }
     }
 }
