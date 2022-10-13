@@ -4,6 +4,8 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.terzulli.terzullifilemanager.activities.MainActivity.isSearchActive;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearFileToExtractSelection;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelectionFromCompress;
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelectionFromCopyMove;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeCompressOperationOnThread;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeCopyMoveOperationOnThread;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeExtractOperationOnThread;
@@ -586,15 +588,17 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
-            //closeSearchView();
+            if (ItemsAdapter.getOperationStartPath().equals(currentPath))
+                ItemsAdapter.recoverSelectionFromCopyMove();
+            else
+                clearSelectionFromCopyMove();
+
             hideCopyMoveExtractBar();
-            ItemsAdapter.recoverSelectionFromCopyMove();
             refreshList();
         });
 
         btnConfirm.setOnClickListener(view -> {
             executeCopyMoveOperationOnThread(isCopy, currentPath);
-            //closeSearchView();
         });
     }
 
@@ -611,7 +615,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
-            //closeSearchView();
             clearFileToExtractSelection();
             hideCopyMoveExtractBar();
             refreshList();
@@ -620,7 +623,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         btnConfirm.setOnClickListener(view -> {
             hideCopyMoveExtractBar();
             executeExtractOperationOnThread(getCurrentPath());
-            //closeSearchView();
         });
     }
 
@@ -642,15 +644,17 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
-            //closeSearchView();
+            if (ItemsAdapter.getOperationStartPath().equals(currentPath))
+                ItemsAdapter.recoverSelectionFromCompress();
+            else
+                clearSelectionFromCompress();
+
             hideCopyMoveExtractBar();
-            ItemsAdapter.recoverSelectionFromCompress();
             refreshList();
         });
 
         btnConfirm.setOnClickListener(view -> {
             executeCompressOperationOnThread(currentPath);
-            //closeSearchView();
         });
     }
 
@@ -782,8 +786,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     public static void displayVideosFiles() {
+        // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
+        // venga caricato correttamente ed evita che la recycler view possa dare problemi
+        // e far crashare l'app
+        MainFragment.loadPathInternal(false);
+
         ArrayList<File> searchedResults = new ArrayList<>();
-        pathHomeFriendlyName = strLocationVideosFriendlyName;
         findVideosFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
 
         File[] searchedResultsArr = new File[searchedResults.size()];
@@ -791,12 +799,17 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         for (File file : searchedResults)
             searchedResultsArr[i++] = file;
 
+        pathHomeFriendlyName = strLocationVideosFriendlyName;
         MainFragment.loadSelection(searchedResultsArr);
         setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_videos));
     }
 
     public static void displayAudioFiles() {
-        pathHomeFriendlyName = strLocationAudioFriendlyName;
+        // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
+        // venga caricato correttamente ed evita che la recycler view possa dare problemi
+        // e far crashare l'app
+        MainFragment.loadPathInternal(false);
+
         ArrayList<File> searchedResults = new ArrayList<>();
         findAudioFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
 
@@ -811,7 +824,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     public static void displayImagesFiles() {
-        pathHomeFriendlyName = strLocationImagesFriendlyName;
+        // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
+        // venga caricato correttamente ed evita che la recycler view possa dare problemi
+        // e far crashare l'app
+        MainFragment.loadPathInternal(false);
+
         ArrayList<File> searchedResults = new ArrayList<>();
         findImagesFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
 
@@ -826,15 +843,21 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     public static void displayRecentsFiles() {
-        pathHomeFriendlyName = strLocationImagesFriendlyName;
+        // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
+        // venga caricato correttamente ed evita che la recycler view possa dare problemi
+        // e far crashare l'app
+        MainFragment.loadPathInternal(false);
 
         RecentsFilesManager recentsFilesManager = new RecentsFilesManager(sharedPreferences);
         ArrayList<File> recentsFiles = recentsFilesManager.getRecentsFilesList();
 
-        File[] recentsFilesArr = new File[recentsFiles.size()];
-        int i = 0;
-        for (File file : recentsFiles)
-            recentsFilesArr[i++] = file;
+        File[] recentsFilesArr = new File[0];
+        if (recentsFiles != null) {
+            recentsFilesArr = new File[recentsFiles.size()];
+            int i = 0;
+            for (File file : recentsFiles)
+                recentsFilesArr[i++] = file;
+        }
 
         loadSelection(recentsFilesArr);
         pathHomeFriendlyName = strLocationRecentsFriendlyName;

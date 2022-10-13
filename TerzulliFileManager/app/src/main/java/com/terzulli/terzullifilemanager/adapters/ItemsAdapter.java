@@ -67,6 +67,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     private static Context context;
     private static boolean copyMoveOperationTypeIsCopy = false;
     private static File fileToExtract = null;
+    private static String operationStartPath;
 
     public ItemsAdapter(Context context, File[] filesAndFolders) {
         ItemsAdapter.context = context;
@@ -108,9 +109,17 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         }
     }
 
+    public static String getOperationStartPath() {
+        return operationStartPath;
+    }
+
     public static void saveCurrentFilesBeforeQuerySubmit() {
         currentFilesBeforeQuerySubmit = new ArrayList<>(filesAndDirs.length);
         currentFilesBeforeQuerySubmit.addAll(Arrays.asList(filesAndDirs));
+    }
+
+    public static void clearSelectionFromCopyMove() {
+        selectedFilesToCopyMove.clear();
     }
 
     public static void recoverSelectionFromCopyMove() {
@@ -123,6 +132,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         selectedFilesToCopyMove = new ArrayList<>(selectedFiles.size());
         selectedFilesToCopyMove.addAll(selectedFiles);
         selectedFiles.clear();
+    }
+
+    public static void clearSelectionFromCompress() {
+        selectedFilesToCompress.clear();
     }
 
     public static void recoverSelectionFromCompress() {
@@ -180,6 +193,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFiles == null)
             return;
 
+        operationStartPath = MainFragment.getCurrentPath();
         copyMoveOperationTypeIsCopy = isCopy;
         saveSelectionFromCopyMove();
         clearSelection();
@@ -192,6 +206,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFiles == null)
             return;
 
+        operationStartPath = MainFragment.getCurrentPath();
         saveSelectionFromCompress();
         clearSelection();
         MainFragment.refreshList();
@@ -835,7 +850,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         // ripristino lo stato di selezione precedente
         toggleItemSelection(position, holder, false, true);
-
     }
 
     private void itemOpenerHandler(File selectedFile) {
@@ -854,32 +868,32 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
             if (type == null) {
                 Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
-            } else if (isFileAZipArchive(selectedFile)) {
-                fileToExtract = selectedFile;
-                extractSelectedFile();
-
-                RecentsFilesManager recentsFilesManager = new RecentsFilesManager(context.getSharedPreferences("TerzulliFileManager", MODE_PRIVATE));
-                recentsFilesManager.addFileToRecentsFilesList(selectedFile);
-            } else if (type.equals("application/vnd.android.package-archive")
-                    || type.equals("application/zip") || type.equals("application/java-archive")) {
-
-                // TODO verificare se serve richiedere i permessi per installare
-                installApplication(selectedFile);
             } else {
-
                 RecentsFilesManager recentsFilesManager = new RecentsFilesManager(context.getSharedPreferences("TerzulliFileManager", MODE_PRIVATE));
                 recentsFilesManager.addFileToRecentsFilesList(selectedFile);
 
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    Uri data = Uri.parse(selectedFile.getAbsolutePath());
+                if (isFileAZipArchive(selectedFile)) {
+                    fileToExtract = selectedFile;
+                    extractSelectedFile();
+                } else if (type.equals("application/vnd.android.package-archive")
+                        || type.equals("application/zip") || type.equals("application/java-archive")) {
 
-                    intent.setDataAndType(data, type);
-                    context.startActivity(intent);
-                } catch (Exception e) {
-                    Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
+                    // TODO verificare se serve richiedere i permessi per installare
+                    installApplication(selectedFile);
+                } else {
+
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        Uri data = Uri.parse(selectedFile.getAbsolutePath());
+
+                        intent.setDataAndType(data, type);
+                        context.startActivity(intent);
+                    } catch (Exception e) {
+                        Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
+
         }
     }
 

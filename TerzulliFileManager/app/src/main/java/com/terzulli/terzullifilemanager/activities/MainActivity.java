@@ -645,31 +645,15 @@ public class MainActivity extends PermissionsActivity
 
             switch (destination.getId()) {
                 case R.id.nav_recents:
-                    // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
-                    // venga caricato correttamente ed evita che la recycler view possa dare problemi
-                    // e far crashare l'app
-                    MainFragment.loadPathInternal(false);
                     MainFragment.displayRecentsFiles();
                     break;
                 case R.id.nav_images:
-                    // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
-                    // venga caricato correttamente ed evita che la recycler view possa dare problemi
-                    // e far crashare l'app
-                    MainFragment.loadPathInternal(false);
                     MainFragment.displayImagesFiles();
                     break;
                 case R.id.nav_videos:
-                    // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
-                    // venga caricato correttamente ed evita che la recycler view possa dare problemi
-                    // e far crashare l'app
-                    MainFragment.loadPathInternal(false);
                     MainFragment.displayVideosFiles();
                     break;
                 case R.id.nav_audio:
-                    // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
-                    // venga caricato correttamente ed evita che la recycler view possa dare problemi
-                    // e far crashare l'app
-                    MainFragment.loadPathInternal(false);
                     MainFragment.displayAudioFiles();
                     break;
                 case R.id.nav_download:
