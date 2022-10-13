@@ -37,6 +37,12 @@ public class Utils {
     public static final String strFilePresentation = "Presentation";
     public static final String strFileApplication = "Android application";
     public static final String strFileGeneric = "File";
+    public static final String strLocationInternalFriendlyName = "Internal Storage";
+    public static final String strLocationRecentsFriendlyName = "Recents";
+    public static final String strLocationAudioFriendlyName = "Audio";
+    public static final String strLocationVideosFriendlyName = "Videos";
+    public static final String strLocationImagesFriendlyName = "Images";
+    public static final String strLocationDownloadsFriendlyName = "Downloads";
 
     public static boolean isDeviceInLandscapeOrientation(Activity activity) {
         return activity.getResources().getConfiguration().orientation

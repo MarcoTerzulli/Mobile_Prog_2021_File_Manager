@@ -15,6 +15,12 @@ import static com.terzulli.terzullifilemanager.utils.Utils.humanReadableByteCoun
 import static com.terzulli.terzullifilemanager.utils.Utils.removeHiddenFilesFromArray;
 import static com.terzulli.terzullifilemanager.utils.Utils.strFileApplication;
 import static com.terzulli.terzullifilemanager.utils.Utils.strFileDirectory;
+import static com.terzulli.terzullifilemanager.utils.Utils.strLocationAudioFriendlyName;
+import static com.terzulli.terzullifilemanager.utils.Utils.strLocationDownloadsFriendlyName;
+import static com.terzulli.terzullifilemanager.utils.Utils.strLocationImagesFriendlyName;
+import static com.terzulli.terzullifilemanager.utils.Utils.strLocationInternalFriendlyName;
+import static com.terzulli.terzullifilemanager.utils.Utils.strLocationRecentsFriendlyName;
+import static com.terzulli.terzullifilemanager.utils.Utils.strLocationVideosFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strSortByDate;
 import static com.terzulli.terzullifilemanager.utils.Utils.strSortByName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strSortBySize;
@@ -55,6 +61,7 @@ import com.terzulli.terzullifilemanager.adapters.ItemsAdapter;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -127,6 +134,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
 
             recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
+            swipeRefreshLayout.setRefreshing(false);
 
             ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
             ItemsAdapter.recoverEventuallyActiveExtractOperation();
@@ -149,10 +157,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         String oldPath = currentPath;
         currentPath = path;
 
-        if (!ItemsAdapter.isSelectionModeEnabled())
+        if (!ItemsAdapter.isSelectionModeEnabled()) {
             setActionBarTitle(getCurrentDirectoryName());
-        else
+        } else {
             swipeRefreshLayout.setRefreshing(true);
+        }
 
         new Handler().postDelayed(() -> {
             File rootFile = new File(path);
@@ -268,7 +277,30 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     public static void refreshList() {
-        loadPath(currentPath, true);
+
+        switch (pathHomeFriendlyName) {
+            case strLocationRecentsFriendlyName:
+                loadPath(currentPath, true);
+                break;
+            case strLocationAudioFriendlyName:
+                displayAudioFiles();
+                break;
+            case strLocationVideosFriendlyName:
+                displayVideosFiles();
+                break;
+            case strLocationImagesFriendlyName:
+                displayImagesFiles();
+                break;
+            case strLocationDownloadsFriendlyName:
+                loadPath(currentPath, true);
+                break;
+            case strLocationInternalFriendlyName:
+                loadPath(currentPath, true);
+                break;
+            default:
+                loadPath(currentPath, true);
+                break;
+        }
     }
 
     public static String getParentPath() {
@@ -283,6 +315,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public static String getCurrentPath() {
         return currentPath;
+    }
+
+    public static String getInternalStoragePath() {
+        return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
     /*public static void setCurrentPath(String path) {
@@ -302,7 +338,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         if (isSelectionModeEnabled()) {
             clearSelection();
-            MainFragment.loadPath(MainFragment.getCurrentPath(), false);
+            //MainFragment.loadPath(MainFragment.getCurrentPath(), false);
+            MainFragment.refreshList();
         } else {
             if (!MainFragment.isInHomePath()) {
                 // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
@@ -555,15 +592,15 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
-            closeSearchView();
+            //closeSearchView();
             hideCopyMoveExtractBar();
             ItemsAdapter.recoverSelectionFromCopyMove();
             refreshList();
         });
 
         btnConfirm.setOnClickListener(view -> {
-            closeSearchView();
             executeCopyMoveOperationOnThread(isCopy, currentPath);
+            //closeSearchView();
         });
     }
 
@@ -580,16 +617,16 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
-            closeSearchView();
+            //closeSearchView();
             clearFileToExtractSelection();
             hideCopyMoveExtractBar();
             refreshList();
         });
 
         btnConfirm.setOnClickListener(view -> {
-            closeSearchView();
             hideCopyMoveExtractBar();
             executeExtractOperationOnThread(getCurrentPath());
+            //closeSearchView();
         });
     }
 
@@ -611,15 +648,15 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
-            closeSearchView();
+            //closeSearchView();
             hideCopyMoveExtractBar();
             ItemsAdapter.recoverSelectionFromCompress();
             refreshList();
         });
 
         btnConfirm.setOnClickListener(view -> {
-            closeSearchView();
             executeCompressOperationOnThread(currentPath);
+            //closeSearchView();
         });
     }
 
@@ -725,6 +762,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             // non si fa niente
         });
 
+        Toast.makeText(activityReference, file.getPath(), Toast.LENGTH_LONG).show();
+
         alertBuilder.show();
     }
 
@@ -734,6 +773,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public static void loadPathDownload() {
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+        pathHomeFriendlyName = strLocationInternalFriendlyName;
 
         loadPath(path, true);
         reloadBreadCrumb(path);
@@ -741,6 +781,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public static void loadPathInternal() {
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+        pathHomeFriendlyName = strLocationInternalFriendlyName;
 
         loadPath(path, true);
         reloadBreadCrumb(path);
@@ -768,11 +809,13 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
         pathRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+        if (pathHomeFriendlyName == null)
+            pathHomeFriendlyName = strLocationInternalFriendlyName;
 
         if (currentPath == null)
             currentPath = pathHome;
-        if (pathHomeFriendlyName == null)
-            setPathRootFriendlyName(breadcrumbsView.getContext().getResources().getString(R.string.drawer_menu_storage_internal));
+        /*if (pathHomeFriendlyName == null)
+            setPathRootFriendlyName(breadcrumbsView.getContext().getResources().getString(R.string.drawer_menu_storage_internal));*/
         lastActionBarTitle = "";
 
         // inizializzazione layoyt
@@ -797,7 +840,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             }
         });
 
-        loadPath(currentPath, true);
+        //loadPath(currentPath, true);
+        refreshList();
 
         return view;
     }
@@ -829,12 +873,102 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return sb.toString();
     }
 
-    public void setPathRootFriendlyName(String friendlyName) {
+    /*public void setPathRootFriendlyName(String friendlyName) {
         pathHomeFriendlyName = friendlyName;
-    }
+    }*/
 
     @Override
     public void onRefresh() {
         refreshList();
+    }
+
+    public static void displayVideosFiles() {ArrayList<File> searchedResults = new ArrayList<>();
+        pathHomeFriendlyName = strLocationVideosFriendlyName;
+        findVideosFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
+
+        File[] searchedResultsArr = new File[searchedResults.size()];
+        int i = 0;
+        for (File file : searchedResults)
+            searchedResultsArr[i++] = file;
+
+        MainFragment.loadSelection(searchedResultsArr);
+        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_videos));
+    }
+
+    public static void displayAudioFiles() {
+        pathHomeFriendlyName = strLocationAudioFriendlyName;
+        ArrayList<File> searchedResults = new ArrayList<>();
+        findAudioFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
+
+        File[] searchedResultsArr = new File[searchedResults.size()];
+        int i = 0;
+        for (File file : searchedResults)
+            searchedResultsArr[i++] = file;
+
+        loadSelection(searchedResultsArr);
+        pathHomeFriendlyName = strLocationAudioFriendlyName;
+        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_audio));
+    }
+
+    public static void displayImagesFiles() {
+        pathHomeFriendlyName = strLocationImagesFriendlyName;
+        ArrayList<File> searchedResults = new ArrayList<>();
+        findImagesFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
+
+        File[] searchedResultsArr = new File[searchedResults.size()];
+        int i = 0;
+        for (File file : searchedResults)
+            searchedResultsArr[i++] = file;
+
+        loadSelection(searchedResultsArr);
+        pathHomeFriendlyName = strLocationImagesFriendlyName;
+        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_images));
+    }
+
+    private static void findVideosFiles(File dir, ArrayList<File> fileList){
+        if(dir == null || dir.listFiles() == null)
+            return;
+
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if(file.isHidden())
+                continue;
+
+            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
+                findVideosFiles(file, fileList);
+            else if(getFileType(file).equals(Utils.strFileVideo))
+                fileList.add(file);
+        }
+    }
+
+    private static void findImagesFiles(File dir, ArrayList<File> fileList){
+        if(dir == null || dir.listFiles() == null)
+            return;
+
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if(file.isHidden())
+                continue;
+
+            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
+                findImagesFiles(file, fileList);
+            else if(getFileType(file).equals(Utils.strFileImage))
+                fileList.add(file);
+        }
+    }
+
+    private static void findAudioFiles(File dir, ArrayList<File> fileList){
+        if(dir == null || dir.listFiles() == null)
+            return;
+
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if(file.isHidden())
+                continue;
+
+            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
+                findAudioFiles(file, fileList);
+            else if(getFileType(file).equals(Utils.strFileAudio)) {
+
+                fileList.add(file);
+            }
+        }
     }
 }

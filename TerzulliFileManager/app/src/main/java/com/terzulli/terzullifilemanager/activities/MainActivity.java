@@ -1,7 +1,7 @@
 package com.terzulli.terzullifilemanager.activities;
 
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelectionAndActiveOperations;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.submitSearchQuery;
-import static com.terzulli.terzullifilemanager.utils.Utils.strSortByName;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -82,13 +82,12 @@ public class MainActivity extends PermissionsActivity
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
+                //clearSelectionAndActiveOperations();
                 new Handler().postDelayed(MainFragment::refreshList, 10);
 
                 return true;
             }
         });
-
-
 
         /*searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -517,6 +516,7 @@ public class MainActivity extends PermissionsActivity
                 ItemsAdapter.deselectAll();
                 break;
             case R.id.menu_copy_to:
+                closeSearchView();
                 ItemsAdapter.copyMoveSelection(true);
                 break;
             case R.id.menu_move_to:
@@ -653,22 +653,25 @@ public class MainActivity extends PermissionsActivity
                     MainFragment.loadPathInternal();
                     break;
                 case R.id.nav_images:
-                    // TODO
-                    // TODO cambio titolo toolbar
-                    // TODO caricamento file con ricerca immagini
+                    // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
+                    // venga caricato correttamente ed evita che la recycler view possa dare problemi
+                    // e far crashare l'app
                     MainFragment.loadPathInternal();
+                    MainFragment.displayImagesFiles();
                     break;
                 case R.id.nav_videos:
-                    // TODO
-                    // TODO cambio titolo toolbar
-                    // TODO caricamento file con ricerca video
+                    // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
+                    // venga caricato correttamente ed evita che la recycler view possa dare problemi
+                    // e far crashare l'app
                     MainFragment.loadPathInternal();
+                    MainFragment.displayVideosFiles();
                     break;
                 case R.id.nav_audio:
-                    // TODO
-                    // TODO cambio titolo toolbar
-                    // TODO caricamento file con ricerca audio
+                    // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
+                    // venga caricato correttamente ed evita che la recycler view possa dare problemi
+                    // e far crashare l'app
                     MainFragment.loadPathInternal();
+                    MainFragment.displayAudioFiles();
                     break;
                 case R.id.nav_download:
                     MainFragment.loadPathDownload();

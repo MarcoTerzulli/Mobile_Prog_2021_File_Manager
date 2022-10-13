@@ -1,11 +1,13 @@
 package com.terzulli.terzullifilemanager.adapters;
 
+import static com.terzulli.terzullifilemanager.activities.MainActivity.closeSearchView;
 import static com.terzulli.terzullifilemanager.activities.MainActivity.updateMenuItems;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.displayExtractToBar;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.displayPropertiesDialog;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.resetActionBarTitle;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionBarTitle;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
+import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
 
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
@@ -140,6 +142,12 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         selectedFiles.clear();
     }
 
+    public static void clearSelectionAndActiveOperations() {
+        selectedFiles.clear();
+        selectedFilesToCompress.clear();
+        selectedFilesToCopyMove.clear();
+    }
+
     public static boolean isSelectionModeEnabled() {
         if (selectedFiles == null)
             return false;
@@ -225,6 +233,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
 
+
+
     /**
      * FUnzione interna per la copia o spostamento di file e cartelle (ricorsiva)
      *
@@ -302,8 +312,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         executor.execute(() -> {
 
             //Background work here
-            int returnCode = copyMoveSelectionOperation(isCopy, destinationPath);
             int nItems = selectedFilesToCopyMove.size();
+            int returnCode = copyMoveSelectionOperation(isCopy, destinationPath);
 
             handler.post(() -> {
                 //UI Thread work here
@@ -831,6 +841,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         if (selectedFile.isDirectory()) {
             clearSelection();
+            closeSearchView();
             MainFragment.loadPath(selectedFile.getAbsolutePath(), true);
         } else if (selectedFile.isFile()) {
 
