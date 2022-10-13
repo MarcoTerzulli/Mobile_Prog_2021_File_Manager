@@ -1,6 +1,8 @@
 package com.terzulli.terzullifilemanager.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.terzulli.terzullifilemanager.activities.MainActivity.closeSearchView;
+import static com.terzulli.terzullifilemanager.activities.MainActivity.isSearchActive;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearFileToExtractSelection;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeCompressOperationOnThread;
@@ -107,7 +109,35 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
+    public static void loadSelection(final File[] filesAndDirs) {
+        breadcrumbsView.setVisibility(View.GONE);
+
+        new Handler().postDelayed(() -> {
+
+            String sortBy = sharedPreferences.getString("sortBy", strSortByName);
+            boolean sortOrderAscending = sharedPreferences.getBoolean("sortOrderAscending", true);
+
+            Utils.sortFileAndDirectoriesList(filesAndDirs, sortBy, sortOrderAscending);
+
+            // rimozione file nascosti (iniziano col .)
+            /*if (!sharedPreferences.getBoolean("showHidden", false))
+                filesAndDirs = removeHiddenFilesFromArray(filesAndDirs);*/
+
+            // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
+            initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
+
+            recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
+
+            ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
+            ItemsAdapter.recoverEventuallyActiveExtractOperation();
+            ItemsAdapter.recoverEventuallyActiveCompressOperation();
+        }, 10);
+
+    }
+
     public static void loadPath(final String path, boolean updateBreadcrumb) {
+        breadcrumbsView.setVisibility(View.VISIBLE);
+        ItemsAdapter.clearCurrentFilesBeforeQuerySubmit();
 
         if (isPathProtected(path)) {
             // stiamo tentando di accedere a file di root
@@ -140,10 +170,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
             initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
 
-            // TODO gestione apertura file zip
-            boolean isCurrentDirAnArchive = false;
-
-            recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs, isCurrentDirAnArchive));
+            recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
 
             if (updateBreadcrumb)
                 updateBreadCrumbList(path, oldPath);
@@ -528,12 +555,16 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
+            closeSearchView();
             hideCopyMoveExtractBar();
             ItemsAdapter.recoverSelectionFromCopyMove();
             refreshList();
         });
 
-        btnConfirm.setOnClickListener(view -> executeCopyMoveOperationOnThread(isCopy, currentPath));
+        btnConfirm.setOnClickListener(view -> {
+            closeSearchView();
+            executeCopyMoveOperationOnThread(isCopy, currentPath);
+        });
     }
 
     public static void displayExtractToBar() {
@@ -549,12 +580,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
+            closeSearchView();
             clearFileToExtractSelection();
             hideCopyMoveExtractBar();
             refreshList();
         });
 
         btnConfirm.setOnClickListener(view -> {
+            closeSearchView();
             hideCopyMoveExtractBar();
             executeExtractOperationOnThread(getCurrentPath());
         });
@@ -578,12 +611,16 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
+            closeSearchView();
             hideCopyMoveExtractBar();
             ItemsAdapter.recoverSelectionFromCompress();
             refreshList();
         });
 
-        btnConfirm.setOnClickListener(view -> executeCompressOperationOnThread(currentPath));
+        btnConfirm.setOnClickListener(view -> {
+            closeSearchView();
+            executeCompressOperationOnThread(currentPath);
+        });
     }
 
     public static void displaySortByDialog() {
@@ -775,7 +812,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             setActionBarTitle(lastActionBarTitle);
 
         activityReference = requireActivity();
-        refreshList();
+        if(!isSearchActive())
+            refreshList();
     }
 
     private String getSelectedBreadcrumbPath(int depth) {

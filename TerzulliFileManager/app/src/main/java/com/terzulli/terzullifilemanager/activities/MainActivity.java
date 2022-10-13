@@ -1,11 +1,15 @@
 package com.terzulli.terzullifilemanager.activities;
 
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.submitSearchQuery;
+import static com.terzulli.terzullifilemanager.utils.Utils.strSortByName;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +20,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
@@ -47,8 +52,43 @@ public class MainActivity extends PermissionsActivity
     private ActivityMainBinding binding;
     private Toolbar toolbar;
 
-    // TODO
     private static void setupSearchView() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                ItemsAdapter.recoverCurrentFilesBeforeQuerySubmit();
+                submitSearchQuery(newText);
+
+                return false;
+            }
+        });
+
+        // gestione bottone back della searchview
+        final MenuItem itemSearch = toolbarMenu.findItem(R.id.menu_search);
+        itemSearch.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                // non si fa nulla quando il menù di ricerca si apre
+                // TODO eventuale gestione bottoni menù?
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                new Handler().postDelayed(MainFragment::refreshList, 10);
+
+                return true;
+            }
+        });
+
+
 
         /*searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -60,6 +100,21 @@ public class MainActivity extends PermissionsActivity
                 }
             }
         });*/
+    }
+
+    public static void closeSearchView() {
+        if (searchView != null && !searchView.isIconified()) {
+            final MenuItem itemSearch = toolbarMenu.findItem(R.id.menu_search);
+            MenuItemCompat.collapseActionView(itemSearch);
+            //searchView.setIconified(true);
+        }
+    }
+
+    public static boolean isSearchActive() {
+        if (searchView != null) {
+            return !searchView.isIconified();
+        }
+        return false;
     }
 
     // metodo specifico per navHostFragment: restituisce il fragment corrente
@@ -429,6 +484,7 @@ public class MainActivity extends PermissionsActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        //setupSearchView();
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -443,7 +499,7 @@ public class MainActivity extends PermissionsActivity
         switch (item.getItemId()) {
             case R.id.menu_search:
                 // TODO
-                Toast.makeText(MainActivity.this, "Menu search", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Menu search", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_new_directory:
                 ItemsAdapter.createNewDirectory();

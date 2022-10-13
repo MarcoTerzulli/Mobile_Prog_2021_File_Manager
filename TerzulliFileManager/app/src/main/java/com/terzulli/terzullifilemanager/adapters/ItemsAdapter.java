@@ -47,31 +47,34 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
+    private static ArrayList<File> currentFilesBeforeQuerySubmit;
     private static ArrayList<File> selectedFiles;
     private static ArrayList<File> selectedFilesToCopyMove;
     private static ArrayList<File> selectedFilesToCompress;
     private static File[] filesAndDirs = null;
-    private static boolean isCurrentDirAnArchive;
     @SuppressLint("StaticFieldLeak")
     private static Context context;
     private static boolean copyMoveOperationTypeIsCopy = false;
     private static File fileToExtract = null;
 
-    public ItemsAdapter(Context context, File[] filesAndFolders, boolean isCurrentDirAnArchive) {
+    public ItemsAdapter(Context context, File[] filesAndFolders) {
         ItemsAdapter.context = context;
         filesAndDirs = filesAndFolders;
-        ItemsAdapter.isCurrentDirAnArchive = isCurrentDirAnArchive;
 
         if (selectedFiles == null)
             selectedFiles = new ArrayList<>();
 
         if (selectedFilesToCopyMove == null)
             selectedFilesToCopyMove = new ArrayList<>();
+
+        if (currentFilesBeforeQuerySubmit == null)
+            currentFilesBeforeQuerySubmit = new ArrayList<>();
 
         if (selectedFilesToCompress == null)
             selectedFilesToCompress = new ArrayList<>();
@@ -80,6 +83,29 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     public static void clearFileToExtractSelection() {
         fileToExtract = null;
+    }
+
+    public static void clearCurrentFilesBeforeQuerySubmit() {
+        if(currentFilesBeforeQuerySubmit != null)
+            currentFilesBeforeQuerySubmit.clear();
+    }
+
+    public static void recoverCurrentFilesBeforeQuerySubmit() {
+        //if (filesAndDirs.length < currentFilesBeforeQuerySubmit.size()) {
+        if (currentFilesBeforeQuerySubmit.size() != 0) {
+
+            filesAndDirs = new File[currentFilesBeforeQuerySubmit.size()];
+            int i = 0;
+            for (File file : currentFilesBeforeQuerySubmit)
+                filesAndDirs[i++] = file;
+
+            currentFilesBeforeQuerySubmit.clear();
+        }
+    }
+
+    public static void saveCurrentFilesBeforeQuerySubmit() {
+        currentFilesBeforeQuerySubmit = new ArrayList<>(filesAndDirs.length);
+        currentFilesBeforeQuerySubmit.addAll(Arrays.asList(filesAndDirs));
     }
 
     public static void recoverSelectionFromCopyMove() {
@@ -178,6 +204,24 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFilesToCompress.size() != 0) {
             MainFragment.displayCompressToBar(selectedFilesToCompress.size());
         }
+    }
+
+    public static void submitSearchQuery(final String searchQuery) {
+        saveCurrentFilesBeforeQuerySubmit();
+
+        ArrayList<File> searchedResults = new ArrayList<>();
+
+        for (File file : filesAndDirs) {
+            if (file != null && file.getName().toLowerCase().contains(searchQuery.toLowerCase()))
+                searchedResults.add(file);
+        }
+
+        File[] searchedResultsArr = new File[searchedResults.size()];
+        int i = 0;
+        for (File file : searchedResults)
+            searchedResultsArr[i++] = file;
+
+        MainFragment.loadSelection(searchedResultsArr);
     }
 
 
@@ -457,11 +501,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             return -2;
         }
 
-        /*try {
-            new ZipFile(extractLocation.getPath()).addFiles(filesToCompress);
-        } catch (Exception e) {
-            return -1;
-        }*/
         ZipFile zipFile = new ZipFile(extractLocation.getPath());
 
         for (File fileToCompress : filesToCompress) {
@@ -478,7 +517,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     public static void deleteSelectedFilesOperation(String originalPath) {
-        if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
+        if (isSelectionModeEnabled()) {
             ArrayList<File> filestoDelete = new ArrayList<>(selectedFiles.size());
             filestoDelete.addAll(selectedFiles);
             clearSelection();
@@ -560,7 +599,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     public static void deleteSelectedFiles() {
-        if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
+        if (isSelectionModeEnabled()) {
             int selectionType = 0;
             String fileName = "";
 
@@ -604,7 +643,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     public static void shareSelectedFiles() {
-        if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
+        if (isSelectionModeEnabled()) {
             Intent intentShareFile = new Intent(Intent.ACTION_SEND);
 
             // impstazione mime type
@@ -690,7 +729,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     public static void openWithSelectedFile() {
-        if (isSelectionModeEnabled() && !isCurrentDirAnArchive) {
+        if (isSelectionModeEnabled()) {
             if (selectedFiles.size() == 1) {
                 File file = selectedFiles.get(0);
 
