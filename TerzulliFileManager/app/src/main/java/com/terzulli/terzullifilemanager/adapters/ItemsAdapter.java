@@ -247,7 +247,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         for (File file : searchedResults)
             searchedResultsArr[i++] = file;
 
-        MainFragment.loadSelection(searchedResultsArr);
+        MainFragment.loadSelection(searchedResultsArr, "");
     }
 
 
@@ -859,7 +859,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFile.isDirectory()) {
             clearSelection();
             closeSearchView();
-            MainFragment.loadPath(selectedFile.getAbsolutePath(), true);
+            MainFragment.loadPath(selectedFile.getAbsolutePath(), true, false);
         } else if (selectedFile.isFile()) {
 
             MimeTypeMap map = MimeTypeMap.getSingleton();

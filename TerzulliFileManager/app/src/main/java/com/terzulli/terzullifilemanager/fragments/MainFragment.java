@@ -118,8 +118,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    public static void loadSelection(final File[] filesAndDirs) {
+    public static void loadSelection(final File[] filesAndDirs, String newActionBarTitle) {
         breadcrumbsView.setVisibility(View.GONE);
+        ItemsAdapter.clearCurrentFilesBeforeQuerySubmit();
+
+        if (newActionBarTitle != null && newActionBarTitle.length() != 0)
+            setActionBarTitle(newActionBarTitle);
 
         new Handler().postDelayed(() -> {
 
@@ -141,7 +145,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     }
 
-    public static void loadPath(final String path, boolean updateBreadcrumb) {
+    public static void loadPath(final String path, boolean updateBreadcrumb, boolean reloadBreadCrumb) {
         breadcrumbsView.setVisibility(View.VISIBLE);
         ItemsAdapter.clearCurrentFilesBeforeQuerySubmit();
 
@@ -181,6 +185,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
             if (updateBreadcrumb)
                 updateBreadCrumbList(path, oldPath);
+            if (reloadBreadCrumb)
+                reloadBreadCrumb(path);
 
             swipeRefreshLayout.setRefreshing(false);
 
@@ -289,14 +295,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             case strLocationImagesFriendlyName:
                 displayImagesFiles();
                 break;
-            case strLocationDownloadsFriendlyName:
+            /*case strLocationDownloadsFriendlyName:
                 loadPath(currentPath, true);
                 break;
             case strLocationInternalFriendlyName:
                 loadPath(currentPath, true);
-                break;
+                break;*/
             default:
-                loadPath(currentPath, true);
+                loadPath(currentPath, true, false);
                 break;
         }
     }
@@ -341,7 +347,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         } else {
             if (!MainFragment.isInHomePath()) {
                 // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
-                MainFragment.loadPath(MainFragment.getParentPath(), true);
+                MainFragment.loadPath(MainFragment.getParentPath(), true, false);
             } else {
                 if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
                     return true; // la main activity deve invocare finish
@@ -597,9 +603,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             refreshList();
         });
 
-        btnConfirm.setOnClickListener(view -> {
-            executeCopyMoveOperationOnThread(isCopy, currentPath);
-        });
+        btnConfirm.setOnClickListener(view -> executeCopyMoveOperationOnThread(isCopy, currentPath));
     }
 
     public static void displayExtractToBar() {
@@ -653,9 +657,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             refreshList();
         });
 
-        btnConfirm.setOnClickListener(view -> {
-            executeCompressOperationOnThread(currentPath);
-        });
+        btnConfirm.setOnClickListener(view -> executeCompressOperationOnThread(currentPath));
     }
 
     public static void displaySortByDialog() {
@@ -769,27 +771,27 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         copyMoveExtractBar.setVisibility(View.GONE);
     }
 
-    public static void loadPathDownload() {
+    public static void loadPathDownload(boolean reloadBreadCrumb) {
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
         pathHomeFriendlyName = strLocationInternalFriendlyName;
 
-        loadPath(path, true);
+        loadPath(path, false, reloadBreadCrumb);
         reloadBreadCrumb(path);
     }
 
-    public static void loadPathInternal(boolean updateBreadCrumb) {
+    public static void loadPathInternal(boolean reloadBreadCrumb) {
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
         pathHomeFriendlyName = strLocationInternalFriendlyName;
 
-        loadPath(path, updateBreadCrumb);
-        reloadBreadCrumb(path);
+        loadPath(path, false, reloadBreadCrumb);
     }
 
     public static void displayVideosFiles() {
         // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
         // venga caricato correttamente ed evita che la recycler view possa dare problemi
         // e far crashare l'app
-        MainFragment.loadPathInternal(false);
+        //MainFragment.loadPathInternal(false);
+        currentPath = getInternalStoragePath();
 
         ArrayList<File> searchedResults = new ArrayList<>();
         findVideosFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
@@ -800,15 +802,16 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             searchedResultsArr[i++] = file;
 
         pathHomeFriendlyName = strLocationVideosFriendlyName;
-        MainFragment.loadSelection(searchedResultsArr);
-        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_videos));
+        MainFragment.loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_videos));
+        //setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_videos));
     }
 
     public static void displayAudioFiles() {
         // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
         // venga caricato correttamente ed evita che la recycler view possa dare problemi
         // e far crashare l'app
-        MainFragment.loadPathInternal(false);
+        //MainFragment.loadPathInternal(false);
+        currentPath = getInternalStoragePath();
 
         ArrayList<File> searchedResults = new ArrayList<>();
         findAudioFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
@@ -818,16 +821,17 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         for (File file : searchedResults)
             searchedResultsArr[i++] = file;
 
-        loadSelection(searchedResultsArr);
         pathHomeFriendlyName = strLocationAudioFriendlyName;
-        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_audio));
+        loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_audio));
+        //setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_audio));
     }
 
     public static void displayImagesFiles() {
         // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
         // venga caricato correttamente ed evita che la recycler view possa dare problemi
         // e far crashare l'app
-        MainFragment.loadPathInternal(false);
+        //MainFragment.loadPathInternal(false);
+        currentPath = getInternalStoragePath();
 
         ArrayList<File> searchedResults = new ArrayList<>();
         findImagesFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
@@ -837,16 +841,17 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         for (File file : searchedResults)
             searchedResultsArr[i++] = file;
 
-        loadSelection(searchedResultsArr);
         pathHomeFriendlyName = strLocationImagesFriendlyName;
-        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_images));
+        loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
+        //setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_images));
     }
 
     public static void displayRecentsFiles() {
         // ricaricare il path internal è una soluzione lenta, ma assicura che il layout
         // venga caricato correttamente ed evita che la recycler view possa dare problemi
         // e far crashare l'app
-        MainFragment.loadPathInternal(false);
+        //MainFragment.loadPathInternal(false);
+        currentPath = getInternalStoragePath();
 
         RecentsFilesManager recentsFilesManager = new RecentsFilesManager(sharedPreferences);
         ArrayList<File> recentsFiles = recentsFilesManager.getRecentsFilesList();
@@ -859,9 +864,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 recentsFilesArr[i++] = file;
         }
 
-        loadSelection(recentsFilesArr);
         pathHomeFriendlyName = strLocationRecentsFriendlyName;
-        setActionBarTitle(view.getResources().getString(R.string.drawer_menu_recent));
+        loadSelection(recentsFilesArr, view.getResources().getString(R.string.drawer_menu_recent));
+        //setActionBarTitle(view.getResources().getString(R.string.drawer_menu_recent));
     }
 
     private static void findVideosFiles(File dir, ArrayList<File> fileList) {
@@ -956,14 +961,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             @Override
             public void onNavigateBack(BreadcrumbItem item, int position) {
                 clearSelection();
-                loadPath(getSelectedBreadcrumbPath(position), false);
+                loadPath(getSelectedBreadcrumbPath(position), false, false);
                 //updateBreadCrumbList(currentPath, null);
             }
 
             @Override
             public void onNavigateNewLocation(BreadcrumbItem newItem, int changedPosition) {
                 clearSelection();
-                loadPath(getSelectedBreadcrumbPath(changedPosition - 1) + "/" + newItem.getSelectedItem(), false);
+                loadPath(getSelectedBreadcrumbPath(changedPosition - 1) + "/" + newItem.getSelectedItem(), false, false);
                 //updateBreadCrumbList(currentPath, null);
             }
         });

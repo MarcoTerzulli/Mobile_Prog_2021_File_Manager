@@ -657,7 +657,7 @@ public class MainActivity extends PermissionsActivity
                     MainFragment.displayAudioFiles();
                     break;
                 case R.id.nav_download:
-                    MainFragment.loadPathDownload();
+                    MainFragment.loadPathDownload(true);
                     break;
                 case R.id.nav_internal_storage:
                     MainFragment.loadPathInternal(true);
