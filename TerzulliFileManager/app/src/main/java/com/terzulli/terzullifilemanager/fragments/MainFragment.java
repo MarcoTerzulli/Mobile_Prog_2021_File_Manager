@@ -17,6 +17,7 @@ import static com.terzulli.terzullifilemanager.utils.Utils.removeHiddenFilesFrom
 import static com.terzulli.terzullifilemanager.utils.Utils.strFileApplication;
 import static com.terzulli.terzullifilemanager.utils.Utils.strFileDirectory;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationAudioFriendlyName;
+import static com.terzulli.terzullifilemanager.utils.Utils.strLocationDownloadsFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationImagesFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationInternalFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationRecentsFriendlyName;
@@ -761,8 +762,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             // non si fa niente
         });
 
-        Toast.makeText(activityReference, file.getPath(), Toast.LENGTH_LONG).show();
-
         alertBuilder.show();
     }
 
@@ -1003,6 +1002,20 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             sb.append("/").append(breadcrumbsView.getItems().get(i).getSelectedItem());
         }
         return sb.toString();
+    }
+
+    /**
+     * Metodo che restituisce True se ci troviamo all'interno di una location "custom",
+     * come la sezione "Images", "Audio" e "Recents". Queste schermate mostrano i risultati di una
+     * query e non una location "canonica", e vanno gestiti in maniera diversa.
+     *
+     * @return True se ci troviamo all'interno di una location "custom", false altrimenti.
+     */
+    public static boolean isACustomLocationDisplayed() {
+        if (pathHomeFriendlyName.equals(strLocationInternalFriendlyName)
+                || pathHomeFriendlyName.equals(strLocationDownloadsFriendlyName))
+            return false;
+        return true;
     }
 
     @Override

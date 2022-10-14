@@ -1,6 +1,7 @@
 package com.terzulli.terzullifilemanager.activities;
 
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.submitSearchQuery;
+import static com.terzulli.terzullifilemanager.fragments.MainFragment.isACustomLocationDisplayed;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -12,6 +13,7 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.SearchView;
@@ -74,13 +76,16 @@ public class MainActivity extends PermissionsActivity
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 // non si fa nulla quando il menù di ricerca si apre
-                // TODO eventuale gestione bottoni menù?
+
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 //clearSelectionAndActiveOperations();
+
+                updateMenuItems(menuActualCase);
+
                 new Handler().postDelayed(MainFragment::refreshList, 10);
 
                 return true;
@@ -198,6 +203,20 @@ public class MainActivity extends PermissionsActivity
             default:
                 setMenuItemsDefault();
                 break;
+        }
+
+        // nasconde alcune voci all'interno delle pagine "Images", "Recents", "Audio" e "Videos"
+        if(isACustomLocationDisplayed()) {
+            toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
+            toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
+            toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+        }
+
+        // nasconde alcune voci del menù se la searchview è attiva
+        if(!searchView.isIconified()) {
+            toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
+            toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
+            toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
         }
     }
 
@@ -317,8 +336,6 @@ public class MainActivity extends PermissionsActivity
 
     private static void setMenuItemsDefault() {
         Fragment currentFragment = getForegroundFragment();
-
-        // TODO eventuale gestione view type grid o column
 
         toolbarMenu.findItem(R.id.menu_search).setVisible(true);
 
@@ -494,10 +511,9 @@ public class MainActivity extends PermissionsActivity
         SharedPreferences.Editor sharedPrefEditor = sharedPreferences.edit();
 
         switch (item.getItemId()) {
-            case R.id.menu_search:
+            /*case R.id.menu_search:
                 // TODO
-                //Toast.makeText(MainActivity.this, "Menu search", Toast.LENGTH_SHORT).show();
-                break;
+                break;*/
             case R.id.menu_new_directory:
                 ItemsAdapter.createNewDirectory();
                 break;
