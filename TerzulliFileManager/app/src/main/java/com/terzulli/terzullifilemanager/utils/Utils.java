@@ -41,26 +41,6 @@ public class Utils {
     public static final String strLocationImagesFriendlyName = "Images";
     public static final String strLocationDownloadsFriendlyName = "Downloads";
 
-    /*public static boolean isDeviceInLandscapeOrientation(Activity activity) {
-        return activity.getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_LANDSCAPE;
-    }
-
-    @SuppressLint("SourceLockedOrientationActivity")
-    public static void disableScreenRotation(@NonNull Activity activity) {
-        int screenOrientation = activity.getResources().getConfiguration().orientation;
-
-        if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
-    }
-
-    public static void enableScreenRotation(@NonNull Activity activity) {
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-    }*/
-
     public static void sortByName(File[] files, final boolean ascending) {
         if (files == null)
             return;
