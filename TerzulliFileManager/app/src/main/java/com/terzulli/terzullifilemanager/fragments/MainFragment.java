@@ -36,6 +36,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.Html;
@@ -70,6 +71,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import moe.feng.common.view.breadcrumbs.BreadcrumbsView;
@@ -120,10 +123,50 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    public static void loadSelection(final File[] filesAndDirs, String newActionBarTitle) {
-        //ItemsAdapter.clearCurrentFilesBeforeQuerySubmit();
+    private static void displayEmptyLayoutWhileWaiting(boolean hideBreadcrumb) {
+        swipeRefreshLayout.setRefreshing(true);
+
+        RelativeLayout itemsEmptyPlaceHolder = view.findViewById(R.id.items_empty_directory_placeholder);
+        itemsEmptyPlaceHolder.setVisibility(View.INVISIBLE);
 
         new Handler().postDelayed(() -> {
+            if (isACustomLocationDisplayed())
+                updateBreadCrumbList(null, null);
+            if (hideBreadcrumb)
+                breadcrumbsView.setVisibility(View.GONE);
+        }, 10);
+    }
+
+    public static void loadSelection(final File[] filesAndDirs, String newActionBarTitle) {
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        executor.execute(() -> {
+            String sortBy = sharedPreferences.getString("sortBy", strSortByName);
+            boolean sortOrderAscending = sharedPreferences.getBoolean("sortOrderAscending", true);
+
+            Utils.sortFileAndDirectoriesList(filesAndDirs, sortBy, sortOrderAscending);
+
+            handler.post(() -> {if (isACustomLocationDisplayed())
+                // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
+                initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
+
+                recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
+                swipeRefreshLayout.setRefreshing(false);
+
+                ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
+                ItemsAdapter.recoverEventuallyActiveExtractOperation();
+                ItemsAdapter.recoverEventuallyActiveCompressOperation();
+            });
+        });
+
+
+
+
+        //ItemsAdapter.clearCurrentFilesBeforeQuerySubmit();
+
+        /*new Handler().postDelayed(() -> {
             // la seguente istruzione permette di "resettare" il contenuto del breadcrumb ed evitare
             // il crash dell'app in caso di location "custom"
             if (isACustomLocationDisplayed())
@@ -147,7 +190,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
             ItemsAdapter.recoverEventuallyActiveExtractOperation();
             ItemsAdapter.recoverEventuallyActiveCompressOperation();
-        }, 10);
+        }, 10);*/
 
     }
 
@@ -794,47 +837,72 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public static void displayVideosFiles() {
         currentPath = getInternalStoragePath();
 
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
         ArrayList<File> searchedResults = new ArrayList<>();
-        findVideosFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
 
-        File[] searchedResultsArr = new File[searchedResults.size()];
-        int i = 0;
-        for (File file : searchedResults)
-            searchedResultsArr[i++] = file;
+        executor.execute(() -> {
+            findVideosFiles(searchedResults, activityReference);
 
-        pathHomeFriendlyName = strLocationVideosFriendlyName;
-        MainFragment.loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_videos));
+            File[] searchedResultsArr = new File[searchedResults.size()];
+            int i = 0;
+            for (File file : searchedResults)
+                searchedResultsArr[i++] = file;
+
+            pathHomeFriendlyName = strLocationImagesFriendlyName;
+
+            handler.post(() -> {
+                loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
+            });
+        });
     }
 
     public static void displayAudioFiles() {
         currentPath = getInternalStoragePath();
 
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
         ArrayList<File> searchedResults = new ArrayList<>();
-        findAudioFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
 
-        File[] searchedResultsArr = new File[searchedResults.size()];
-        int i = 0;
-        for (File file : searchedResults)
-            searchedResultsArr[i++] = file;
+        executor.execute(() -> {
+            findAudioFiles(searchedResults, activityReference);
 
-        pathHomeFriendlyName = strLocationAudioFriendlyName;
-        loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_audio));
-        //setActionBarTitle(view.getResources().getString(R.string.drawer_menu_media_audio));
+            File[] searchedResultsArr = new File[searchedResults.size()];
+            int i = 0;
+            for (File file : searchedResults)
+                searchedResultsArr[i++] = file;
+
+            pathHomeFriendlyName = strLocationImagesFriendlyName;
+
+            handler.post(() -> {
+                loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
+            });
+        });
     }
 
     public static void displayImagesFiles() {
         currentPath = getInternalStoragePath();
 
+        displayEmptyLayoutWhileWaiting(true);
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
         ArrayList<File> searchedResults = new ArrayList<>();
-        findImagesFiles(new File(MainFragment.getInternalStoragePath()), searchedResults);
 
-        File[] searchedResultsArr = new File[searchedResults.size()];
-        int i = 0;
-        for (File file : searchedResults)
-            searchedResultsArr[i++] = file;
+        executor.execute(() -> {
+            findImagesFiles(searchedResults, activityReference);
 
-        pathHomeFriendlyName = strLocationImagesFriendlyName;
-        loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
+            File[] searchedResultsArr = new File[searchedResults.size()];
+            int i = 0;
+            for (File file : searchedResults)
+                searchedResultsArr[i++] = file;
+
+            pathHomeFriendlyName = strLocationImagesFriendlyName;
+
+            handler.post(() -> {
+                loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
+            });
+        });
     }
 
     public static void displayRecentsFiles() {
@@ -855,50 +923,30 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         loadSelection(recentsFilesArr, view.getResources().getString(R.string.drawer_menu_recent));
     }
 
-    private static void findVideosFiles(File dir, ArrayList<File> fileList) {
-        if (dir == null || dir.listFiles() == null)
-            return;
+    private static void findVideosFiles(ArrayList<File> fileList, Activity context) {
+        ArrayList<String> urlList = getAllVideosUrls(context);
 
-        for (File file : Objects.requireNonNull(dir.listFiles())) {
-            if (file.isHidden())
-                continue;
-
-            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
-                findVideosFiles(file, fileList);
-            else if (getFileType(file).equals(Utils.strFileVideo))
-                fileList.add(file);
+        for (String uri : urlList) {
+            if (uri != null && uri.length() != 0)
+                fileList.add(new File(uri));
         }
     }
 
-    private static void findImagesFiles(File dir, ArrayList<File> fileList) {
-        if (dir == null || dir.listFiles() == null)
-            return;
+    private static void findImagesFiles(ArrayList<File> fileList, Activity context) {
+        ArrayList<String> urlList = getAllImagesUrls(context);
 
-        for (File file : Objects.requireNonNull(dir.listFiles())) {
-            if (file.isHidden())
-                continue;
-
-            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
-                findImagesFiles(file, fileList);
-            else if (getFileType(file).equals(Utils.strFileImage))
-                fileList.add(file);
+        for (String uri : urlList) {
+            if (uri != null && uri.length() != 0)
+                fileList.add(new File(uri));
         }
     }
 
-    private static void findAudioFiles(File dir, ArrayList<File> fileList) {
-        if (dir == null || dir.listFiles() == null)
-            return;
+    private static void findAudioFiles(ArrayList<File> fileList, Activity context) {
+        ArrayList<String> urlList = getAllAudioUrls(context);
 
-        for (File file : Objects.requireNonNull(dir.listFiles())) {
-            if (file.isHidden())
-                continue;
-
-            if (file.isDirectory() && !file.getPath().equals(MainFragment.getInternalStoragePath() + "/Android"))
-                findAudioFiles(file, fileList);
-            else if (getFileType(file).equals(Utils.strFileAudio)) {
-
-                fileList.add(file);
-            }
+        for (String uri : urlList) {
+            if (uri != null && uri.length() != 0)
+                fileList.add(new File(uri));
         }
     }
 
@@ -998,22 +1046,73 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return sb.toString();
     }
 
-    private static ArrayList<String> getAllImagesUris(Activity context) {
-        ArrayList<String> galleryImageUrls;
-        final String[] columns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
+    private static ArrayList<String> getAllImagesUrls(Activity context) {
+        ArrayList<String> urlList;
+        final String[] projection = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
 
-        Cursor imagecursor = context.managedQuery(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, null);
+        /*Cursor cursor = context.managedQuery(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
 
-        galleryImageUrls = new ArrayList<>();
+        Cursor cursor = context.managedQuery(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                MediaStore.Images.Media.DATA + " not like ? ",
+                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
 
-        for (int i = 0; i < imagecursor.getCount(); i++) {
-            imagecursor.moveToPosition(i);
-            int dataColumnIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.DATA);
-            galleryImageUrls.add(imagecursor.getString(dataColumnIndex));
+        urlList = new ArrayList<>();
+
+        for (int i = 0; i < cursor.getCount(); i++) {
+            cursor.moveToPosition(i);
+            int dataColumnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            urlList.add(cursor.getString(dataColumnIndex));
 
         }
-        return galleryImageUrls;
+        return urlList;
+    }
+
+    private static ArrayList<String> getAllVideosUrls(Activity context) {
+        ArrayList<String> urlList;
+        final String[] projection = {MediaStore.Video.Media.DATA, MediaStore.Video.Media._ID};
+
+        /*Cursor cursor = context.managedQuery(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
+
+        Cursor cursor = context.managedQuery(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
+                MediaStore.Video.Media.DATA + " not like ? ",
+                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
+
+        urlList = new ArrayList<>();
+
+        for (int i = 0; i < cursor.getCount(); i++) {
+            cursor.moveToPosition(i);
+            int dataColumnIndex = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
+            urlList.add(cursor.getString(dataColumnIndex));
+
+        }
+        return urlList;
+    }
+
+    private static ArrayList<String> getAllAudioUrls(Activity context) {
+        ArrayList<String> urlList;
+        final String[] projection = {MediaStore.Audio.Media.DATA, MediaStore.Audio.Media._ID};
+
+        /*Cursor cursor = context.managedQuery(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
+
+        Cursor cursor = context.managedQuery(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection,
+                MediaStore.Audio.Media.DATA + " not like ? ",
+                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
+
+        urlList = new ArrayList<>();
+
+        for (int i = 0; i < cursor.getCount(); i++) {
+            cursor.moveToPosition(i);
+            int dataColumnIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+            urlList.add(cursor.getString(dataColumnIndex));
+
+        }
+        return urlList;
     }
 
     @Override
