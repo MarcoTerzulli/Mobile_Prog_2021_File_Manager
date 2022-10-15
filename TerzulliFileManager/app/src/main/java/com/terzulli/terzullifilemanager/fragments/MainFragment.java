@@ -101,6 +101,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     @SuppressLint("StaticFieldLeak")
     private static Activity activityReference;
     private static SharedPreferences sharedPreferences;
+    private static int activeLoadingsCounter = 0;
 
     public MainFragment() {
         // Required empty public constructor
@@ -139,8 +140,13 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public static void loadSelection(final File[] filesAndDirs, String newActionBarTitle) {
 
+        if (newActionBarTitle != null && newActionBarTitle.length() != 0)
+            setActionBarTitle(newActionBarTitle);
+
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
+
+        int loadingTicket = ++activeLoadingsCounter;
 
         executor.execute(() -> {
             String sortBy = sharedPreferences.getString("sortBy", strSortByName);
@@ -148,73 +154,58 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
             Utils.sortFileAndDirectoriesList(filesAndDirs, sortBy, sortOrderAscending);
 
-            handler.post(() -> {if (isACustomLocationDisplayed())
-                // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
-                initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
+            handler.post(() -> {
+                // se nel frattempo l'utente ha scelto di caricare un'altra schermata,
+                // annullo questo caricamento
+                
+                if (activeLoadingsCounter <= loadingTicket) {
+                    if (isACustomLocationDisplayed()){
+                        updateBreadCrumbList(null, null);
+                        breadcrumbsView.setVisibility(View.GONE);
+                    } else
+                        breadcrumbsView.setVisibility(View.VISIBLE);
 
-                recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
-                swipeRefreshLayout.setRefreshing(false);
+                    // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
+                    initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
 
-                ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
-                ItemsAdapter.recoverEventuallyActiveExtractOperation();
-                ItemsAdapter.recoverEventuallyActiveCompressOperation();
+                    recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
+                    swipeRefreshLayout.setRefreshing(false);
+
+                    ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
+                    ItemsAdapter.recoverEventuallyActiveExtractOperation();
+                    ItemsAdapter.recoverEventuallyActiveCompressOperation();
+                }
             });
         });
-
-
-
-
-        //ItemsAdapter.clearCurrentFilesBeforeQuerySubmit();
-
-        /*new Handler().postDelayed(() -> {
-            // la seguente istruzione permette di "resettare" il contenuto del breadcrumb ed evitare
-            // il crash dell'app in caso di location "custom"
-            if (isACustomLocationDisplayed())
-                updateBreadCrumbList(null, null);
-            breadcrumbsView.setVisibility(View.GONE);
-
-            if (newActionBarTitle != null && newActionBarTitle.length() != 0)
-                setActionBarTitle(newActionBarTitle);
-
-            String sortBy = sharedPreferences.getString("sortBy", strSortByName);
-            boolean sortOrderAscending = sharedPreferences.getBoolean("sortOrderAscending", true);
-
-            Utils.sortFileAndDirectoriesList(filesAndDirs, sortBy, sortOrderAscending);
-
-            // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
-            initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
-
-            recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
-            swipeRefreshLayout.setRefreshing(false);
-
-            ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
-            ItemsAdapter.recoverEventuallyActiveExtractOperation();
-            ItemsAdapter.recoverEventuallyActiveCompressOperation();
-        }, 10);*/
 
     }
 
     public static void loadPath(final String path, boolean updateBreadcrumb, boolean reloadBreadCrumb) {
+
         ItemsAdapter.clearCurrentFilesBeforeQuerySubmit();
 
         if (isPathProtected(path)) {
             // stiamo tentando di accedere a file di root
+            breadcrumbsView.setVisibility(View.VISIBLE);
             updateBreadCrumbList(currentPath, null);
             Toast.makeText(view.getContext(), R.string.error_access_to_root_directory, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String oldPath = currentPath;
-        currentPath = path;
+        if (!ItemsAdapter.isSelectionModeEnabled()) {
+            setActionBarTitle(getCurrentDirectoryName());
+        } else {
+            swipeRefreshLayout.setRefreshing(true);
+        }
 
-        new Handler().postDelayed(() -> {
-            breadcrumbsView.setVisibility(View.VISIBLE);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
 
-            if (!ItemsAdapter.isSelectionModeEnabled()) {
-                setActionBarTitle(getCurrentDirectoryName());
-            } else {
-                swipeRefreshLayout.setRefreshing(true);
-            }
+        int loadingTicket = ++activeLoadingsCounter;
+
+        executor.execute(() -> {
+            String oldPath = currentPath;
+            currentPath = path;
 
             File rootFile = new File(path);
             File[] filesAndDirs = rootFile.listFiles();
@@ -228,22 +219,36 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             if (!sharedPreferences.getBoolean("showHidden", false))
                 filesAndDirs = removeHiddenFilesFromArray(filesAndDirs);
 
-            // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
-            initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
+            File[] finalFilesAndDirs = filesAndDirs;
+            handler.post(() -> {
+                // se nel frattempo l'utente ha scelto di caricare un'altra schermata,
+                // annullo questo caricamento
 
-            recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
+                if (activeLoadingsCounter <= loadingTicket) {
+                    if (isACustomLocationDisplayed()){
+                        updateBreadCrumbList(null, null);
+                        breadcrumbsView.setVisibility(View.GONE);
+                    } else
+                        breadcrumbsView.setVisibility(View.VISIBLE);
 
-            if (updateBreadcrumb)
-                updateBreadCrumbList(path, oldPath);
-            if (reloadBreadCrumb)
-                reloadBreadCrumb(path);
+                    // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
+                    initializeEmptyDirectoryLayout(finalFilesAndDirs == null || finalFilesAndDirs.length == 0);
 
-            swipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setAdapter(new ItemsAdapter(view.getContext(), finalFilesAndDirs));
 
-            ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
-            ItemsAdapter.recoverEventuallyActiveExtractOperation();
-            ItemsAdapter.recoverEventuallyActiveCompressOperation();
-        }, 10);
+                    if (updateBreadcrumb)
+                        updateBreadCrumbList(path, oldPath);
+                    if (reloadBreadCrumb)
+                        reloadBreadCrumb(path);
+
+                    swipeRefreshLayout.setRefreshing(false);
+
+                    ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
+                    ItemsAdapter.recoverEventuallyActiveExtractOperation();
+                    ItemsAdapter.recoverEventuallyActiveCompressOperation();
+                }
+            });
+        });
 
     }
 
@@ -836,73 +841,54 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public static void displayVideosFiles() {
         currentPath = getInternalStoragePath();
+        currentPath = getInternalStoragePath();
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
+        displayEmptyLayoutWhileWaiting(true);
         ArrayList<File> searchedResults = new ArrayList<>();
 
-        executor.execute(() -> {
-            findVideosFiles(searchedResults, activityReference);
+        findVideosFiles(searchedResults, activityReference);
 
-            File[] searchedResultsArr = new File[searchedResults.size()];
-            int i = 0;
-            for (File file : searchedResults)
-                searchedResultsArr[i++] = file;
+        File[] searchedResultsArr = new File[searchedResults.size()];
+        int i = 0;
+        for (File file : searchedResults)
+            searchedResultsArr[i++] = file;
 
-            pathHomeFriendlyName = strLocationImagesFriendlyName;
-
-            handler.post(() -> {
-                loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
-            });
-        });
+        pathHomeFriendlyName = strLocationVideosFriendlyName;
+        loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_videos));
     }
 
     public static void displayAudioFiles() {
         currentPath = getInternalStoragePath();
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
+        displayEmptyLayoutWhileWaiting(true);
         ArrayList<File> searchedResults = new ArrayList<>();
 
-        executor.execute(() -> {
-            findAudioFiles(searchedResults, activityReference);
+        findAudioFiles(searchedResults, activityReference);
 
-            File[] searchedResultsArr = new File[searchedResults.size()];
-            int i = 0;
-            for (File file : searchedResults)
-                searchedResultsArr[i++] = file;
+        File[] searchedResultsArr = new File[searchedResults.size()];
+        int i = 0;
+        for (File file : searchedResults)
+            searchedResultsArr[i++] = file;
 
-            pathHomeFriendlyName = strLocationImagesFriendlyName;
-
-            handler.post(() -> {
-                loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
-            });
-        });
+        pathHomeFriendlyName = strLocationAudioFriendlyName;
+        loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_audio));
     }
 
     public static void displayImagesFiles() {
         currentPath = getInternalStoragePath();
 
         displayEmptyLayoutWhileWaiting(true);
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
         ArrayList<File> searchedResults = new ArrayList<>();
 
-        executor.execute(() -> {
-            findImagesFiles(searchedResults, activityReference);
+        findImagesFiles(searchedResults, activityReference);
 
-            File[] searchedResultsArr = new File[searchedResults.size()];
-            int i = 0;
-            for (File file : searchedResults)
-                searchedResultsArr[i++] = file;
+        File[] searchedResultsArr = new File[searchedResults.size()];
+        int i = 0;
+        for (File file : searchedResults)
+            searchedResultsArr[i++] = file;
 
-            pathHomeFriendlyName = strLocationImagesFriendlyName;
-
-            handler.post(() -> {
-                loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
-            });
-        });
+        pathHomeFriendlyName = strLocationImagesFriendlyName;
+        loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
     }
 
     public static void displayRecentsFiles() {
