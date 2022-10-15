@@ -35,6 +35,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
@@ -893,9 +894,15 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         File selectedFile = filesAndDirs[position];
 
         if (!isSelected) {
-            if (Utils.fileIsImage(selectedFile))
-                holder.itemIcon.setImageBitmap(loadImagePreview(selectedFile));
-            else
+            if (Utils.fileIsImage(selectedFile)) {
+                loadImageThumbnailAsync(selectedFile, holder);
+
+                /*Bitmap icon = loadImageThumbnail(selectedFile);
+                if (icon != null)
+                    holder.itemIcon.setImageBitmap(icon);
+                else
+                    holder.itemIcon.setImageResource(R.drawable.ic_file_generic);*/
+            } else
                 holder.itemIcon.setImageResource(Utils.getFileTypeIcon(selectedFile));
         } else {
             holder.itemIcon.setImageResource(R.drawable.ic_check_circle_filled);
@@ -963,15 +970,45 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         holder.itemDetails.setBackgroundColor(color);
     }
 
-    private Bitmap loadImagePreview(File file) {
+    private Bitmap loadImageThumbnail(File file) {
         if (file == null)
             return null;
 
+        //Bitmap image = BitmapFactory.decodeFile(file.getAbsolutePath());
         if (file.exists()) {
-            return BitmapFactory.decodeFile(file.getAbsolutePath());
+            // resize image to 48dp
+            Bitmap image = BitmapFactory.decodeFile(file.getAbsolutePath());
+            int maxPixelSize = (int) Utils.convertDpToPixel(48, context);
+
+            return Utils.resizeBitmap(image, maxPixelSize, maxPixelSize);
         }
 
         return null;
+    }
+
+    private void loadImageThumbnailAsync(@NonNull File file, @NonNull ItemsViewHolder holder) {
+        // ottengo la dimensione dai metadati
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(file.getAbsolutePath(), opts);
+
+        int maxPixelSize = (int) Utils.convertDpToPixel(32, context);
+        float actualRatio = (float) opts.outWidth / (float) opts.outHeight;
+        float ratioMax = 1.0f;
+
+        int finalWidth = maxPixelSize;
+        int finalHeight = maxPixelSize;
+
+        if (ratioMax > actualRatio)
+            finalWidth = (int) ((float)maxPixelSize * actualRatio);
+        else
+            finalHeight = (int) ((float)maxPixelSize / actualRatio);
+
+        Picasso.get()
+                .load(file)
+                .placeholder(R.drawable.ic_file_generic)
+                .resize(finalWidth, finalHeight)
+                .into(holder.itemIcon);
     }
 
     @Override

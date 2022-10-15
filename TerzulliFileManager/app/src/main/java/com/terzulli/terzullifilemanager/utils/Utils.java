@@ -2,9 +2,13 @@ package com.terzulli.terzullifilemanager.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.util.DisplayMetrics;
 import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
@@ -506,5 +510,29 @@ public class Utils {
             return validateDirectoryName(name);
         else
             return validateFileName(name);
+    }
+
+    public static float convertDpToPixel(float dp, Context context){
+        return dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    public static Bitmap resizeBitmap(Bitmap image, int maxWidth, int maxHeight) {
+        if (maxHeight > 0 && maxWidth > 0) {
+            float actualRatio = (float) image.getWidth() / (float) image.getHeight();
+            float ratioMax = (float) maxWidth / (float) maxHeight;
+
+            int finalWidth = maxWidth;
+            int finalHeight = maxHeight;
+
+            if (ratioMax > actualRatio)
+                finalWidth = (int) ((float)maxHeight * actualRatio);
+            else
+                finalHeight = (int) ((float)maxWidth / actualRatio);
+
+            //return Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true);
+            return ThumbnailUtils.extractThumbnail(image, finalWidth, finalHeight);
+        } else {
+            return image;
+        }
     }
 }

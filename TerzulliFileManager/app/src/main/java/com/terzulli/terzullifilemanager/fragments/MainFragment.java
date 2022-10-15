@@ -31,10 +31,12 @@ import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileNa
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -900,6 +902,18 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
+    /**
+     * Metodo che restituisce True se ci troviamo all'interno di una location "custom",
+     * come la sezione "Images", "Audio" e "Recents". Queste schermate mostrano i risultati di una
+     * query e non una location "canonica", e vanno gestiti in maniera diversa.
+     *
+     * @return True se ci troviamo all'interno di una location "custom", false altrimenti.
+     */
+    public static boolean isACustomLocationDisplayed() {
+        return !pathHomeFriendlyName.equals(strLocationInternalFriendlyName)
+                && !pathHomeFriendlyName.equals(strLocationDownloadsFriendlyName);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -984,16 +998,22 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return sb.toString();
     }
 
-    /**
-     * Metodo che restituisce True se ci troviamo all'interno di una location "custom",
-     * come la sezione "Images", "Audio" e "Recents". Queste schermate mostrano i risultati di una
-     * query e non una location "canonica", e vanno gestiti in maniera diversa.
-     *
-     * @return True se ci troviamo all'interno di una location "custom", false altrimenti.
-     */
-    public static boolean isACustomLocationDisplayed() {
-        return !pathHomeFriendlyName.equals(strLocationInternalFriendlyName)
-                && !pathHomeFriendlyName.equals(strLocationDownloadsFriendlyName);
+    private static ArrayList<String> getAllImagesUris(Activity context) {
+        ArrayList<String> galleryImageUrls;
+        final String[] columns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
+
+        Cursor imagecursor = context.managedQuery(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, null);
+
+        galleryImageUrls = new ArrayList<>();
+
+        for (int i = 0; i < imagecursor.getCount(); i++) {
+            imagecursor.moveToPosition(i);
+            int dataColumnIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            galleryImageUrls.add(imagecursor.getString(dataColumnIndex));
+
+        }
+        return galleryImageUrls;
     }
 
     @Override
