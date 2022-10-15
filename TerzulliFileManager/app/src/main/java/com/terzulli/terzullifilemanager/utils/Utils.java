@@ -1,17 +1,10 @@
 package com.terzulli.terzullifilemanager.utils;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.webkit.MimeTypeMap;
-
-import androidx.annotation.NonNull;
 
 import com.terzulli.terzullifilemanager.R;
 
@@ -48,7 +41,7 @@ public class Utils {
     public static final String strLocationImagesFriendlyName = "Images";
     public static final String strLocationDownloadsFriendlyName = "Downloads";
 
-    public static boolean isDeviceInLandscapeOrientation(Activity activity) {
+    /*public static boolean isDeviceInLandscapeOrientation(Activity activity) {
         return activity.getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
     }
@@ -66,7 +59,7 @@ public class Utils {
 
     public static void enableScreenRotation(@NonNull Activity activity) {
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-    }
+    }*/
 
     public static void sortByName(File[] files, final boolean ascending) {
         if (files == null)
@@ -153,11 +146,8 @@ public class Utils {
     }
 
 
-    public static File[] sortFileAndDirectoriesList(File[] filesAndDirs, final String sortBy, final boolean ascending) {
+    public static void sortFileAndDirectoriesList(File[] filesAndDirs, final String sortBy, final boolean ascending) {
         switch (sortBy) {
-            case strSortByName:
-                Utils.sortByName(filesAndDirs, ascending);
-                break;
             case strSortBySize:
                 Utils.sortBySize(filesAndDirs, ascending);
                 break;
@@ -169,7 +159,7 @@ public class Utils {
                 break;
         }
 
-        return filesAndDirs;
+        //return filesAndDirs;
     }
 
     public static String formatFileDetails(File file) {
@@ -388,10 +378,6 @@ public class Utils {
             case "3gp":
                 return strFileVideo;
 
-            case "jsp":
-            case "php":
-                return strFileGeneric;
-
             case "java":
             case "cpp":
             case "py":
@@ -403,22 +389,18 @@ public class Utils {
             case "txt":
             case "xml":
             case "log":
+            case "doc":
+            case "docx":
+            case "pdf":
                 return strFileDocument;
 
             case "xls":
             case "xlsx":
                 return strFileSpreadsheet;
 
-            case "doc":
-            case "docx":
-                return strFileDocument;
-
             case "ppt":
             case "pptx":
                 return strFilePresentation;
-
-            case "pdf":
-                return strFileDocument;
 
             case "jar":
             case "zip":
@@ -487,24 +469,6 @@ public class Utils {
         return name.matches("^[a-zA-Z0-9-_()\\[\\] ]*(\\.[a-zA-Z0-9_]+)+$");
     }
 
-    /*public static String stringAddEscapeForRegex(String str) {
-        str = str.replace("(", "\\(");
-        str = str.replace(")", "\\)");
-        str = str.replace("[", "\\[");
-        str = str.replace("]", "\\]");
-
-        return str;
-    }
-
-    public static String stringRemoveEscapeForRegex(String str) {
-        str = str.replace("\\(", "(");
-        str = str.replace("\\)", ")");
-        str = str.replace("\\[", "[");
-        str = str.replace("\\]", "]");
-
-        return str;
-    }*/
-
     public static boolean validateGenericFileName(File file, String name) {
         if (file.isDirectory())
             return validateDirectoryName(name);
@@ -514,25 +478,5 @@ public class Utils {
 
     public static float convertDpToPixel(float dp, Context context){
         return dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-    }
-
-    public static Bitmap resizeBitmap(Bitmap image, int maxWidth, int maxHeight) {
-        if (maxHeight > 0 && maxWidth > 0) {
-            float actualRatio = (float) image.getWidth() / (float) image.getHeight();
-            float ratioMax = (float) maxWidth / (float) maxHeight;
-
-            int finalWidth = maxWidth;
-            int finalHeight = maxHeight;
-
-            if (ratioMax > actualRatio)
-                finalWidth = (int) ((float)maxHeight * actualRatio);
-            else
-                finalHeight = (int) ((float)maxWidth / actualRatio);
-
-            //return Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true);
-            return ThumbnailUtils.extractThumbnail(image, finalWidth, finalHeight);
-        } else {
-            return image;
-        }
     }
 }

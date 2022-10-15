@@ -14,7 +14,6 @@ import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
@@ -148,10 +147,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         selectedFilesToCompress.addAll(selectedFiles);
         selectedFiles.clear();
     }
-
-    /*public static ArrayList<File> getSelectedFilesToCopyMove() {
-        return selectedFilesToCopyMove;
-    }*/
 
     public static void clearSelection() {
         selectedFiles.clear();
@@ -337,9 +332,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                         else
                             toastMessage = context.getResources().getString(R.string.action_move_completed_first_part);
 
-                        /*toastMessage += " " + nItems + " "
-                                + context.getResources().getString(R.string.action_copy_move_completed_second_part) + " "
-                                + destinationPath + context.getResources().getString(R.string.action_copy_move_completed_third_part); */
                         toastMessage += " " + nItems + " " + context.getResources().getString(R.string.action_copy_move_completed_third_part);
                         Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
 
@@ -896,12 +888,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (!isSelected) {
             if (Utils.fileIsImage(selectedFile)) {
                 loadImageThumbnailAsync(selectedFile, holder);
-
-                /*Bitmap icon = loadImageThumbnail(selectedFile);
-                if (icon != null)
-                    holder.itemIcon.setImageBitmap(icon);
-                else
-                    holder.itemIcon.setImageResource(R.drawable.ic_file_generic);*/
             } else
                 holder.itemIcon.setImageResource(Utils.getFileTypeIcon(selectedFile));
         } else {
@@ -968,22 +954,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         holder.itemTextContainer.setBackgroundColor(color);
         holder.itemName.setBackgroundColor(color);
         holder.itemDetails.setBackgroundColor(color);
-    }
-
-    private Bitmap loadImageThumbnail(File file) {
-        if (file == null)
-            return null;
-
-        //Bitmap image = BitmapFactory.decodeFile(file.getAbsolutePath());
-        if (file.exists()) {
-            // resize image to 48dp
-            Bitmap image = BitmapFactory.decodeFile(file.getAbsolutePath());
-            int maxPixelSize = (int) Utils.convertDpToPixel(48, context);
-
-            return Utils.resizeBitmap(image, maxPixelSize, maxPixelSize);
-        }
-
-        return null;
     }
 
     private void loadImageThumbnailAsync(@NonNull File file, @NonNull ItemsViewHolder holder) {
