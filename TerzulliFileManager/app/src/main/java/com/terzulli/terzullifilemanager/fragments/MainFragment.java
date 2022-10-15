@@ -101,7 +101,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     @SuppressLint("StaticFieldLeak")
     private static Activity activityReference;
     private static SharedPreferences sharedPreferences;
-    private static int activeLoadingsCounter = 0;
+    private static long activeLoadingsCounter = 0;
 
     public MainFragment() {
         // Required empty public constructor
@@ -146,7 +146,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
-        int loadingTicket = ++activeLoadingsCounter;
+        long loadingTicket = ++activeLoadingsCounter;
 
         executor.execute(() -> {
             String sortBy = sharedPreferences.getString("sortBy", strSortByName);
@@ -157,7 +157,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             handler.post(() -> {
                 // se nel frattempo l'utente ha scelto di caricare un'altra schermata,
                 // annullo questo caricamento
-                
+
                 if (activeLoadingsCounter <= loadingTicket) {
                     if (isACustomLocationDisplayed()){
                         updateBreadCrumbList(null, null);
@@ -201,7 +201,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
-        int loadingTicket = ++activeLoadingsCounter;
+        long loadingTicket = ++activeLoadingsCounter;
 
         executor.execute(() -> {
             String oldPath = currentPath;
@@ -948,6 +948,75 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 && !pathHomeFriendlyName.equals(strLocationDownloadsFriendlyName);
     }
 
+    private static ArrayList<String> getAllImagesUrls(Activity context) {
+        ArrayList<String> urlList;
+        final String[] projection = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
+
+        /*Cursor cursor = context.managedQuery(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
+
+        Cursor cursor = context.managedQuery(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                MediaStore.Images.Media.DATA + " not like ? ",
+                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
+
+        urlList = new ArrayList<>();
+
+        for (int i = 0; i < cursor.getCount(); i++) {
+            cursor.moveToPosition(i);
+            int dataColumnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            urlList.add(cursor.getString(dataColumnIndex));
+
+        }
+        return urlList;
+    }
+
+    private static ArrayList<String> getAllVideosUrls(Activity context) {
+        ArrayList<String> urlList;
+        final String[] projection = {MediaStore.Video.Media.DATA, MediaStore.Video.Media._ID};
+
+        /*Cursor cursor = context.managedQuery(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
+
+        Cursor cursor = context.managedQuery(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
+                MediaStore.Video.Media.DATA + " not like ? ",
+                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
+
+        urlList = new ArrayList<>();
+
+        for (int i = 0; i < cursor.getCount(); i++) {
+            cursor.moveToPosition(i);
+            int dataColumnIndex = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
+            urlList.add(cursor.getString(dataColumnIndex));
+
+        }
+        return urlList;
+    }
+
+    private static ArrayList<String> getAllAudioUrls(Activity context) {
+        ArrayList<String> urlList;
+        final String[] projection = {MediaStore.Audio.Media.DATA, MediaStore.Audio.Media._ID};
+
+        /*Cursor cursor = context.managedQuery(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
+
+        Cursor cursor = context.managedQuery(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection,
+                MediaStore.Audio.Media.DATA + " not like ? ",
+                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
+
+        urlList = new ArrayList<>();
+
+        for (int i = 0; i < cursor.getCount(); i++) {
+            cursor.moveToPosition(i);
+            int dataColumnIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+            urlList.add(cursor.getString(dataColumnIndex));
+
+        }
+        return urlList;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1030,75 +1099,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             sb.append("/").append(breadcrumbsView.getItems().get(i).getSelectedItem());
         }
         return sb.toString();
-    }
-
-    private static ArrayList<String> getAllImagesUrls(Activity context) {
-        ArrayList<String> urlList;
-        final String[] projection = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
-
-        /*Cursor cursor = context.managedQuery(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
-
-        Cursor cursor = context.managedQuery(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                MediaStore.Images.Media.DATA + " not like ? ",
-                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
-
-        urlList = new ArrayList<>();
-
-        for (int i = 0; i < cursor.getCount(); i++) {
-            cursor.moveToPosition(i);
-            int dataColumnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-            urlList.add(cursor.getString(dataColumnIndex));
-
-        }
-        return urlList;
-    }
-
-    private static ArrayList<String> getAllVideosUrls(Activity context) {
-        ArrayList<String> urlList;
-        final String[] projection = {MediaStore.Video.Media.DATA, MediaStore.Video.Media._ID};
-
-        /*Cursor cursor = context.managedQuery(
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
-
-        Cursor cursor = context.managedQuery(
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
-                MediaStore.Video.Media.DATA + " not like ? ",
-                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
-
-        urlList = new ArrayList<>();
-
-        for (int i = 0; i < cursor.getCount(); i++) {
-            cursor.moveToPosition(i);
-            int dataColumnIndex = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
-            urlList.add(cursor.getString(dataColumnIndex));
-
-        }
-        return urlList;
-    }
-
-    private static ArrayList<String> getAllAudioUrls(Activity context) {
-        ArrayList<String> urlList;
-        final String[] projection = {MediaStore.Audio.Media.DATA, MediaStore.Audio.Media._ID};
-
-        /*Cursor cursor = context.managedQuery(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
-
-        Cursor cursor = context.managedQuery(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection,
-                MediaStore.Audio.Media.DATA + " not like ? ",
-                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
-
-        urlList = new ArrayList<>();
-
-        for (int i = 0; i < cursor.getCount(); i++) {
-            cursor.moveToPosition(i);
-            int dataColumnIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-            urlList.add(cursor.getString(dataColumnIndex));
-
-        }
-        return urlList;
     }
 
     @Override
