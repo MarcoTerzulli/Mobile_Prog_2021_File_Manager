@@ -1,5 +1,6 @@
 package com.terzulli.terzullifilemanager.activities;
 
+import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.saveCurrentFilesBeforeQuerySubmit;
 import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.submitSearchQuery;
 import static com.terzulli.terzullifilemanager.fragments.MainFragment.isACustomLocationDisplayed;
 
@@ -62,7 +63,6 @@ public class MainActivity extends PermissionsActivity
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                ItemsAdapter.recoverCurrentFilesBeforeQuerySubmit();
                 submitSearchQuery(newText);
 
                 return false;
@@ -76,6 +76,7 @@ public class MainActivity extends PermissionsActivity
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 // non si fa nulla quando il menù di ricerca si apre
+                saveCurrentFilesBeforeQuerySubmit();
 
                 return true;
             }

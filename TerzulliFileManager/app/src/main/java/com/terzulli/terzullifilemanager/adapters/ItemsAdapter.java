@@ -95,7 +95,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     public static void recoverCurrentFilesBeforeQuerySubmit() {
-        //if (filesAndDirs.length < currentFilesBeforeQuerySubmit.size()) {
         if (currentFilesBeforeQuerySubmit.size() != 0) {
 
             filesAndDirs = new File[currentFilesBeforeQuerySubmit.size()];
@@ -221,6 +220,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     public static void submitSearchQuery(final String searchQuery) {
+        // recupero tutti i file originali del path corrente in caso siano state fatte query precedenti
+        recoverCurrentFilesBeforeQuerySubmit();
+        // salvo tutti i file del path corrente
         saveCurrentFilesBeforeQuerySubmit();
 
         ArrayList<File> searchedResults = new ArrayList<>();

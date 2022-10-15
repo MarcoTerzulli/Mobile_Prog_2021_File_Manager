@@ -121,7 +121,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     public static void loadSelection(final File[] filesAndDirs, String newActionBarTitle) {
-        ItemsAdapter.clearCurrentFilesBeforeQuerySubmit();
+        //ItemsAdapter.clearCurrentFilesBeforeQuerySubmit();
 
         new Handler().postDelayed(() -> {
             // la seguente istruzione permette di "resettare" il contenuto del breadcrumb ed evitare

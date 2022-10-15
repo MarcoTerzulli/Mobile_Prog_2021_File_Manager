@@ -180,7 +180,6 @@ public class Utils {
 
     @SuppressLint("SimpleDateFormat")
     public static String formatDateDetailsFull(Date date) {
-        Date todayDate = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yy, HH:mm");
 
         return formatter.format(date);
@@ -428,7 +427,7 @@ public class Utils {
         if (filesAndDirs == null)
             return null;
 
-        List<File> fileList = new LinkedList<File>(Arrays.asList(filesAndDirs));
+        List<File> fileList = new LinkedList<>(Arrays.asList(filesAndDirs));
         List<File> filetoRemoveList = new ArrayList<>();
 
         for(File file : fileList){
