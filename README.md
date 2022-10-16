@@ -24,28 +24,21 @@ The following instructions will allow you to have a working copy of the project 
 
 ### Prerequisites
 
-Software to install for the project to work, and how to install it.
-
-```
-* A Linux, Windows or MacOS machine
-* Python 3.7+
-```
+The application works on Android devices running ```Android Oreo (8.0)``` or a more recent version of Android.
 
 No additional requirements and installation steps needed!
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-## How the Application Works
-
-Todo
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
 ## Application Purposes and Limitations
 
-The Application was realized only for a didactic use, and it's not intended **TODO**.
+The Application was realized only for a didactic use, and it's not intended to be a complete file manager.
+
+In fact, the following features are not available:
+* Preview of zip archives content
+* Access to SD Card or removable storages
+* Access to root paths (root exlorer)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

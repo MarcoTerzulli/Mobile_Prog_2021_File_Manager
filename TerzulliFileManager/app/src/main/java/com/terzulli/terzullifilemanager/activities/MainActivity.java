@@ -36,6 +36,8 @@ import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
+import java.util.Objects;
+
 public class MainActivity extends PermissionsActivity
         implements PermissionsActivity.OnPermissionGranted {
 

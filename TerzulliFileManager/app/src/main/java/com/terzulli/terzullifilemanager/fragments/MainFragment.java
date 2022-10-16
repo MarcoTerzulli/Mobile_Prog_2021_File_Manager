@@ -41,6 +41,7 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -110,8 +111,13 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public static void setActionBarTitle(String title) {
         lastActionBarTitle = title;
 
+        Log.d("DEBUG title", "\nnuovo titolo " + title);
+
         if (supportActionBar != null)
             Objects.requireNonNull(supportActionBar).setTitle(title);
+
+        if (supportActionBar != null)
+            Log.d("DEBUG title", "titolo impostato  " + Objects.requireNonNull(supportActionBar).getTitle());
     }
 
     public static void initializeEmptyDirectoryLayout(boolean showEmptyLayout) {
@@ -143,15 +149,17 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (newActionBarTitle != null && newActionBarTitle.length() != 0)
             setActionBarTitle(newActionBarTitle);
 
+        // forzo la posizione della scrollview a 0 per prevenire inconsistenze e crash se è in corso
+        // un'animazione di scroll mentre setto un nuovo adapter
+        recyclerView.scrollToPosition(0);
+
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
-
         long loadingTicket = ++activeLoadingsCounter;
 
         executor.execute(() -> {
             String sortBy = sharedPreferences.getString("sortBy", strSortByName);
             boolean sortOrderAscending = sharedPreferences.getBoolean("sortOrderAscending", true);
-
             Utils.sortFileAndDirectoriesList(filesAndDirs, sortBy, sortOrderAscending);
 
             handler.post(() -> {
@@ -159,6 +167,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 // annullo questo caricamento
 
                 if (activeLoadingsCounter <= loadingTicket) {
+
                     if (isACustomLocationDisplayed()){
                         updateBreadCrumbList(null, null);
                         breadcrumbsView.setVisibility(View.GONE);
@@ -199,9 +208,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             swipeRefreshLayout.setRefreshing(true);
         }
 
+        // forzo la posizione della scrollview a 0 per prevenire inconsistenze e crash se è in corso
+        // un'animazione di scroll mentre setto un nuovo adapter
+        recyclerView.scrollToPosition(0);
+
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
-
         long loadingTicket = ++activeLoadingsCounter;
 
         executor.execute(() -> {
@@ -213,7 +225,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
             String sortBy = sharedPreferences.getString("sortBy", strSortByName);
             boolean sortOrderAscending = sharedPreferences.getBoolean("sortOrderAscending", true);
-
             Utils.sortFileAndDirectoriesList(filesAndDirs, sortBy, sortOrderAscending);
 
             // rimozione file nascosti (iniziano col .)
@@ -226,6 +237,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 // annullo questo caricamento
 
                 if (activeLoadingsCounter <= loadingTicket) {
+
                     if (isACustomLocationDisplayed()){
                         updateBreadCrumbList(null, null);
                         breadcrumbsView.setVisibility(View.GONE);
