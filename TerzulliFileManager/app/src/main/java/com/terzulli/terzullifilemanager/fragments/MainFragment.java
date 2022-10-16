@@ -399,7 +399,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         if (isSelectionModeEnabled()) {
             clearSelection();
-            //MainFragment.loadPath(MainFragment.getCurrentPath(), false);
             MainFragment.refreshList();
         } else {
             if (!MainFragment.isInHomePath()) {

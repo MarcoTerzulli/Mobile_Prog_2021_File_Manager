@@ -240,9 +240,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         MainFragment.loadSelection(searchedResultsArr, "");
     }
 
-
-
-
     /**
      * FUnzione interna per la copia o spostamento di file e cartelle (ricorsiva)
      *
@@ -798,7 +795,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         File selectedFile = filesAndDirs[position];
 
         //icona
-        setItemIcon(position, holder, false);
+        setItemIcon(selectedFile, holder, false);
 
         // background
         TypedValue outValue = new TypedValue();
@@ -821,22 +818,22 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             if (!isSelectionModeEnabled()) {
                 itemOpenerHandler(selectedFile);
             } else {
-                toggleItemSelection(position, holder, true, false);
+                toggleItemSelection(selectedFile, holder, true, false);
             }
         });
 
         // gestione selezione item con long click
         holder.itemView.setOnLongClickListener(view -> {
-            toggleItemSelection(position, holder, false, false);
+            toggleItemSelection(selectedFile, holder, false, false);
 
             return true;
         });
 
         // gestione selezione item con click sull'icona
-        holder.itemIcon.setOnClickListener(view -> toggleItemSelection(position, holder, true, false));
+        holder.itemIcon.setOnClickListener(view -> toggleItemSelection(selectedFile, holder, true, false));
 
         // ripristino lo stato di selezione precedente
-        toggleItemSelection(position, holder, false, true);
+        toggleItemSelection(selectedFile, holder, false, true);
     }
 
     private void itemOpenerHandler(File selectedFile) {
@@ -884,8 +881,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         }
     }
 
-    private void setItemIcon(int position, @NonNull ItemsViewHolder holder, boolean isSelected) {
-        File selectedFile = filesAndDirs[position];
+    private void setItemIcon(File selectedFile, @NonNull ItemsViewHolder holder, boolean isSelected) {
+        //File selectedFile = filesAndDirs[position];
 
         if (!isSelected) {
             if (Utils.fileIsImage(selectedFile)) {
@@ -898,8 +895,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     }
 
-    private void toggleItemSelection(int position, @NonNull ItemsViewHolder holder, boolean unselect, boolean recoverLastState) {
-        File selectedFile = filesAndDirs[position];
+    private void toggleItemSelection(File selectedFile, @NonNull ItemsViewHolder holder, boolean unselect, boolean recoverLastState) {
+        //File selectedFile = filesAndDirs[position];
         int color;
         boolean setSelectedIcon = false;
 
@@ -936,7 +933,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         }
 
         setItemBackgroundColor(color, holder);
-        setItemIcon(position, holder, setSelectedIcon);
+        setItemIcon(selectedFile, holder, setSelectedIcon);
 
         // aggiorno il titolo della toolbar in base al numero di elementi selezionati
         if (!selectedFiles.isEmpty()) {
