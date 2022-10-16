@@ -40,6 +40,8 @@ In fact, the following features are not available:
 * Access to SD Card or removable storages
 * Access to root paths (root exlorer)
 
+The Applicazion has been developed to support devices with ```Android Sdk``` version >= 26 and <= 33 (the latest available during the develpment of the current version of the project).
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
