@@ -81,7 +81,7 @@ public class Utils {
                     return 1;
 
                 // both files or both directories
-                return (int) (t.lastModified() - t1.lastModified());
+                return (new Date(t.lastModified())).compareTo(new Date(t1.lastModified()));
             });
         } else {
 
@@ -92,7 +92,7 @@ public class Utils {
                     return 1;
 
                 // both files or both directories
-                return (int) (t1.lastModified() - t.lastModified());
+                return (new Date(t1.lastModified())).compareTo(new Date(t.lastModified()));
             });
         }
 

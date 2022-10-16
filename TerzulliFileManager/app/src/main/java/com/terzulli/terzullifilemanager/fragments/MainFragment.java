@@ -169,6 +169,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
 
                     recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
+                    recyclerView.scrollToPosition(0);
                     swipeRefreshLayout.setRefreshing(false);
 
                     ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
@@ -241,6 +242,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     if (reloadBreadCrumb)
                         reloadBreadCrumb(path);
 
+                    recyclerView.scrollToPosition(0);
                     swipeRefreshLayout.setRefreshing(false);
 
                     ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
@@ -952,10 +954,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         ArrayList<String> urlList;
         final String[] projection = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
 
-        /*Cursor cursor = context.managedQuery(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
-
-        Cursor cursor = context.managedQuery(
+        // escludo la cartella Android che può contenere media interni delle applicazioni
+        // visto che sono poco rilevanti per l'utente
+        Cursor cursor = context.getContentResolver().query(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
                 MediaStore.Images.Media.DATA + " not like ? ",
                 new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
@@ -968,6 +969,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             urlList.add(cursor.getString(dataColumnIndex));
 
         }
+        cursor.close();
+
         return urlList;
     }
 
@@ -975,10 +978,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         ArrayList<String> urlList;
         final String[] projection = {MediaStore.Video.Media.DATA, MediaStore.Video.Media._ID};
 
-        /*Cursor cursor = context.managedQuery(
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
-
-        Cursor cursor = context.managedQuery(
+        // escludo la cartella Android che può contenere media interni delle applicazioni
+        // visto che sono poco rilevanti per l'utente
+        Cursor cursor = context.getContentResolver().query(
                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
                 MediaStore.Video.Media.DATA + " not like ? ",
                 new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
@@ -991,6 +993,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             urlList.add(cursor.getString(dataColumnIndex));
 
         }
+        cursor.close();
+
         return urlList;
     }
 
@@ -998,10 +1002,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         ArrayList<String> urlList;
         final String[] projection = {MediaStore.Audio.Media.DATA, MediaStore.Audio.Media._ID};
 
-        /*Cursor cursor = context.managedQuery(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);*/
-
-        Cursor cursor = context.managedQuery(
+        // escludo la cartella Android che può contenere media interni delle applicazioni
+        // visto che sono poco rilevanti per l'utente
+        Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection,
                 MediaStore.Audio.Media.DATA + " not like ? ",
                 new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
@@ -1014,6 +1017,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             urlList.add(cursor.getString(dataColumnIndex));
 
         }
+        cursor.close();
+
         return urlList;
     }
 
@@ -1044,8 +1049,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         if (currentPath == null)
             currentPath = pathHome;
-        /*if (pathHomeFriendlyName == null)
-            setPathRootFriendlyName(breadcrumbsView.getContext().getResources().getString(R.string.drawer_menu_storage_internal));*/
         lastActionBarTitle = "";
 
         // inizializzazione layoyt
@@ -1092,7 +1095,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         if (depth == -1)
             depth = breadcrumbsView.getItems().size() - 1;
 
-        //StringBuilder sb = new StringBuilder(Environment.getExternalStorageDirectory().getAbsolutePath());
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i <= depth; i++) {
