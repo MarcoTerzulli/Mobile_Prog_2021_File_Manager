@@ -656,7 +656,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
     public static void shareSelectedFiles() {
         if (isSelectionModeEnabled()) {
-            Intent intentShareFile = new Intent(Intent.ACTION_SEND);
+            Intent intentShareFile = new Intent(Intent.ACTION_SEND_MULTIPLE);
 
             // impstazione mime type
             String mimetype = Utils.getMimeType(Uri.fromFile(selectedFiles.get(0)));
@@ -669,16 +669,17 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             intentShareFile.setType(mimetype);
 
             // allego i file
+            ArrayList<Uri> filesToShare = new ArrayList<>();
             for (File file : selectedFiles) {
-                //intentShareFile.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + file.getAbsolutePath()));
-                intentShareFile.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context,
-                        context.getPackageName() + ".provider", file));
+                filesToShare.add(FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file));
             }
 
-            intentShareFile.putExtra(Intent.EXTRA_SUBJECT, "Sharing File...");
-            intentShareFile.putExtra(Intent.EXTRA_TEXT, "Sharing File...");
+            intentShareFile.putExtra(Intent.EXTRA_SUBJECT, context.getResources().getString(R.string.intent_share_subject));
+            intentShareFile.putExtra(Intent.EXTRA_TEXT, context.getResources().getString(R.string.intent_share_text));
+            intentShareFile.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            intentShareFile.putParcelableArrayListExtra(Intent.EXTRA_STREAM, filesToShare);
 
-            context.startActivity(Intent.createChooser(intentShareFile, "Share File"));
+            context.startActivity(Intent.createChooser(intentShareFile, context.getResources().getString(R.string.intent_share_title)));
         }
     }
 
@@ -751,9 +752,14 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    Uri data = Uri.parse(file.getAbsolutePath());
+                    //Uri data = Uri.parse(file.getAbsolutePath());
+
+                    Uri data = FileProvider.getUriForFile(context,
+                            context.getApplicationContext().getPackageName() + ".provider", file);
+
 
                     intent.setDataAndType(data, type);
+                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     context.startActivity(Intent.createChooser(intent, context.getResources().getString(R.string.action_open_with)));
                 } catch (Exception e) {
                     Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
@@ -868,9 +874,14 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
                     try {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
-                        Uri data = Uri.parse(selectedFile.getAbsolutePath());
+                        //Uri data = Uri.parse(selectedFile.getAbsolutePath());
+                        //Uri data = Uri.fromFile(selectedFile);
+
+                        Uri data = FileProvider.getUriForFile(context,
+                                context.getApplicationContext().getPackageName() + ".provider", selectedFile);
 
                         intent.setDataAndType(data, type);
+                        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         context.startActivity(intent);
                     } catch (Exception e) {
                         Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();

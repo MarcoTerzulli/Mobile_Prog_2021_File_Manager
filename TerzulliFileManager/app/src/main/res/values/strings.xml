@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Terzulli File Manager</string>
     <string name="app_name_compact">File Manager</string>
     <string name="next">Next</string>
@@ -138,6 +138,11 @@
     <string name="zip_insert_password_dialog_descr">The selected archive seems to be protected by a password.</string>
     <string name="zip_insert_password_dialog_insert">Password:</string>
     <string name="zip_protected">Protected Archive</string>
+
+    <!-- File share-->
+    <string name="intent_share_title">Share File</string>
+    <string name="intent_share_subject">Sharing Files</string>
+    <string name="intent_share_text">Attached files</string>
 
     <!-- Error -->
     <string name="error_access_to_root_directory">You don\'t have to permission to access this location</string>
