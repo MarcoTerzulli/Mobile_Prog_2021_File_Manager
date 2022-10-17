@@ -96,7 +96,7 @@
     <string name="action_copy_move_items">items</string>
     <string name="action_copy_move_item">item</string>
     <string name="action_copy_completed_first_part">Copy of</string>
-    <string name="action_move_completed_first_part">Copy of</string>
+    <string name="action_move_completed_first_part">Move of</string>
     <string name="action_copy_move_completed_second_part">items to</string>
     <string name="action_copy_move_completed_third_part">completed</string>
     <string name="action_extract_here">Extract here</string>
