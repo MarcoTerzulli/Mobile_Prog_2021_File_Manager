@@ -116,7 +116,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    private void displayEmptyLayoutWhileWaiting(boolean hideBreadcrumb) {
+    private void displayEmptyLayoutWhileWaiting() {
         swipeRefreshLayout.setRefreshing(true);
 
         RelativeLayout itemsEmptyPlaceHolder = view.findViewById(R.id.items_empty_directory_placeholder);
@@ -125,8 +125,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         new Handler().postDelayed(() -> {
             if (isACustomLocationDisplayed())
                 updateBreadCrumbList(null, null);
-            if (hideBreadcrumb)
-                breadcrumbsView.setVisibility(View.GONE);
+            breadcrumbsView.setVisibility(View.GONE);
         }, 10);
     }
 
@@ -360,12 +359,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             case strLocationImagesFriendlyName:
                 displayImagesFiles();
                 break;
-            /*case strLocationDownloadsFriendlyName:
-                loadPath(currentPath, true);
-                break;
-            case strLocationInternalFriendlyName:
-                loadPath(currentPath, true);
-                break;*/
             default:
                 loadPath(currentPath, true, false);
                 break;
@@ -390,18 +383,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
-    /*public static void setCurrentPath(String path) {
-        currentPath = path;
-    }*/
-
     public boolean isInHomePath() {
         // se siamo già nella root
         return Objects.equals(currentPath, pathHome);
     }
-
-    /*public static void setHomePath(String path) {
-        pathHome = path;
-    }*/
 
     public boolean goBack() {
 
@@ -873,7 +858,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         currentPath = getInternalStoragePath();
         currentPath = getInternalStoragePath();
 
-        displayEmptyLayoutWhileWaiting(true);
+        displayEmptyLayoutWhileWaiting();
         ArrayList<File> searchedResults = new ArrayList<>();
 
         findVideosFiles(searchedResults, activityReference);
@@ -890,7 +875,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void displayAudioFiles() {
         currentPath = getInternalStoragePath();
 
-        displayEmptyLayoutWhileWaiting(true);
+        displayEmptyLayoutWhileWaiting();
         ArrayList<File> searchedResults = new ArrayList<>();
 
         findAudioFiles(searchedResults, activityReference);
@@ -907,7 +892,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void displayImagesFiles() {
         currentPath = getInternalStoragePath();
 
-        displayEmptyLayoutWhileWaiting(true);
+        displayEmptyLayoutWhileWaiting();
         ArrayList<File> searchedResults = new ArrayList<>();
 
         findImagesFiles(searchedResults, activityReference);

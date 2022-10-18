@@ -104,17 +104,6 @@ public class MainActivity extends PermissionsActivity
                 return true;
             }
         });
-
-        /*searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-
-                    Toast.makeText(MainActivity.this, "back", Toast.LENGTH_SHORT).show();
-                    searchView.setIconified(true);
-                }
-            }
-        });*/
     }
 
     public void closeSearchView() {
@@ -195,18 +184,6 @@ public class MainActivity extends PermissionsActivity
                     // selezione completa ma di soli file
                     setMenuItemsAllSelectedOnlyFiles();
                     break;
-                /*case 8:
-                    // selezione dentro zip
-                    setMenuItemsOneSelectedInsideZip();
-                    break;
-                case 9:
-                    // selezione completa dentro zip
-                    setMenuItemsAllSelectedInsideZip();
-                    break;
-                case 10:
-                    // nessuna seleazione ma siamo dentro uno zip
-                    setMenuItemsZip();
-                    break;*/
                 case 11:
                     //  selezione completa (generica) ma c'è un solo file
                     setMenuItemsAllSelectedOneFile();
@@ -240,41 +217,6 @@ public class MainActivity extends PermissionsActivity
 
     }
 
-    /*private static void setMenuItemsOneSelectedInsideZip() {
-        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_select_all).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_extract).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_get_info).setVisible(true);
-
-        // nascondo il resto
-        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
-        //toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
-        //toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
-        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_open_with).setVisible(true);
-        toolbarMenu.findItem(R.id.menu_share).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_delete).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_search).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_copy_to).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_move_to).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_compress).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_rename).setVisible(false);
-    }*/
-
-    /*private static void setMenuItemsAllSelectedInsideZip() {
-        setMenuItemsOneSelectedInsideZip();
-
-        toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
-        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(true);
-    }
-
-    private static void setMenuItemsZip() {
-        setMenuItemsDefault();
-        toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
-    }*/
-
     private void setMenuItemsOneFileSelected() {
         toolbarMenu.findItem(R.id.menu_open_with).setVisible(true);
         toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
@@ -291,8 +233,6 @@ public class MainActivity extends PermissionsActivity
 
         // nascondo il resto
         toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
-        //toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
-        //toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
         toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
         toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
         toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
@@ -570,9 +510,6 @@ public class MainActivity extends PermissionsActivity
                     case R.id.menu_compress:
                         ((ItemsAdapter)currentAdapter).compressSelection();
                         break;
-            /*case R.id.menu_decompress:
-                Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
-                break;*/
                     case R.id.menu_get_info:
                         ((ItemsAdapter)currentAdapter).infoSelectedFile();
                         break;

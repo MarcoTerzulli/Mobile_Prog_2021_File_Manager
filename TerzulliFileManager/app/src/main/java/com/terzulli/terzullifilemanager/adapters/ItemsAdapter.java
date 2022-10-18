@@ -86,8 +86,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         selectedFilesManager.setOperationStartPath(mainFragment.getCurrentPath());
         selectedFilesManager.setCopyMoveOperationTypeIsCopy(isCopy);
-        /*operationStartPath = MainFragment.getCurrentPath();
-        copyMoveOperationTypeIsCopy = isCopy;*/
         saveSelectionForCopyMove();
         clearSelection();
         mainFragment.refreshList();
@@ -99,7 +97,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         if (selectedFilesManager.getSelectedFiles().size() == 0)
             return;
 
-        //operationStartPath = MainFragment.getCurrentPath();
         selectedFilesManager.setOperationStartPath(mainFragment.getCurrentPath());
         saveSelectionForCompress();
         clearSelection();
@@ -165,12 +162,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             return -1;
 
         clearSelection();
-        //selectedFilesToCopyMove = new ArrayList<>();
         selectedFilesManager.clearSelectionFromCopyMove();
 
         File newLocation = new File(destinationPath);
         if (newLocation.exists()) {
-            //if (!newLocation.getPath().equals(filesToCopyMove.get(0).getParent())) {
             // copy
             for (File fileToMove : filesToCopyMove) {
 
@@ -207,7 +202,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     public void extractSelectedFile() {
         if (selectedFilesManager.getFileToExtract() != null) {
             // caso in cui apriamo un file direttamente con il click
-            //extractSelectedFilesOperation(fileToDeCompress, fileToDeCompress.getParent());
             mainFragment.displayExtractToBar();
         }
     }
@@ -267,12 +261,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         executor.execute(() -> {
 
-            //Background work here
             int returnCode = extractSelectedFileOperation(new File(selectedFilesManager.getFileToExtract().getPath()),
                     extractPath);
 
             handler.post(() -> {
-                //UI Thread work here
 
                 switch (returnCode) {
                     case 1:
@@ -307,11 +299,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         executor.execute(() -> {
 
-            //Background work here
             int returnCode = compressSelectedFilesOperation(compressPath);
 
             handler.post(() -> {
-                //UI Thread work here
 
                 switch (returnCode) {
                     case 1:
@@ -347,7 +337,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
      */
     private int extractSelectedFileOperation(File fileToExtract, String extractPath) {
         if (fileToExtract != null) {
-            //ItemsAdapter.fileToExtract = null;
             selectedFilesManager.setFileToExtract(null);
 
             String newName = fileToExtract.getName().substring(0, fileToExtract.getName().length() - ".zip".length());
@@ -404,7 +393,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             return -1;
 
         clearSelection();
-        //selectedFilesToCompress = new ArrayList<>();
         selectedFilesManager.setSelectedFilesToCompress(new ArrayList<>());
 
         String newName = "archive";
@@ -703,21 +691,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     public void clearCurrentFilesBeforeQuerySubmit() {
-        /*if(currentFilesBeforeQuerySubmit != null)
-            currentFilesBeforeQuerySubmit.clear();*/
         selectedFilesManager.clearCurrentFilesBeforeQuerySubmit();
     }
 
     public void recoverCurrentFilesBeforeQuerySubmit() {
-        /*if (currentFilesBeforeQuerySubmit.size() != 0) {
-
-            filesAndDirs = new File[currentFilesBeforeQuerySubmit.size()];
-            int i = 0;
-            for (File file : currentFilesBeforeQuerySubmit)
-                filesAndDirs[i++] = file;
-
-            currentFilesBeforeQuerySubmit.clear();
-        }*/
 
         if (selectedFilesManager.getCurrentFilesBeforeQuerySubmit().size() != 0) {
 
@@ -731,81 +708,55 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     public String getOperationStartPath() {
-        //return operationStartPath;
         return selectedFilesManager.getOperationStartPath();
     }
 
     public void saveCurrentFilesBeforeQuerySubmit() {
-        /*currentFilesBeforeQuerySubmit = new ArrayList<>(filesAndDirs.length);
-        currentFilesBeforeQuerySubmit.addAll(Arrays.asList(filesAndDirs));*/
         selectedFilesManager.setCurrentFilesBeforeQuerySubmit(filesAndDirs);
     }
 
     public void clearSelectionFromCopyMove() {
-        //selectedFilesToCopyMove.clear();
         selectedFilesManager.clearSelectionFromCopyMove();
     }
 
     public void recoverSelectionFromCopyMove() {
-        /*selectedFiles = new ArrayList<>(selectedFilesToCopyMove.size());
-        selectedFiles.addAll(selectedFilesToCopyMove);
-        selectedFilesToCopyMove.clear();*/
         selectedFilesManager.recoverSelectionFromCopyMove();
     }
 
     public void saveSelectionForCopyMove() {
-        /*selectedFilesToCopyMove = new ArrayList<>(selectedFiles.size());
-        selectedFilesToCopyMove.addAll(selectedFiles);
-        selectedFiles.clear();*/
-
         selectedFilesManager.setSelectedFilesToCopyMove(selectedFilesManager.getSelectedFiles());
         selectedFilesManager.clearSelectedFiles();
     }
 
     public void clearSelectionFromCompress() {
-        //selectedFilesToCompress.clear();
         selectedFilesManager.clearSelectionFromCompress();
     }
 
     public void recoverSelectionFromCompress() {
-        /*selectedFiles = new ArrayList<>(selectedFilesToCompress.size());
-        selectedFiles.addAll(selectedFilesToCompress);
-        selectedFilesToCompress.clear();*/
-
         selectedFilesManager.setSelectedFiles(selectedFilesManager.getSelectedFilesToCompress());
         selectedFilesManager.clearSelectionFromCompress();
     }
 
     public void saveSelectionForCompress() {
-        /*selectedFilesToCompress = new ArrayList<>(selectedFiles.size());
-        selectedFilesToCompress.addAll(selectedFiles);
-        selectedFiles.clear();*/
-
         selectedFilesManager.setSelectedFilesToCompress(selectedFilesManager.getSelectedFiles());
         selectedFilesManager.clearSelectedFiles();
     }
 
     public void clearSelection() {
-        //selectedFiles.clear();
         selectedFilesManager.clearSelectedFiles();
     }
 
     public boolean isSelectionModeEnabled() {
-        /*if (selectedFiles == null)
-            return false;
-        return !selectedFiles.isEmpty();*/
         return !selectedFilesManager.getSelectedFiles().isEmpty();
     }
 
     public void selectAll() {
-        /*clearSelection();
-        selectedFiles.addAll(Arrays.asList(filesAndDirs));
-        MainFragment.refreshList();*/
-
         clearSelection();
+
         ArrayList<File> selectedFilesList = new ArrayList<>(filesAndDirs.length);
         selectedFilesList.addAll(Arrays.asList(filesAndDirs));
         selectedFilesManager.setSelectedFiles(selectedFilesList);
+
         mainFragment.refreshList();
     }
 
@@ -895,20 +846,18 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 } else if (type.equals("application/vnd.android.package-archive")
                         || type.equals("application/zip") || type.equals("application/java-archive")) {
 
-                    // TODO verificare se serve richiedere i permessi per installare
                     installApplication(selectedFile);
                 } else {
 
                     try {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
-                        //Uri data = Uri.parse(selectedFile.getAbsolutePath());
-                        //Uri data = Uri.fromFile(selectedFile);
 
                         Uri data = FileProvider.getUriForFile(context,
                                 context.getApplicationContext().getPackageName() + ".provider", selectedFile);
 
                         intent.setDataAndType(data, type);
                         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
                         context.startActivity(intent);
                     } catch (Exception e) {
                         Toast.makeText(context, R.string.cant_open_file, Toast.LENGTH_SHORT).show();
@@ -920,7 +869,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
     }
 
     private void setItemIcon(File selectedFile, @NonNull ItemsViewHolder holder, boolean isSelected) {
-        //File selectedFile = filesAndDirs[position];
 
         if (!isSelected) {
             if (Utils.fileIsImage(selectedFile)) {
@@ -942,7 +890,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             // comportamento normale
             if (selectedFilesManager.getSelectedFiles().contains(selectedFile) && unselect) {
                 // unselect
-                //selectedFiles.remove(selectedFile);
                 selectedFilesManager.removeSelectedFile(selectedFile);
 
                 TypedValue outValue = new TypedValue();
@@ -952,7 +899,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 setItemBackgroundColor(color, holder);
             } else {
                 // select
-                //selectedFiles.add(selectedFile);
                 selectedFilesManager.addSelectedFile(selectedFile);
 
                 color = ContextCompat.getColor(context, R.color.item_selected_light);
