@@ -1,15 +1,6 @@
 package com.terzulli.terzullifilemanager.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.terzulli.terzullifilemanager.activities.MainActivity.isSearchActive;
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearFileToExtractSelection;
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelection;
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelectionFromCompress;
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.clearSelectionFromCopyMove;
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeCompressOperationOnThread;
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeCopyMoveOperationOnThread;
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.executeExtractOperationOnThread;
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.isSelectionModeEnabled;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatDateDetailsFull;
 import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
 import static com.terzulli.terzullifilemanager.utils.Utils.humanReadableByteCountSI;
@@ -28,7 +19,6 @@ import static com.terzulli.terzullifilemanager.utils.Utils.strSortBySize;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateDirectoryName;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileName;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -83,32 +73,28 @@ import moe.feng.common.view.breadcrumbs.model.IBreadcrumbItem;
 
 public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
-    private static final int backPressedInterval = 2000;
-    private static RecyclerView recyclerView;
-    @SuppressLint("StaticFieldLeak")
-    private static RelativeLayout copyMoveExtractBar;
-    @SuppressLint("StaticFieldLeak")
-    private static SwipeRefreshLayout swipeRefreshLayout;
-    @SuppressLint("StaticFieldLeak")
-    private static View view;
     private static String currentPath;
     private static String pathHome;
-    private static String pathRoot;
     private static String pathHomeFriendlyName;
-    private static ActionBar supportActionBar;
-    private static BreadcrumbsView breadcrumbsView;
     private static String lastActionBarTitle;
-    private static long timeBackPressed;
-    @SuppressLint("StaticFieldLeak")
-    private static Activity activityReference;
-    private static SharedPreferences sharedPreferences;
     private static long activeLoadingsCounter = 0;
+    private final String pathRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+    private RecyclerView recyclerView;
+    private RelativeLayout copyMoveExtractBar;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private View view;
+    private ActionBar supportActionBar;
+    private BreadcrumbsView breadcrumbsView;
+    private long timeBackPressed;
+    private Activity activityReference;
+    private SharedPreferences sharedPreferences;
+    private RecyclerView.Adapter currentAdapter;
 
     public MainFragment() {
         // Required empty public constructor
     }
 
-    public static void setActionBarTitle(String title) {
+    public void setActionBarTitle(String title) {
         lastActionBarTitle = title;
 
         Log.d("DEBUG title", "\nnuovo titolo " + title);
@@ -120,7 +106,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             Log.d("DEBUG title", "titolo impostato  " + Objects.requireNonNull(supportActionBar).getTitle());
     }
 
-    public static void initializeEmptyDirectoryLayout(boolean showEmptyLayout) {
+    public void initializeEmptyDirectoryLayout(boolean showEmptyLayout) {
         RelativeLayout itemsEmptyPlaceHolder = view.findViewById(R.id.items_empty_directory_placeholder);
 
         if (showEmptyLayout) {
@@ -130,7 +116,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    private static void displayEmptyLayoutWhileWaiting(boolean hideBreadcrumb) {
+    private void displayEmptyLayoutWhileWaiting(boolean hideBreadcrumb) {
         swipeRefreshLayout.setRefreshing(true);
 
         RelativeLayout itemsEmptyPlaceHolder = view.findViewById(R.id.items_empty_directory_placeholder);
@@ -144,7 +130,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }, 10);
     }
 
-    public static void loadSelection(final File[] filesAndDirs, String newActionBarTitle) {
+    public void loadSelection(final File[] filesAndDirs, String newActionBarTitle) {
 
         if (newActionBarTitle != null && newActionBarTitle.length() != 0)
             setActionBarTitle(newActionBarTitle);
@@ -177,22 +163,33 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
                     initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
 
-                    recyclerView.setAdapter(new ItemsAdapter(view.getContext(), filesAndDirs));
+                    currentAdapter = new ItemsAdapter(view.getContext(), filesAndDirs, this, requireActivity());
+                    recyclerView.setAdapter(currentAdapter);
                     recyclerView.scrollToPosition(0);
                     swipeRefreshLayout.setRefreshing(false);
 
-                    ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
-                    ItemsAdapter.recoverEventuallyActiveExtractOperation();
-                    ItemsAdapter.recoverEventuallyActiveCompressOperation();
+                    ((ItemsAdapter)currentAdapter).recoverEventuallyActiveCopyMoveOperation();
+                    ((ItemsAdapter)currentAdapter).recoverEventuallyActiveExtractOperation();
+                    ((ItemsAdapter)currentAdapter).recoverEventuallyActiveCompressOperation();
                 }
             });
         });
 
     }
 
-    public static void loadPath(final String path, boolean updateBreadcrumb, boolean reloadBreadCrumb) {
+    public void loadPath(final String path, boolean updateBreadcrumb, boolean reloadBreadCrumb) {
 
-        ItemsAdapter.clearCurrentFilesBeforeQuerySubmit();
+        if(currentAdapter != null) {
+            if(currentAdapter instanceof ItemsAdapter){
+                ((ItemsAdapter)currentAdapter).clearCurrentFilesBeforeQuerySubmit();
+
+                if (!((ItemsAdapter)currentAdapter).isSelectionModeEnabled()) {
+                    setActionBarTitle(getCurrentDirectoryName());
+                } else {
+                    swipeRefreshLayout.setRefreshing(true);
+                }
+            }
+        }
 
         if (isPathProtected(path)) {
             // stiamo tentando di accedere a file di root
@@ -200,12 +197,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             updateBreadCrumbList(currentPath, null);
             Toast.makeText(view.getContext(), R.string.error_access_to_root_directory, Toast.LENGTH_SHORT).show();
             return;
-        }
-
-        if (!ItemsAdapter.isSelectionModeEnabled()) {
-            setActionBarTitle(getCurrentDirectoryName());
-        } else {
-            swipeRefreshLayout.setRefreshing(true);
         }
 
         // forzo la posizione della scrollview a 0 per prevenire inconsistenze e crash se è in corso
@@ -247,7 +238,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
                     initializeEmptyDirectoryLayout(finalFilesAndDirs == null || finalFilesAndDirs.length == 0);
 
-                    recyclerView.setAdapter(new ItemsAdapter(view.getContext(), finalFilesAndDirs));
+                    currentAdapter = new ItemsAdapter(view.getContext(), finalFilesAndDirs, this, requireActivity());
+                    recyclerView.setAdapter(currentAdapter);
 
                     if (updateBreadcrumb)
                         updateBreadCrumbList(path, oldPath);
@@ -257,20 +249,24 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     recyclerView.scrollToPosition(0);
                     swipeRefreshLayout.setRefreshing(false);
 
-                    ItemsAdapter.recoverEventuallyActiveCopyMoveOperation();
-                    ItemsAdapter.recoverEventuallyActiveExtractOperation();
-                    ItemsAdapter.recoverEventuallyActiveCompressOperation();
+                    ((ItemsAdapter)currentAdapter).recoverEventuallyActiveCopyMoveOperation();
+                    ((ItemsAdapter)currentAdapter).recoverEventuallyActiveExtractOperation();
+                    ((ItemsAdapter)currentAdapter).recoverEventuallyActiveCompressOperation();
                 }
             });
         });
 
     }
 
-    public static void resetActionBarTitle() {
+    public RecyclerView.Adapter getCurrentAdapter() {
+        return currentAdapter;
+    }
+
+    public void resetActionBarTitle() {
         setActionBarTitle(getCurrentDirectoryName());
     }
 
-    private static void reloadBreadCrumb(String newPath) {
+    private void reloadBreadCrumb(String newPath) {
         if (breadcrumbsView != null) {
             emptyBreadcrumb();
 
@@ -282,7 +278,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    private static void updateBreadCrumbList(String newPath, String oldPath) {
+    private void updateBreadCrumbList(String newPath, String oldPath) {
         if (newPath == null || newPath.length() == 0) {
             List<String> pathList = Collections.singletonList(pathHome);
             breadcrumbsView.addItem(new BreadcrumbItem(pathList));
@@ -320,7 +316,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    private static void emptyBreadcrumb() {
+    private void emptyBreadcrumb() {
         if (breadcrumbsView != null) {
             // clean breadcrumb
             List<IBreadcrumbItem> currentItemsList = breadcrumbsView.getItems();
@@ -332,11 +328,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    private static boolean isPathProtected(String path) {
+    private boolean isPathProtected(String path) {
         return (!pathRoot.equals(path) && pathRoot.contains(path));
     }
 
-    private static String getCurrentDirectoryName() {
+    private String getCurrentDirectoryName() {
         if (isInHomePath()) {
             return pathHomeFriendlyName;
         }
@@ -349,7 +345,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return "";
     }
 
-    public static void refreshList() {
+    public void refreshList() {
 
         switch (pathHomeFriendlyName) {
             case strLocationRecentsFriendlyName:
@@ -376,7 +372,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    public static String getParentPath() {
+    public String getParentPath() {
         // se siamo già nella root
         if (Objects.equals(currentPath, pathHome))
             return pathHome;
@@ -386,11 +382,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return file.getParent();
     }
 
-    public static String getCurrentPath() {
+    public String getCurrentPath() {
         return currentPath;
     }
 
-    public static String getInternalStoragePath() {
+    public String getInternalStoragePath() {
         return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
@@ -398,7 +394,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         currentPath = path;
     }*/
 
-    public static boolean isInHomePath() {
+    public boolean isInHomePath() {
         // se siamo già nella root
         return Objects.equals(currentPath, pathHome);
     }
@@ -407,16 +403,17 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         pathHome = path;
     }*/
 
-    public static boolean goBack() {
+    public boolean goBack() {
 
-        if (isSelectionModeEnabled()) {
-            clearSelection();
-            MainFragment.refreshList();
+        if (currentAdapter instanceof ItemsAdapter && ((ItemsAdapter)currentAdapter).isSelectionModeEnabled()) {
+            ((ItemsAdapter)currentAdapter).clearSelection();
+            refreshList();
         } else {
-            if (!MainFragment.isInHomePath()) {
+            if (!isInHomePath()) {
                 // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
-                MainFragment.loadPath(MainFragment.getParentPath(), true, false);
+                loadPath(getParentPath(), true, false);
             } else {
+                int backPressedInterval = 2000;
                 if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
                     return true; // la main activity deve invocare finish
                 else {
@@ -429,8 +426,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return false;
     }
 
-    private static void renameFile(File file, String newName) {
-        if (file == null)
+    private void renameFile(File file, String newName) {
+        if (file == null || !(currentAdapter instanceof ItemsAdapter))
             return;
 
         File dir = file.getParentFile();
@@ -441,12 +438,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             if (from.exists()) {
                 from.renameTo(to);
                 refreshList();
-                ItemsAdapter.clearSelection();
+                ((ItemsAdapter)currentAdapter).clearSelection();
             }
         }
     }
 
-    public static void displayRenameDialog(File file) {
+    public void displayRenameDialog(File file) {
         if (file == null)
             return;
 
@@ -497,7 +494,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
     }
 
-    private static void createDirectory(File currentDirectory, String newDirectoryName) {
+    private void createDirectory(File currentDirectory, String newDirectoryName) {
         if (currentDirectory == null)
             return;
 
@@ -525,7 +522,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    public static void displayNewDirectoryDialog() {
+    public void displayNewDirectoryDialog() {
         File currentDirectory = new File(currentPath);
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
@@ -585,7 +582,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
      * @param fileName        nome dell'eventuale file (solo per selezione singola)
      * @param selectedFilesQt numero di file selezionati
      */
-    public static void displayDeleteSelectionDialog(int selectionType, String fileName, int selectedFilesQt) {
+    public void displayDeleteSelectionDialog(int selectionType, String fileName, int selectedFilesQt) {
         if (fileName == null)
             return;
 
@@ -624,20 +621,24 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.show();
     }
 
-    private static void executeDeleteOperationOnThread(int selectedFilesQt) {
-        activityReference.runOnUiThread(() -> {
-            String toastMessage = view.getResources().getString(R.string.delete_toast_first_part) + " " + selectedFilesQt + " ";
-            if (selectedFilesQt == 1)
-                toastMessage += view.getResources().getString(R.string.delete_toast_single_second_part);
-            else
-                toastMessage += view.getResources().getString(R.string.delete_toast_multiple_second_part);
+    private void executeDeleteOperationOnThread(int selectedFilesQt) {
+        if (currentAdapter instanceof ItemsAdapter) {
 
-            Toast.makeText(view.getContext(), toastMessage, Toast.LENGTH_SHORT).show();
-            ItemsAdapter.deleteSelectedFilesOperation(currentPath);
-        });
+            activityReference.runOnUiThread(() -> {
+                String toastMessage = view.getResources().getString(R.string.delete_toast_first_part) + " " + selectedFilesQt + " ";
+                if (selectedFilesQt == 1)
+                    toastMessage += view.getResources().getString(R.string.delete_toast_single_second_part);
+                else
+                    toastMessage += view.getResources().getString(R.string.delete_toast_multiple_second_part);
+
+                Toast.makeText(view.getContext(), toastMessage, Toast.LENGTH_SHORT).show();
+                ((ItemsAdapter)currentAdapter).deleteSelectedFilesOperation(currentPath);
+            });
+        }
+
     }
 
-    public static void displayCopyMoveBar(boolean isCopy, int selectedItemsQt) {
+    public void displayCopyMoveBar(boolean isCopy, int selectedItemsQt) {
         copyMoveExtractBar.setVisibility(View.VISIBLE);
 
         Button btnCancel = view.findViewById(R.id.items_copy_move_btn_cancel_operation);
@@ -662,19 +663,26 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
-            if (ItemsAdapter.getOperationStartPath().equals(currentPath))
-                ItemsAdapter.recoverSelectionFromCopyMove();
-            else
-                clearSelectionFromCopyMove();
+            if (currentAdapter instanceof ItemsAdapter) {
+
+                if (((ItemsAdapter)currentAdapter).getOperationStartPath().equals(currentPath))
+                    ((ItemsAdapter)currentAdapter).recoverSelectionFromCopyMove();
+                else
+                    ((ItemsAdapter)currentAdapter).clearSelectionFromCopyMove();
+            }
+
 
             hideCopyMoveExtractBar();
             refreshList();
         });
 
-        btnConfirm.setOnClickListener(view -> executeCopyMoveOperationOnThread(isCopy, currentPath));
+        btnConfirm.setOnClickListener(view -> {
+            if (currentAdapter instanceof ItemsAdapter)
+                ((ItemsAdapter)currentAdapter).executeCopyMoveOperationOnThread(isCopy, currentPath);
+        });
     }
 
-    public static void displayExtractToBar() {
+    public void displayExtractToBar() {
         copyMoveExtractBar.setVisibility(View.VISIBLE);
 
         Button btnCancel = view.findViewById(R.id.items_copy_move_btn_cancel_operation);
@@ -687,18 +695,22 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
-            clearFileToExtractSelection();
+            if (currentAdapter instanceof ItemsAdapter)
+                ((ItemsAdapter)currentAdapter).clearFileToExtractSelection();
+
             hideCopyMoveExtractBar();
             refreshList();
         });
 
         btnConfirm.setOnClickListener(view -> {
             hideCopyMoveExtractBar();
-            executeExtractOperationOnThread(getCurrentPath());
+
+            if (currentAdapter instanceof ItemsAdapter)
+                ((ItemsAdapter)currentAdapter).executeExtractOperationOnThread(getCurrentPath());
         });
     }
 
-    public static void displayCompressToBar(int selectedItemsQt) {
+    public void displayCompressToBar(int selectedItemsQt) {
         copyMoveExtractBar.setVisibility(View.VISIBLE);
 
         Button btnCancel = view.findViewById(R.id.items_copy_move_btn_cancel_operation);
@@ -716,19 +728,24 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         txtOpDescr.setText(descr);
 
         btnCancel.setOnClickListener(view -> {
-            if (ItemsAdapter.getOperationStartPath().equals(currentPath))
-                ItemsAdapter.recoverSelectionFromCompress();
-            else
-                clearSelectionFromCompress();
+            if (currentAdapter instanceof ItemsAdapter) {
+                if (((ItemsAdapter)currentAdapter).getOperationStartPath().equals(currentPath))
+                    ((ItemsAdapter)currentAdapter).recoverSelectionFromCompress();
+                else
+                    ((ItemsAdapter)currentAdapter).clearSelectionFromCompress();
+            }
 
             hideCopyMoveExtractBar();
             refreshList();
         });
 
-        btnConfirm.setOnClickListener(view -> executeCompressOperationOnThread(currentPath));
+        btnConfirm.setOnClickListener(view -> {
+            if (currentAdapter instanceof ItemsAdapter)
+                ((ItemsAdapter)currentAdapter).executeCompressOperationOnThread(currentPath);
+        });
     }
 
-    public static void displaySortByDialog() {
+    public void displaySortByDialog() {
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
         alertBuilder.setTitle(R.string.action_sort_by);
 
@@ -785,7 +802,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.show();
     }
 
-    public static void displayPropertiesDialog(File file) {
+    public void displayPropertiesDialog(File file) {
 
         // attributi file
         String fileType = getFileType(file);
@@ -833,11 +850,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.show();
     }
 
-    public static void hideCopyMoveExtractBar() {
+    public void hideCopyMoveExtractBar() {
         copyMoveExtractBar.setVisibility(View.GONE);
     }
 
-    public static void loadPathDownload(boolean reloadBreadCrumb) {
+    public void loadPathDownload(boolean reloadBreadCrumb) {
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
         pathHomeFriendlyName = strLocationInternalFriendlyName;
 
@@ -845,14 +862,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         reloadBreadCrumb(path);
     }
 
-    public static void loadPathInternal(boolean reloadBreadCrumb) {
+    public void loadPathInternal(boolean reloadBreadCrumb) {
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
         pathHomeFriendlyName = strLocationInternalFriendlyName;
 
         loadPath(path, false, reloadBreadCrumb);
     }
 
-    public static void displayVideosFiles() {
+    public void displayVideosFiles() {
         currentPath = getInternalStoragePath();
         currentPath = getInternalStoragePath();
 
@@ -870,7 +887,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_videos));
     }
 
-    public static void displayAudioFiles() {
+    public void displayAudioFiles() {
         currentPath = getInternalStoragePath();
 
         displayEmptyLayoutWhileWaiting(true);
@@ -887,7 +904,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_audio));
     }
 
-    public static void displayImagesFiles() {
+    public void displayImagesFiles() {
         currentPath = getInternalStoragePath();
 
         displayEmptyLayoutWhileWaiting(true);
@@ -904,7 +921,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
     }
 
-    public static void displayRecentsFiles() {
+    public void displayRecentsFiles() {
         currentPath = getInternalStoragePath();
 
         RecentsFilesManager recentsFilesManager = new RecentsFilesManager(sharedPreferences);
@@ -922,7 +939,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         loadSelection(recentsFilesArr, view.getResources().getString(R.string.drawer_menu_recent));
     }
 
-    private static void findVideosFiles(ArrayList<File> fileList, Activity context) {
+    private void findVideosFiles(ArrayList<File> fileList, Activity context) {
         ArrayList<String> urlList = getAllVideosUrls(context);
 
         for (String uri : urlList) {
@@ -931,7 +948,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    private static void findImagesFiles(ArrayList<File> fileList, Activity context) {
+    private void findImagesFiles(ArrayList<File> fileList, Activity context) {
         ArrayList<String> urlList = getAllImagesUrls(context);
 
         for (String uri : urlList) {
@@ -940,7 +957,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    private static void findAudioFiles(ArrayList<File> fileList, Activity context) {
+    private void findAudioFiles(ArrayList<File> fileList, Activity context) {
         ArrayList<String> urlList = getAllAudioUrls(context);
 
         for (String uri : urlList) {
@@ -956,12 +973,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
      *
      * @return True se ci troviamo all'interno di una location "custom", false altrimenti.
      */
-    public static boolean isACustomLocationDisplayed() {
+    public boolean isACustomLocationDisplayed() {
         return !pathHomeFriendlyName.equals(strLocationInternalFriendlyName)
                 && !pathHomeFriendlyName.equals(strLocationDownloadsFriendlyName);
     }
 
-    private static ArrayList<String> getAllImagesUrls(Activity context) {
+    private ArrayList<String> getAllImagesUrls(Activity context) {
         ArrayList<String> urlList;
         final String[] projection = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
 
@@ -970,7 +987,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         Cursor cursor = context.getContentResolver().query(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
                 MediaStore.Images.Media.DATA + " not like ? ",
-                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
+                new String[]{getInternalStoragePath() + "/Android"}, null);
 
         urlList = new ArrayList<>();
 
@@ -985,7 +1002,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return urlList;
     }
 
-    private static ArrayList<String> getAllVideosUrls(Activity context) {
+    private ArrayList<String> getAllVideosUrls(Activity context) {
         ArrayList<String> urlList;
         final String[] projection = {MediaStore.Video.Media.DATA, MediaStore.Video.Media._ID};
 
@@ -994,7 +1011,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
                 MediaStore.Video.Media.DATA + " not like ? ",
-                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
+                new String[]{getInternalStoragePath() + "/Android"}, null);
 
         urlList = new ArrayList<>();
 
@@ -1009,7 +1026,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return urlList;
     }
 
-    private static ArrayList<String> getAllAudioUrls(Activity context) {
+    private ArrayList<String> getAllAudioUrls(Activity context) {
         ArrayList<String> urlList;
         final String[] projection = {MediaStore.Audio.Media.DATA, MediaStore.Audio.Media._ID};
 
@@ -1018,7 +1035,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection,
                 MediaStore.Audio.Media.DATA + " not like ? ",
-                new String[]{MainFragment.getInternalStoragePath() + "/Android"}, null);
+                new String[]{getInternalStoragePath() + "/Android"}, null);
 
         urlList = new ArrayList<>();
 
@@ -1052,9 +1069,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         copyMoveExtractBar = view.findViewById(R.id.items_copy_move_bar);
         activityReference = requireActivity();
         sharedPreferences = activityReference.getSharedPreferences("TerzulliFileManager", MODE_PRIVATE);
+        currentAdapter = null;
 
         pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
-        pathRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
         if (pathHomeFriendlyName == null)
             pathHomeFriendlyName = strLocationInternalFriendlyName;
 
@@ -1071,13 +1088,17 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         breadcrumbsView.setCallback(new DefaultBreadcrumbsCallback<BreadcrumbItem>() {
             @Override
             public void onNavigateBack(BreadcrumbItem item, int position) {
-                clearSelection();
+                if(currentAdapter instanceof ItemsAdapter)
+                    ((ItemsAdapter)currentAdapter).clearSelection();
+
                 loadPath(getSelectedBreadcrumbPath(position), false, false);
             }
 
             @Override
             public void onNavigateNewLocation(BreadcrumbItem newItem, int changedPosition) {
-                clearSelection();
+                if(currentAdapter instanceof ItemsAdapter)
+                    ((ItemsAdapter)currentAdapter).clearSelection();
+
                 loadPath(getSelectedBreadcrumbPath(changedPosition - 1) + "/" + newItem.getSelectedItem(), false, false);
             }
         });
@@ -1098,7 +1119,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             setActionBarTitle(lastActionBarTitle);
 
         activityReference = requireActivity();
-        if (!isSearchActive())
+        if (!((MainActivity)activityReference).isSearchActive())
             refreshList();
     }
 

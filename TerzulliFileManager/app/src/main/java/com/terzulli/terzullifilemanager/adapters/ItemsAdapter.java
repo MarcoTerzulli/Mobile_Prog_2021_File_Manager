@@ -1,16 +1,10 @@
 package com.terzulli.terzullifilemanager.adapters;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.terzulli.terzullifilemanager.activities.MainActivity.closeSearchView;
-import static com.terzulli.terzullifilemanager.activities.MainActivity.updateMenuItems;
-import static com.terzulli.terzullifilemanager.fragments.MainFragment.displayExtractToBar;
-import static com.terzulli.terzullifilemanager.fragments.MainFragment.displayPropertiesDialog;
-import static com.terzulli.terzullifilemanager.fragments.MainFragment.resetActionBarTitle;
-import static com.terzulli.terzullifilemanager.fragments.MainFragment.setActionBarTitle;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
 import static com.terzulli.terzullifilemanager.utils.Utils.isFileAZipArchive;
 
-import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +33,7 @@ import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.RecentsFilesManager;
+import com.terzulli.terzullifilemanager.utils.SelectedFilesManager;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import net.lingala.zip4j.ZipFile;
@@ -56,170 +51,83 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
-    private static ArrayList<File> currentFilesBeforeQuerySubmit;
-    private static ArrayList<File> selectedFiles;
-    private static ArrayList<File> selectedFilesToCopyMove;
-    private static ArrayList<File> selectedFilesToCompress;
-    private static File[] filesAndDirs = null;
-    @SuppressLint("StaticFieldLeak")
-    private static Context context;
-    private static boolean copyMoveOperationTypeIsCopy = false;
-    private static File fileToExtract = null;
-    private static String operationStartPath;
+    private final Context context;
+    private final SelectedFilesManager selectedFilesManager;
+    private final MainFragment mainFragment;
+    private final Activity activityReference;
+    private File[] filesAndDirs;
 
-    public ItemsAdapter(Context context, File[] filesAndFolders) {
-        ItemsAdapter.context = context;
+    public ItemsAdapter(Context context, File[] filesAndFolders, MainFragment mainFragment, Activity activityReference) {
+        this.context = context;
         filesAndDirs = filesAndFolders;
+        this.mainFragment = mainFragment;
+        this.activityReference = activityReference;
 
-        if (selectedFiles == null)
-            selectedFiles = new ArrayList<>();
-
-        if (selectedFilesToCopyMove == null)
-            selectedFilesToCopyMove = new ArrayList<>();
-
-        if (currentFilesBeforeQuerySubmit == null)
-            currentFilesBeforeQuerySubmit = new ArrayList<>();
-
-        if (selectedFilesToCompress == null)
-            selectedFilesToCompress = new ArrayList<>();
+        selectedFilesManager = new SelectedFilesManager();
 
     }
 
-    public static void clearFileToExtractSelection() {
-        fileToExtract = null;
-    }
-
-    public static void clearCurrentFilesBeforeQuerySubmit() {
-        if(currentFilesBeforeQuerySubmit != null)
-            currentFilesBeforeQuerySubmit.clear();
-    }
-
-    public static void recoverCurrentFilesBeforeQuerySubmit() {
-        if (currentFilesBeforeQuerySubmit.size() != 0) {
-
-            filesAndDirs = new File[currentFilesBeforeQuerySubmit.size()];
-            int i = 0;
-            for (File file : currentFilesBeforeQuerySubmit)
-                filesAndDirs[i++] = file;
-
-            currentFilesBeforeQuerySubmit.clear();
-        }
-    }
-
-    public static String getOperationStartPath() {
-        return operationStartPath;
-    }
-
-    public static void saveCurrentFilesBeforeQuerySubmit() {
-        currentFilesBeforeQuerySubmit = new ArrayList<>(filesAndDirs.length);
-        currentFilesBeforeQuerySubmit.addAll(Arrays.asList(filesAndDirs));
-    }
-
-    public static void clearSelectionFromCopyMove() {
-        selectedFilesToCopyMove.clear();
-    }
-
-    public static void recoverSelectionFromCopyMove() {
-        selectedFiles = new ArrayList<>(selectedFilesToCopyMove.size());
-        selectedFiles.addAll(selectedFilesToCopyMove);
-        selectedFilesToCopyMove.clear();
-    }
-
-    public static void saveSelectionFromCopyMove() {
-        selectedFilesToCopyMove = new ArrayList<>(selectedFiles.size());
-        selectedFilesToCopyMove.addAll(selectedFiles);
-        selectedFiles.clear();
-    }
-
-    public static void clearSelectionFromCompress() {
-        selectedFilesToCompress.clear();
-    }
-
-    public static void recoverSelectionFromCompress() {
-        selectedFiles = new ArrayList<>(selectedFilesToCompress.size());
-        selectedFiles.addAll(selectedFilesToCompress);
-        selectedFilesToCompress.clear();
-    }
-
-    public static void saveSelectionFromCompress() {
-        selectedFilesToCompress = new ArrayList<>(selectedFiles.size());
-        selectedFilesToCompress.addAll(selectedFiles);
-        selectedFiles.clear();
-    }
-
-    public static void clearSelection() {
-        selectedFiles.clear();
-    }
-
-    public static boolean isSelectionModeEnabled() {
-        if (selectedFiles == null)
-            return false;
-        return !selectedFiles.isEmpty();
-    }
-
-    public static void selectAll() {
+    public void deselectAll() {
         clearSelection();
-        selectedFiles.addAll(Arrays.asList(filesAndDirs));
-        MainFragment.refreshList();
+        mainFragment.refreshList();
     }
 
-    public static void deselectAll() {
-        clearSelection();
-        MainFragment.refreshList();
-    }
-
-    public static void infoSelectedFile() {
-        if (isSelectionModeEnabled() && selectedFiles.size() == 1) {
-            displayPropertiesDialog(selectedFiles.get(0));
+    public void infoSelectedFile() {
+        if (isSelectionModeEnabled() && selectedFilesManager.getSelectedFiles().size() == 1) {
+            mainFragment.displayPropertiesDialog(selectedFilesManager.getSelectedFiles().get(0));
         } else if (!isSelectionModeEnabled()) {
-            displayPropertiesDialog(new File(MainFragment.getCurrentPath()));
+            mainFragment.displayPropertiesDialog(new File(mainFragment.getCurrentPath()));
         }
     }
 
-    public static void copyMoveSelection(boolean isCopy) {
-        if (selectedFiles == null)
+    public void copyMoveSelection(boolean isCopy) {
+        if (selectedFilesManager.getSelectedFiles().size() == 0)
             return;
 
-        operationStartPath = MainFragment.getCurrentPath();
-        copyMoveOperationTypeIsCopy = isCopy;
-        saveSelectionFromCopyMove();
+        selectedFilesManager.setOperationStartPath(mainFragment.getCurrentPath());
+        selectedFilesManager.setCopyMoveOperationTypeIsCopy(isCopy);
+        /*operationStartPath = MainFragment.getCurrentPath();
+        copyMoveOperationTypeIsCopy = isCopy;*/
+        saveSelectionForCopyMove();
         clearSelection();
-        MainFragment.refreshList();
+        mainFragment.refreshList();
 
-        MainFragment.displayCopyMoveBar(isCopy, selectedFilesToCopyMove.size());
+        mainFragment.displayCopyMoveBar(isCopy, selectedFilesManager.getSelectedFilesToCopyMove().size());
     }
 
-    public static void compressSelection() {
-        if (selectedFiles == null)
+    public void compressSelection() {
+        if (selectedFilesManager.getSelectedFiles().size() == 0)
             return;
 
-        operationStartPath = MainFragment.getCurrentPath();
-        saveSelectionFromCompress();
+        //operationStartPath = MainFragment.getCurrentPath();
+        selectedFilesManager.setOperationStartPath(mainFragment.getCurrentPath());
+        saveSelectionForCompress();
         clearSelection();
-        MainFragment.refreshList();
+        mainFragment.refreshList();
 
-        MainFragment.displayCompressToBar(selectedFilesToCompress.size());
+        mainFragment.displayCompressToBar(selectedFilesManager.getSelectedFilesToCompress().size());
     }
 
-    public static void recoverEventuallyActiveCopyMoveOperation() {
-        if (selectedFilesToCopyMove.size() != 0) {
-            MainFragment.displayCopyMoveBar(copyMoveOperationTypeIsCopy, selectedFilesToCopyMove.size());
+    public void recoverEventuallyActiveCopyMoveOperation() {
+        if (selectedFilesManager.getSelectedFilesToCopyMove().size() != 0) {
+            mainFragment.displayCopyMoveBar(selectedFilesManager.copyMoveOperationTypeIsCopy(),
+                    selectedFilesManager.getSelectedFilesToCopyMove().size());
         }
     }
 
-    public static void recoverEventuallyActiveExtractOperation() {
-        if (fileToExtract != null) {
-            MainFragment.displayExtractToBar();
+    public void recoverEventuallyActiveExtractOperation() {
+        if (selectedFilesManager.getFileToExtract() != null) {
+            mainFragment.displayExtractToBar();
         }
     }
 
-    public static void recoverEventuallyActiveCompressOperation() {
-        if (selectedFilesToCompress.size() != 0) {
-            MainFragment.displayCompressToBar(selectedFilesToCompress.size());
+    public void recoverEventuallyActiveCompressOperation() {
+        if (selectedFilesManager.getSelectedFilesToCompress().size() != 0) {
+            mainFragment.displayCompressToBar(selectedFilesManager.getSelectedFilesToCompress().size());
         }
     }
 
-    public static void submitSearchQuery(final String searchQuery) {
+    public void submitSearchQuery(final String searchQuery) {
         // recupero tutti i file originali del path corrente in caso siano state fatte query precedenti
         recoverCurrentFilesBeforeQuerySubmit();
         // salvo tutti i file del path corrente
@@ -237,7 +145,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         for (File file : searchedResults)
             searchedResultsArr[i++] = file;
 
-        MainFragment.loadSelection(searchedResultsArr, "");
+        mainFragment.loadSelection(searchedResultsArr, "");
     }
 
     /**
@@ -249,15 +157,16 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
      * - 1: operazione completata con successo
      * - -1: generata eccezione durante l'operazione
      */
-    public static int copyMoveSelectionOperation(boolean isCopy, String destinationPath) {
-        ArrayList<File> filesToCopyMove = new ArrayList<>(selectedFilesToCopyMove.size());
-        filesToCopyMove.addAll(selectedFilesToCopyMove);
+    public int copyMoveSelectionOperation(boolean isCopy, String destinationPath) {
+        ArrayList<File> filesToCopyMove = new ArrayList<>(selectedFilesManager.getSelectedFilesToCopyMove().size());
+        filesToCopyMove.addAll(selectedFilesManager.getSelectedFilesToCopyMove());
 
         if (filesToCopyMove.size() == 0)
             return -1;
 
         clearSelection();
-        selectedFilesToCopyMove = new ArrayList<>();
+        //selectedFilesToCopyMove = new ArrayList<>();
+        selectedFilesManager.clearSelectionFromCopyMove();
 
         File newLocation = new File(destinationPath);
         if (newLocation.exists()) {
@@ -283,31 +192,31 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         return 1;
     }
 
-    public static void renameSelectedFile() {
+    public void renameSelectedFile() {
         // controllo se c'è esattamente un file / cartella selezionato
         if (checkSelectedFilesType() == 1 || checkSelectedFilesType() == 2
                 || checkSelectedFilesType() == 11 || checkSelectedFilesType() == 12)
-            MainFragment.displayRenameDialog(selectedFiles.get(0));
+            mainFragment.displayRenameDialog(selectedFilesManager.getSelectedFiles().get(0));
     }
 
-    public static void createNewDirectory() {
+    public void createNewDirectory() {
         if (!isSelectionModeEnabled())
-            MainFragment.displayNewDirectoryDialog();
+            mainFragment.displayNewDirectoryDialog();
     }
 
-    public static void extractSelectedFile() {
-        if (fileToExtract != null) {
+    public void extractSelectedFile() {
+        if (selectedFilesManager.getFileToExtract() != null) {
             // caso in cui apriamo un file direttamente con il click
             //extractSelectedFilesOperation(fileToDeCompress, fileToDeCompress.getParent());
-            displayExtractToBar();
+            mainFragment.displayExtractToBar();
         }
     }
 
-    public static void executeCopyMoveOperationOnThread(boolean isCopy, String destinationPath) {
+    public void executeCopyMoveOperationOnThread(boolean isCopy, String destinationPath) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
-        MainFragment.hideCopyMoveExtractBar();
+        mainFragment.hideCopyMoveExtractBar();
 
         if (isCopy)
             Toast.makeText(context, R.string.action_copy_started, Toast.LENGTH_SHORT).show();
@@ -317,7 +226,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         executor.execute(() -> {
 
             //Background work here
-            int nItems = selectedFilesToCopyMove.size();
+            int nItems = selectedFilesManager.getSelectedFilesToCopyMove().size();
             int returnCode = copyMoveSelectionOperation(isCopy, destinationPath);
 
             handler.post(() -> {
@@ -331,7 +240,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                         else
                             toastMessage = context.getResources().getString(R.string.action_move_completed_first_part);
 
-                        toastMessage += " " + nItems + " " + context.getResources().getString(R.string.action_copy_move_completed_third_part);
+                        toastMessage += " " + nItems + " " + context.getResources().getString(R.string.action_copy_move_completed_second_part_v2)
+                                + " " + context.getResources().getString(R.string.action_copy_move_completed_third_part);
                         Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
 
                         break;
@@ -342,23 +252,24 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                         break;
                 }
 
-                if (MainFragment.getCurrentPath().equals(destinationPath))
-                    MainFragment.refreshList();
+                if (mainFragment.getCurrentPath().equals(destinationPath))
+                    mainFragment.refreshList();
             });
         });
     }
 
-    public static void executeExtractOperationOnThread(String extractPath) {
+    public void executeExtractOperationOnThread(String extractPath) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
-        MainFragment.hideCopyMoveExtractBar();
+        mainFragment.hideCopyMoveExtractBar();
         Toast.makeText(context, R.string.action_extraction_started, Toast.LENGTH_SHORT).show();
 
         executor.execute(() -> {
 
             //Background work here
-            int returnCode = extractSelectedFileOperation(new File(fileToExtract.getPath()), extractPath);
+            int returnCode = extractSelectedFileOperation(new File(selectedFilesManager.getFileToExtract().getPath()),
+                    extractPath);
 
             handler.post(() -> {
                 //UI Thread work here
@@ -381,17 +292,17 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                         break;
                 }
 
-                if (MainFragment.getCurrentPath().equals(extractPath))
-                    MainFragment.refreshList();
+                if (mainFragment.getCurrentPath().equals(extractPath))
+                    mainFragment.refreshList();
             });
         });
     }
 
-    public static void executeCompressOperationOnThread(String compressPath) {
+    public void executeCompressOperationOnThread(String compressPath) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
-        MainFragment.hideCopyMoveExtractBar();
+        mainFragment.hideCopyMoveExtractBar();
         Toast.makeText(context, R.string.action_compression_started, Toast.LENGTH_SHORT).show();
 
         executor.execute(() -> {
@@ -417,8 +328,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                         break;
                 }
 
-                if (MainFragment.getCurrentPath().equals(compressPath))
-                    MainFragment.refreshList();
+                if (mainFragment.getCurrentPath().equals(compressPath))
+                    mainFragment.refreshList();
             });
         });
     }
@@ -434,9 +345,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
      * - -2: errore durante la creazione della cartella di estrazione. Nome duplicato (superati tentativi max) o mancanza permessi storage
      * - -3: archivio protetto da password
      */
-    private static int extractSelectedFileOperation(File fileToExtract, String extractPath) {
+    private int extractSelectedFileOperation(File fileToExtract, String extractPath) {
         if (fileToExtract != null) {
-            ItemsAdapter.fileToExtract = null;
+            //ItemsAdapter.fileToExtract = null;
+            selectedFilesManager.setFileToExtract(null);
 
             String newName = fileToExtract.getName().substring(0, fileToExtract.getName().length() - ".zip".length());
             String originalName = newName;
@@ -484,15 +396,16 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
      * - -1: errore durante la creazione dello zip
      * - -2: errore Nome archivio duplicato (superati tentativi max) o mancanza permessi storage
      */
-    private static int compressSelectedFilesOperation(String compressPath) {
-        ArrayList<File> filesToCompress = new ArrayList<>(selectedFilesToCompress.size());
-        filesToCompress.addAll(selectedFilesToCompress);
+    private int compressSelectedFilesOperation(String compressPath) {
+        ArrayList<File> filesToCompress = new ArrayList<>(selectedFilesManager.getSelectedFilesToCompress().size());
+        filesToCompress.addAll(selectedFilesManager.getSelectedFilesToCompress());
 
         if (filesToCompress.size() == 0)
             return -1;
 
         clearSelection();
-        selectedFilesToCompress = new ArrayList<>();
+        //selectedFilesToCompress = new ArrayList<>();
+        selectedFilesManager.setSelectedFilesToCompress(new ArrayList<>());
 
         String newName = "archive";
         String originalName = newName;
@@ -528,22 +441,22 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         return 1;
     }
 
-    public static void deleteSelectedFilesOperation(String originalPath) {
+    public void deleteSelectedFilesOperation(String originalPath) {
         if (isSelectionModeEnabled()) {
-            ArrayList<File> filestoDelete = new ArrayList<>(selectedFiles.size());
-            filestoDelete.addAll(selectedFiles);
+            ArrayList<File> filestoDelete = new ArrayList<>(selectedFilesManager.getSelectedFiles().size());
+            filestoDelete.addAll(selectedFilesManager.getSelectedFiles());
             clearSelection();
 
             for (File file : filestoDelete) {
                 deleteRecursive(file);
             }
 
-            if (MainFragment.getCurrentPath().equals(originalPath))
-                MainFragment.refreshList();
+            if (mainFragment.getCurrentPath().equals(originalPath))
+                mainFragment.refreshList();
         }
     }
 
-    private static void deleteRecursive(File file) {
+    private void deleteRecursive(File file) {
         if (file.isDirectory()) {
             for (File child : Objects.requireNonNull(file.listFiles()))
                 deleteRecursive(child);
@@ -552,7 +465,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         file.delete();
     }
 
-    private static void copyFileLowLevelOperation(File sourceLocation, File targetLocation)
+    private void copyFileLowLevelOperation(File sourceLocation, File targetLocation)
             throws IOException {
 
         File outFile = new File(targetLocation, sourceLocation.getName());
@@ -610,7 +523,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         }
     }
 
-    public static void deleteSelectedFiles() {
+    public void deleteSelectedFiles() {
         if (isSelectionModeEnabled()) {
             int selectionType = 0;
             String fileName = "";
@@ -620,13 +533,13 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 case 11:
                     // 2: singolo file
                     selectionType = 2;
-                    fileName = selectedFiles.get(0).getName();
+                    fileName = selectedFilesManager.getSelectedFiles().get(0).getName();
                     break;
                 case 2:
                 case 12:
                     // 1: singola directory
                     selectionType = 1;
-                    fileName = selectedFiles.get(0).getName();
+                    fileName = selectedFilesManager.getSelectedFiles().get(0).getName();
                     break;
                 case 3:
                     // 4: multipli file
@@ -644,23 +557,23 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                     break;
             }
 
-            MainFragment.displayDeleteSelectionDialog(selectionType, fileName, selectedFiles.size());
+            mainFragment.displayDeleteSelectionDialog(selectionType, fileName, selectedFilesManager.getSelectedFiles().size());
         }
     }
 
-    private static boolean checkIfItemWasSelected(File file) {
-        if (selectedFiles.isEmpty())
+    private boolean checkIfItemWasSelected(File file) {
+        if (selectedFilesManager.getSelectedFiles().isEmpty())
             return false;
-        return selectedFiles.contains(file);
+        return selectedFilesManager.getSelectedFiles().contains(file);
     }
 
-    public static void shareSelectedFiles() {
+    public void shareSelectedFiles() {
         if (isSelectionModeEnabled()) {
             Intent intentShareFile = new Intent(Intent.ACTION_SEND_MULTIPLE);
 
             // impstazione mime type
-            String mimetype = Utils.getMimeType(Uri.fromFile(selectedFiles.get(0)));
-            for (File file : selectedFiles) {
+            String mimetype = Utils.getMimeType(Uri.fromFile(selectedFilesManager.getSelectedFiles().get(0)));
+            for (File file : selectedFilesManager.getSelectedFiles()) {
                 if (!mimetype.equals(Utils.getMimeType(Uri.fromFile(file)))) {
                     mimetype = "*/*";
                     break;
@@ -670,7 +583,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
             // allego i file
             ArrayList<Uri> filesToShare = new ArrayList<>();
-            for (File file : selectedFiles) {
+            for (File file : selectedFilesManager.getSelectedFiles()) {
                 filesToShare.add(FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file));
             }
 
@@ -704,14 +617,14 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
      * - 9: selezione completa dentro zip
      * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
      * */
-    private static int checkSelectedFilesType() {
-        if (selectedFiles.isEmpty())
+    private int checkSelectedFilesType() {
+        if (selectedFilesManager.getSelectedFiles().isEmpty())
             return 0;
 
         int foundFileCount = 0;
         int foundDirsCount = 0;
 
-        for (File file : selectedFiles) {
+        for (File file : selectedFilesManager.getSelectedFiles()) {
             if (file.isDirectory()) {
                 foundDirsCount++;
             } else {
@@ -725,7 +638,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
             return 12;
         if (filesAndDirs.length == foundFileCount)
             return 7;
-        if (selectedFiles.size() == filesAndDirs.length)
+        if (selectedFilesManager.getSelectedFiles().size() == filesAndDirs.length)
             return 6;
         if (foundDirsCount > 1 && foundFileCount == 0)
             return 4;
@@ -741,10 +654,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         return 0; // non dovremmo mai arrivare qui
     }
 
-    public static void openWithSelectedFile() {
+    public void openWithSelectedFile() {
         if (isSelectionModeEnabled()) {
-            if (selectedFiles.size() == 1) {
-                File file = selectedFiles.get(0);
+            if (selectedFilesManager.getSelectedFiles().size() == 1) {
+                File file = selectedFilesManager.getSelectedFiles().get(0);
 
                 MimeTypeMap map = MimeTypeMap.getSingleton();
                 String ext = Utils.getFileExtension(file);
@@ -768,7 +681,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         }
     }
 
-    private static void installApplication(File file) {
+    private void installApplication(File file) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         intent.setDataAndType(FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file),
@@ -782,6 +695,118 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         } catch (ActivityNotFoundException e) {
             Toast.makeText(context, R.string.error_package_install, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void clearFileToExtractSelection() {
+        //fileToExtract = null;
+        selectedFilesManager.setFileToExtract(null);
+    }
+
+    public void clearCurrentFilesBeforeQuerySubmit() {
+        /*if(currentFilesBeforeQuerySubmit != null)
+            currentFilesBeforeQuerySubmit.clear();*/
+        selectedFilesManager.clearCurrentFilesBeforeQuerySubmit();
+    }
+
+    public void recoverCurrentFilesBeforeQuerySubmit() {
+        /*if (currentFilesBeforeQuerySubmit.size() != 0) {
+
+            filesAndDirs = new File[currentFilesBeforeQuerySubmit.size()];
+            int i = 0;
+            for (File file : currentFilesBeforeQuerySubmit)
+                filesAndDirs[i++] = file;
+
+            currentFilesBeforeQuerySubmit.clear();
+        }*/
+
+        if (selectedFilesManager.getCurrentFilesBeforeQuerySubmit().size() != 0) {
+
+            filesAndDirs = new File[selectedFilesManager.getCurrentFilesBeforeQuerySubmit().size()];
+            int i = 0;
+            for (File file : selectedFilesManager.getCurrentFilesBeforeQuerySubmit())
+                filesAndDirs[i++] = file;
+
+            selectedFilesManager.clearCurrentFilesBeforeQuerySubmit();
+        }
+    }
+
+    public String getOperationStartPath() {
+        //return operationStartPath;
+        return selectedFilesManager.getOperationStartPath();
+    }
+
+    public void saveCurrentFilesBeforeQuerySubmit() {
+        /*currentFilesBeforeQuerySubmit = new ArrayList<>(filesAndDirs.length);
+        currentFilesBeforeQuerySubmit.addAll(Arrays.asList(filesAndDirs));*/
+        selectedFilesManager.setCurrentFilesBeforeQuerySubmit(filesAndDirs);
+    }
+
+    public void clearSelectionFromCopyMove() {
+        //selectedFilesToCopyMove.clear();
+        selectedFilesManager.clearSelectionFromCopyMove();
+    }
+
+    public void recoverSelectionFromCopyMove() {
+        /*selectedFiles = new ArrayList<>(selectedFilesToCopyMove.size());
+        selectedFiles.addAll(selectedFilesToCopyMove);
+        selectedFilesToCopyMove.clear();*/
+        selectedFilesManager.recoverSelectionFromCopyMove();
+    }
+
+    public void saveSelectionForCopyMove() {
+        /*selectedFilesToCopyMove = new ArrayList<>(selectedFiles.size());
+        selectedFilesToCopyMove.addAll(selectedFiles);
+        selectedFiles.clear();*/
+
+        selectedFilesManager.setSelectedFilesToCopyMove(selectedFilesManager.getSelectedFiles());
+        selectedFilesManager.clearSelectedFiles();
+    }
+
+    public void clearSelectionFromCompress() {
+        //selectedFilesToCompress.clear();
+        selectedFilesManager.clearSelectionFromCompress();
+    }
+
+    public void recoverSelectionFromCompress() {
+        /*selectedFiles = new ArrayList<>(selectedFilesToCompress.size());
+        selectedFiles.addAll(selectedFilesToCompress);
+        selectedFilesToCompress.clear();*/
+
+        selectedFilesManager.setSelectedFiles(selectedFilesManager.getSelectedFilesToCompress());
+        selectedFilesManager.clearSelectionFromCompress();
+    }
+
+    public void saveSelectionForCompress() {
+        /*selectedFilesToCompress = new ArrayList<>(selectedFiles.size());
+        selectedFilesToCompress.addAll(selectedFiles);
+        selectedFiles.clear();*/
+
+        selectedFilesManager.setSelectedFilesToCompress(selectedFilesManager.getSelectedFiles());
+        selectedFilesManager.clearSelectedFiles();
+    }
+
+    public void clearSelection() {
+        //selectedFiles.clear();
+        selectedFilesManager.clearSelectedFiles();
+    }
+
+    public boolean isSelectionModeEnabled() {
+        /*if (selectedFiles == null)
+            return false;
+        return !selectedFiles.isEmpty();*/
+        return !selectedFilesManager.getSelectedFiles().isEmpty();
+    }
+
+    public void selectAll() {
+        /*clearSelection();
+        selectedFiles.addAll(Arrays.asList(filesAndDirs));
+        MainFragment.refreshList();*/
+
+        clearSelection();
+        ArrayList<File> selectedFilesList = new ArrayList<>(filesAndDirs.length);
+        selectedFilesList.addAll(Arrays.asList(filesAndDirs));
+        selectedFilesManager.setSelectedFiles(selectedFilesList);
+        mainFragment.refreshList();
     }
 
     @NonNull
@@ -848,8 +873,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         if (selectedFile.isDirectory()) {
             clearSelection();
-            closeSearchView();
-            MainFragment.loadPath(selectedFile.getAbsolutePath(), true, false);
+            if(activityReference instanceof MainActivity)
+                ((MainActivity)activityReference).closeSearchView();
+            mainFragment.loadPath(selectedFile.getAbsolutePath(), true, false);
         } else if (selectedFile.isFile()) {
 
             MimeTypeMap map = MimeTypeMap.getSingleton();
@@ -863,7 +889,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 recentsFilesManager.addFileToRecentsFilesList(selectedFile);
 
                 if (isFileAZipArchive(selectedFile)) {
-                    fileToExtract = selectedFile;
+                    //fileToExtract = selectedFile;
+                    selectedFilesManager.setFileToExtract(selectedFile);
                     extractSelectedFile();
                 } else if (type.equals("application/vnd.android.package-archive")
                         || type.equals("application/zip") || type.equals("application/java-archive")) {
@@ -913,9 +940,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         if (!recoverLastState) {
             // comportamento normale
-            if (selectedFiles.contains(selectedFile) && unselect) {
+            if (selectedFilesManager.getSelectedFiles().contains(selectedFile) && unselect) {
                 // unselect
-                selectedFiles.remove(selectedFile);
+                //selectedFiles.remove(selectedFile);
+                selectedFilesManager.removeSelectedFile(selectedFile);
 
                 TypedValue outValue = new TypedValue();
                 context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
@@ -924,7 +952,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 setItemBackgroundColor(color, holder);
             } else {
                 // select
-                selectedFiles.add(selectedFile);
+                //selectedFiles.add(selectedFile);
+                selectedFilesManager.addSelectedFile(selectedFile);
 
                 color = ContextCompat.getColor(context, R.color.item_selected_light);
                 setSelectedIcon = true;
@@ -947,14 +976,20 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         setItemIcon(selectedFile, holder, setSelectedIcon);
 
         // aggiorno il titolo della toolbar in base al numero di elementi selezionati
-        if (!selectedFiles.isEmpty()) {
-            setActionBarTitle(selectedFiles.size() + " " + context.getResources().getString(R.string.selected_file_lowercase));
-            MainActivity.setActionBarToggleCloseButton();
+        if (!selectedFilesManager.getSelectedFiles().isEmpty()) {
+            mainFragment.setActionBarTitle(selectedFilesManager.getSelectedFiles().size() + " " + context.getResources().getString(R.string.selected_file_lowercase));
+
+            if(activityReference instanceof MainActivity)
+                ((MainActivity)activityReference).setActionBarToggleCloseButton();
         } else {
-            resetActionBarTitle();
-            MainActivity.setActionBarToggleDefault();
+            mainFragment.resetActionBarTitle();
+
+            if(activityReference instanceof MainActivity)
+                ((MainActivity)activityReference).setActionBarToggleDefault();
         }
-        updateMenuItems(checkSelectedFilesType());
+
+        if(activityReference instanceof MainActivity)
+            ((MainActivity)activityReference).updateMenuItems(checkSelectedFilesType());
     }
 
     private void setItemBackgroundColor(final int color, @NonNull ItemsViewHolder holder) {

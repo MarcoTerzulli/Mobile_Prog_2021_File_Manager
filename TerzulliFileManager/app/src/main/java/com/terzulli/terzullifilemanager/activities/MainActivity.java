@@ -1,9 +1,5 @@
 package com.terzulli.terzullifilemanager.activities;
 
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.saveCurrentFilesBeforeQuerySubmit;
-import static com.terzulli.terzullifilemanager.adapters.ItemsAdapter.submitSearchQuery;
-import static com.terzulli.terzullifilemanager.fragments.MainFragment.isACustomLocationDisplayed;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -14,7 +10,6 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.SearchView;
@@ -28,6 +23,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
 import com.terzulli.terzullifilemanager.R;
@@ -36,26 +32,23 @@ import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
-import java.util.Objects;
-
 public class MainActivity extends PermissionsActivity
         implements PermissionsActivity.OnPermissionGranted {
 
     @SuppressLint("StaticFieldLeak")
-    private static SearchView searchView;
-    private static Menu toolbarMenu;
-    private static Fragment navHostFragment;
-    private static int menuActualCase;
-    private static SharedPreferences sharedPreferences;
-    private static DrawerLayout drawer;
-    private static ActionBarDrawerToggle actionBarDrawerToggle;
-    @SuppressLint("StaticFieldLeak")
-    private static Activity activity;
+    private SearchView searchView;
+    private Menu toolbarMenu;
+    private Fragment navHostFragment;
+    private int menuActualCase;
+    private SharedPreferences sharedPreferences;
+    private DrawerLayout drawer;
+    private ActionBarDrawerToggle actionBarDrawerToggle;
+    private Activity activity;
     private AppBarConfiguration AppBarConfiguration;
     private ActivityMainBinding binding;
     private Toolbar toolbar;
 
-    private static void setupSearchView() {
+    private void setupSearchView() {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
             @Override
@@ -65,7 +58,15 @@ public class MainActivity extends PermissionsActivity
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                submitSearchQuery(newText);
+                Fragment currentFragment = getForegroundFragment();
+
+                if(currentFragment instanceof MainFragment) {
+                    RecyclerView.Adapter currentAdapter = ((MainFragment)currentFragment).getCurrentAdapter();
+
+                    if(currentAdapter instanceof ItemsAdapter) {
+                        ((ItemsAdapter)currentAdapter).submitSearchQuery(newText);
+                    }
+                }
 
                 return false;
             }
@@ -78,18 +79,27 @@ public class MainActivity extends PermissionsActivity
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 // non si fa nulla quando il menù di ricerca si apre
-                saveCurrentFilesBeforeQuerySubmit();
+                Fragment currentFragment = getForegroundFragment();
+
+                if(currentFragment instanceof MainFragment) {
+                    RecyclerView.Adapter currentAdapter = ((MainFragment)currentFragment).getCurrentAdapter();
+
+                    if(currentAdapter instanceof ItemsAdapter) {
+                        ((ItemsAdapter)currentAdapter).saveCurrentFilesBeforeQuerySubmit();
+                    }
+                }
 
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                //clearSelectionAndActiveOperations();
-
                 updateMenuItems(menuActualCase);
 
-                new Handler().postDelayed(MainFragment::refreshList, 10);
+                Fragment currentFragment = getForegroundFragment();
+                if(currentFragment instanceof MainFragment) {
+                    new Handler().postDelayed(((MainFragment)currentFragment)::refreshList, 10);
+                }
 
                 return true;
             }
@@ -107,7 +117,7 @@ public class MainActivity extends PermissionsActivity
         });*/
     }
 
-    public static void closeSearchView() {
+    public void closeSearchView() {
         if (searchView != null && !searchView.isIconified()) {
             final MenuItem itemSearch = toolbarMenu.findItem(R.id.menu_search);
             MenuItemCompat.collapseActionView(itemSearch);
@@ -115,7 +125,7 @@ public class MainActivity extends PermissionsActivity
         }
     }
 
-    public static boolean isSearchActive() {
+    public boolean isSearchActive() {
         if (searchView != null) {
             return !searchView.isIconified();
         }
@@ -123,7 +133,7 @@ public class MainActivity extends PermissionsActivity
     }
 
     // metodo specifico per navHostFragment: restituisce il fragment corrente
-    public static Fragment getForegroundFragment() {
+    public Fragment getForegroundFragment() {
         return navHostFragment == null ? null : navHostFragment.getChildFragmentManager().getFragments().get(0);
     }
 
@@ -150,77 +160,84 @@ public class MainActivity extends PermissionsActivity
      * - 9: selezione completa dentro zip
      * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
      */
-    public static void updateMenuItems(int menuCase) {
+    public void updateMenuItems(int menuCase) {
 
         if (toolbarMenu == null || toolbarMenu.findItem(R.id.menu_search) == null)
             return;
 
         menuActualCase = menuCase;
 
-        switch (menuActualCase) {
-            case 1:
-                // 1 file selezionato
-                setMenuItemsOneFileSelected();
-                break;
-            case 2:
-                // 1 directory selezionata
-                setMenuItemsOneDirectorySelected();
-                break;
-            case 3:
-                // molteplici file selezionati
-                setMenuItemsMultipleFileSelected();
-                break;
-            case 4:
-            case 5:
-                // molteplici file / directory selezionate
-                setMenuItemsMultipleGenericSelected();
-                break;
-            case 6:
-                // selezione completa
-                setMenuItemsAllSelected();
-                break;
-            case 7:
-                // selezione completa ma di soli file
-                setMenuItemsAllSelectedOnlyFiles();
-                break;
-            /*case 8:
-                // selezione dentro zip
-                setMenuItemsOneSelectedInsideZip();
-                break;
-            case 9:
-                // selezione completa dentro zip
-                setMenuItemsAllSelectedInsideZip();
-                break;
-            case 10:
-                // nessuna seleazione ma siamo dentro uno zip
-                setMenuItemsZip();
-                break;*/
-            case 11:
-                //  selezione completa (generica) ma c'è un solo file
-                setMenuItemsAllSelectedOneFile();
-                break;
-            case 12:
-                // - 12: selezione completa (generica) ma c'è una sola cartella
-                setMenuItemsAllSelectedOneDirectory();
-                break;
-            default:
-                setMenuItemsDefault();
-                break;
+        Fragment currentFragment = getForegroundFragment();
+        if(currentFragment instanceof MainFragment) {
+            switch (menuActualCase) {
+                case 1:
+                    // 1 file selezionato
+                    setMenuItemsOneFileSelected();
+                    break;
+                case 2:
+                    // 1 directory selezionata
+                    setMenuItemsOneDirectorySelected();
+                    break;
+                case 3:
+                    // molteplici file selezionati
+                    setMenuItemsMultipleFileSelected();
+                    break;
+                case 4:
+                case 5:
+                    // molteplici file / directory selezionate
+                    setMenuItemsMultipleGenericSelected();
+                    break;
+                case 6:
+                    // selezione completa
+                    setMenuItemsAllSelected();
+                    break;
+                case 7:
+                    // selezione completa ma di soli file
+                    setMenuItemsAllSelectedOnlyFiles();
+                    break;
+                /*case 8:
+                    // selezione dentro zip
+                    setMenuItemsOneSelectedInsideZip();
+                    break;
+                case 9:
+                    // selezione completa dentro zip
+                    setMenuItemsAllSelectedInsideZip();
+                    break;
+                case 10:
+                    // nessuna seleazione ma siamo dentro uno zip
+                    setMenuItemsZip();
+                    break;*/
+                case 11:
+                    //  selezione completa (generica) ma c'è un solo file
+                    setMenuItemsAllSelectedOneFile();
+                    break;
+                case 12:
+                    // - 12: selezione completa (generica) ma c'è una sola cartella
+                    setMenuItemsAllSelectedOneDirectory();
+                    break;
+                default:
+                    setMenuItemsDefault();
+                    break;
+            }
+
+            // nasconde alcune voci all'interno delle pagine "Images", "Recents", "Audio" e "Videos"
+            if(((MainFragment)currentFragment).isACustomLocationDisplayed()) {
+                toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
+                toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
+                toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+            }
+
+            // nasconde alcune voci del menù se la searchview è attiva
+            if(!searchView.isIconified()) {
+                toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
+                toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
+                toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+            }
+        } else {
+            disableMenu();
         }
 
-        // nasconde alcune voci all'interno delle pagine "Images", "Recents", "Audio" e "Videos"
-        if(isACustomLocationDisplayed()) {
-            toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
-            toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
-            toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
-        }
 
-        // nasconde alcune voci del menù se la searchview è attiva
-        if(!searchView.isIconified()) {
-            toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
-            toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
-            toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
-        }
     }
 
     /*private static void setMenuItemsOneSelectedInsideZip() {
@@ -258,7 +275,7 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
     }*/
 
-    private static void setMenuItemsOneFileSelected() {
+    private void setMenuItemsOneFileSelected() {
         toolbarMenu.findItem(R.id.menu_open_with).setVisible(true);
         toolbarMenu.findItem(R.id.menu_sort_by).setVisible(true);
         toolbarMenu.findItem(R.id.menu_select_all).setVisible(true);
@@ -282,7 +299,7 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_extract).setVisible(false);
     }
 
-    private static void setMenuItemsOneDirectorySelected() {
+    private void setMenuItemsOneDirectorySelected() {
         // sono sostanzialmente gli stessi...
         setMenuItemsOneFileSelected();
 
@@ -290,7 +307,7 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_share).setVisible(false);
     }
 
-    private static void setMenuItemsMultipleGenericSelected() {
+    private void setMenuItemsMultipleGenericSelected() {
         // sono sostanzialmente gli stessi...
         setMenuItemsOneFileSelected();
 
@@ -300,13 +317,13 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_get_info).setVisible(false);
     }
 
-    private static void setMenuItemsMultipleFileSelected() {
+    private void setMenuItemsMultipleFileSelected() {
         // sono sostanzialmente gli stessi...
         setMenuItemsMultipleGenericSelected();
         toolbarMenu.findItem(R.id.menu_share).setVisible(true);
     }
 
-    private static void setMenuItemsAllSelected() {
+    private void setMenuItemsAllSelected() {
         // sono sostanzialmente gli stessi...
         setMenuItemsMultipleGenericSelected();
 
@@ -314,7 +331,7 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
     }
 
-    private static void setMenuItemsAllSelectedOneFile() {
+    private void setMenuItemsAllSelectedOneFile() {
         // sono sostanzialmente gli stessi...
         setMenuItemsOneFileSelected();
 
@@ -322,7 +339,7 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
     }
 
-    private static void setMenuItemsAllSelectedOneDirectory() {
+    private void setMenuItemsAllSelectedOneDirectory() {
         // sono sostanzialmente gli stessi...
         setMenuItemsOneDirectorySelected();
 
@@ -330,24 +347,20 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
     }
 
-    private static void setMenuItemsAllSelectedOnlyFiles() {
+    private void setMenuItemsAllSelectedOnlyFiles() {
         // sono sostanzialmente gli stessi...
         setMenuItemsAllSelected();
         toolbarMenu.findItem(R.id.menu_share).setVisible(true);
 
     }
 
-    private static void setMenuItemsDefault() {
-        Fragment currentFragment = getForegroundFragment();
+    private void setMenuItemsDefault() {
 
         toolbarMenu.findItem(R.id.menu_search).setVisible(true);
-
-        // default
         toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
         toolbarMenu.findItem(R.id.menu_copy_to).setVisible(false);
         toolbarMenu.findItem(R.id.menu_move_to).setVisible(false);
         toolbarMenu.findItem(R.id.menu_compress).setVisible(false);
-        //toolbarMenu.findItem(R.id.menu_decompress).setVisible(false);
         toolbarMenu.findItem(R.id.menu_rename).setVisible(false);
         toolbarMenu.findItem(R.id.menu_share).setVisible(false);
         toolbarMenu.findItem(R.id.menu_delete).setVisible(false);
@@ -356,18 +369,7 @@ public class MainActivity extends PermissionsActivity
         toolbarMenu.findItem(R.id.menu_select_all).setVisible(true);
         toolbarMenu.findItem(R.id.menu_extract).setVisible(false);
         toolbarMenu.findItem(R.id.menu_get_info).setVisible(true);
-
-        if (currentFragment instanceof MainFragment) {
-            toolbarMenu.findItem(R.id.menu_new_directory).setVisible(true);
-
-        } /*else if (currentFragment instanceof RecentsFragment ||
-                currentFragment instanceof AudioFragment ||
-                currentFragment instanceof DownloadFragment ||
-                currentFragment instanceof ImagesFragment ||
-                currentFragment instanceof VideosFragment) {
-
-            toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
-        }*/
+        toolbarMenu.findItem(R.id.menu_new_directory).setVisible(true);
 
         toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(!sharedPreferences.getBoolean("showHidden", false));
         toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(sharedPreferences.getBoolean("showHidden", false));
@@ -377,7 +379,28 @@ public class MainActivity extends PermissionsActivity
         setupSearchView();
     }
 
-    public static void setActionBarToggleDefault() {
+    private void disableMenu() {
+
+        toolbarMenu.findItem(R.id.menu_search).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_copy_to).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_move_to).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_compress).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_rename).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_share).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_delete).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_sort_by).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_open_with).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_select_all).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_extract).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_get_info).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
+
+        toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
+        toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
+    }
+
+    public void setActionBarToggleDefault() {
         Drawable drawerIcon = ResourcesCompat.getDrawable(activity.getResources(), R.drawable.ic_menu, activity.getTheme());
 
         actionBarDrawerToggle.setHomeAsUpIndicator(drawerIcon);
@@ -393,14 +416,16 @@ public class MainActivity extends PermissionsActivity
         drawer.addDrawerListener(actionBarDrawerToggle);
     }
 
-    public static void setActionBarToggleCloseButton() {
+    public void setActionBarToggleCloseButton() {
         Drawable drawerIcon = ResourcesCompat.getDrawable(activity.getResources(), R.drawable.ic_menu_close, activity.getTheme());
 
         actionBarDrawerToggle.setHomeAsUpIndicator(drawerIcon);
 
         actionBarDrawerToggle.setToolbarNavigationClickListener(v -> {
-            if (getForegroundFragment() != null && getForegroundFragment() instanceof MainFragment) {
-                if (MainFragment.goBack())
+            Fragment currentFragment = getForegroundFragment();
+
+            if (currentFragment instanceof MainFragment) {
+                if (((MainFragment)currentFragment).goBack())
                     activity.finish();
                 else
                     setActionBarToggleDefault();
@@ -410,14 +435,16 @@ public class MainActivity extends PermissionsActivity
         drawer.addDrawerListener(actionBarDrawerToggle);
     }
 
-    public static void setActionBarToggleBackButton() {
+    public void setActionBarToggleBackButton() {
         Drawable drawerIcon = ResourcesCompat.getDrawable(activity.getResources(), R.drawable.ic_menu_arrow_back, activity.getTheme());
 
         actionBarDrawerToggle.setHomeAsUpIndicator(drawerIcon);
 
         actionBarDrawerToggle.setToolbarNavigationClickListener(v -> {
-            if (getForegroundFragment() != null && getForegroundFragment() instanceof MainFragment) {
-                if (MainFragment.goBack())
+            Fragment actualFragment = getForegroundFragment();
+
+            if (actualFragment instanceof MainFragment) {
+                if (((MainFragment)actualFragment).goBack())
                     activity.finish();
                 else
                     setActionBarToggleDefault();
@@ -487,7 +514,7 @@ public class MainActivity extends PermissionsActivity
 
     }
 
-    /*public Fragment getVisibleFragment() {
+    /*private Fragment getVisibleFragment() {
         FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
         List<Fragment> fragmentsList = fragmentManager.getFragments();
 
@@ -509,71 +536,74 @@ public class MainActivity extends PermissionsActivity
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // TODO eventuale controllo fragment ?
-
+        Fragment currentFragment = getForegroundFragment();
         SharedPreferences.Editor sharedPrefEditor = sharedPreferences.edit();
 
-        switch (item.getItemId()) {
-            /*case R.id.menu_search:
-                // TODO
-                break;*/
-            case R.id.menu_new_directory:
-                ItemsAdapter.createNewDirectory();
-                break;
-            case R.id.menu_open_with:
-                ItemsAdapter.openWithSelectedFile();
-                break;
-            case R.id.menu_sort_by:
-                MainFragment.displaySortByDialog();
-                break;
-            case R.id.menu_select_all:
-                ItemsAdapter.selectAll();
-                break;
-            case R.id.menu_deselect_all:
-                ItemsAdapter.deselectAll();
-                break;
-            case R.id.menu_copy_to:
-                closeSearchView();
-                ItemsAdapter.copyMoveSelection(true);
-                break;
-            case R.id.menu_move_to:
-                ItemsAdapter.copyMoveSelection(false);
-                break;
-            case R.id.menu_compress:
-                ItemsAdapter.compressSelection();
-                break;
+        if(currentFragment instanceof MainFragment) {
+
+            RecyclerView.Adapter currentAdapter = ((MainFragment)currentFragment).getCurrentAdapter();
+
+            if(currentAdapter instanceof ItemsAdapter) {
+                switch (item.getItemId()) {
+                    case R.id.menu_new_directory:
+                        ((ItemsAdapter)currentAdapter).createNewDirectory();
+                        break;
+                    case R.id.menu_open_with:
+                        ((ItemsAdapter)currentAdapter).openWithSelectedFile();
+                        break;
+                    case R.id.menu_sort_by:
+                        ((MainFragment)currentFragment).displaySortByDialog();
+                        break;
+                    case R.id.menu_select_all:
+                        ((ItemsAdapter)currentAdapter).selectAll();
+                        break;
+                    case R.id.menu_deselect_all:
+                        ((ItemsAdapter)currentAdapter).deselectAll();
+                        break;
+                    case R.id.menu_copy_to:
+                        closeSearchView();
+                        ((ItemsAdapter)currentAdapter).copyMoveSelection(true);
+                        break;
+                    case R.id.menu_move_to:
+                        ((ItemsAdapter)currentAdapter).copyMoveSelection(false);
+                        break;
+                    case R.id.menu_compress:
+                        ((ItemsAdapter)currentAdapter).compressSelection();
+                        break;
             /*case R.id.menu_decompress:
                 Toast.makeText(MainActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath(), Toast.LENGTH_SHORT).show();
                 break;*/
-            case R.id.menu_get_info:
-                ItemsAdapter.infoSelectedFile();
-                break;
-            case R.id.menu_show_hidden:
-                sharedPrefEditor.putBoolean("showHidden", true);
-                sharedPrefEditor.apply();
-                MainFragment.refreshList();
-                break;
-            case R.id.menu_dont_show_hidden:
-                sharedPrefEditor.putBoolean("showHidden", false);
-                sharedPrefEditor.apply();
-                MainFragment.refreshList();
-                break;
-            case R.id.menu_rename:
-                ItemsAdapter.renameSelectedFile();
-                break;
-            case R.id.menu_delete:
-                ItemsAdapter.deleteSelectedFiles();
-                break;
-            case R.id.menu_share:
-                ItemsAdapter.shareSelectedFiles();
-                break;
-            default:
-                // non dovremmo mai arrivarci
-                return false;
+                    case R.id.menu_get_info:
+                        ((ItemsAdapter)currentAdapter).infoSelectedFile();
+                        break;
+                    case R.id.menu_show_hidden:
+                        sharedPrefEditor.putBoolean("showHidden", true);
+                        sharedPrefEditor.apply();
+                        ((MainFragment)currentFragment).refreshList();
+                        break;
+                    case R.id.menu_dont_show_hidden:
+                        sharedPrefEditor.putBoolean("showHidden", false);
+                        sharedPrefEditor.apply();
+                        ((MainFragment)currentFragment).refreshList();
+                        break;
+                    case R.id.menu_rename:
+                        ((ItemsAdapter)currentAdapter).renameSelectedFile();
+                        break;
+                    case R.id.menu_delete:
+                        ((ItemsAdapter)currentAdapter).deleteSelectedFiles();
+                        break;
+                    case R.id.menu_share:
+                        ((ItemsAdapter)currentAdapter).shareSelectedFiles();
+                        break;
+                    default:
+                        // non dovremmo mai arrivarci
+                        return false;
+                }
+            }
+
+
         }
 
-        /* R.id.nav_recents, R.id.nav_images, R.id.nav_videos, R.id.nav_audio, R.id.nav_download,
-                R.id.nav_internal_storage, R.id.nav_sd_card, R.id.nav_external_storage */
 
         return super.onOptionsItemSelected(item);
 
@@ -581,7 +611,6 @@ public class MainActivity extends PermissionsActivity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        //setMenuItemsDefault();
         if (toolbarMenu == null) {
             toolbarMenu = ((Toolbar) findViewById(R.id.main_toolbar)).getMenu();
         }
@@ -603,11 +632,15 @@ public class MainActivity extends PermissionsActivity
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (getForegroundFragment() != null && getForegroundFragment() instanceof MainFragment) {
-            if (MainFragment.goBack())
-                finish();
         } else {
-            super.onBackPressed();
+            Fragment currentFragment = getForegroundFragment();
+
+            if (currentFragment instanceof MainFragment) {
+                if (((MainFragment)currentFragment).goBack())
+                    finish();
+            } else {
+                super.onBackPressed();
+            }
         }
     }
 
@@ -617,7 +650,7 @@ public class MainActivity extends PermissionsActivity
 
         // ricarico il contenuto ora che ho i permessi per lo storage
         if (currentFragment instanceof MainFragment) {
-            MainFragment.refreshList();
+            ((MainFragment)currentFragment).refreshList();
         }
 
 
@@ -656,56 +689,48 @@ public class MainActivity extends PermissionsActivity
     private void initializeDrawerDestionations(NavController navController) {
 
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            Fragment currentFragment = getForegroundFragment();
 
+            if(currentFragment instanceof MainFragment) {
 
-        /* R.id.nav_recents, R.id.nav_images, R.id.nav_videos, R.id.nav_audio, R.id.nav_download,
-                R.id.nav_internal_storage, R.id.nav_sd_card, R.id.nav_external_storage */
-
-
-            switch (destination.getId()) {
-                case R.id.nav_recents:
-                    MainFragment.displayRecentsFiles();
-                    break;
-                case R.id.nav_images:
-                    MainFragment.displayImagesFiles();
-                    break;
-                case R.id.nav_videos:
-                    MainFragment.displayVideosFiles();
-                    break;
-                case R.id.nav_audio:
-                    MainFragment.displayAudioFiles();
-                    break;
-                case R.id.nav_download:
-                    MainFragment.loadPathDownload(true);
-                    break;
-                case R.id.nav_internal_storage:
-                    MainFragment.loadPathInternal(true);
-                    break;
-                case R.id.nav_sd_card:
-                    /*
-                    L'accesso alla sd card non è stato implementato per ragioni tempistiche.
-                    Ho scelto di non rimuovere la struttura sottostante, che ho disabilitato
-                    (nascondendo gli elementi corrispondendit)
-                    */
-                    break;
-                case R.id.nav_external_storage:
-                    /*
-                    L'accesso allo storage esterno non è stato implementato per ragioni tempistiche.
-                    Ho scelto di non rimuovere la struttura sottostante, che ho disabilitato
-                    (nascondendo gli elementi corrispondendit)
-                    */
-                    break;
-                default:
-                    break;
+                switch (destination.getId()) {
+                    case R.id.nav_recents:
+                        ((MainFragment)currentFragment).displayRecentsFiles();
+                        break;
+                    case R.id.nav_images:
+                        ((MainFragment)currentFragment).displayImagesFiles();
+                        break;
+                    case R.id.nav_videos:
+                        ((MainFragment)currentFragment).displayVideosFiles();
+                        break;
+                    case R.id.nav_audio:
+                        ((MainFragment)currentFragment).displayAudioFiles();
+                        break;
+                    case R.id.nav_download:
+                        ((MainFragment)currentFragment).loadPathDownload(true);
+                        break;
+                    case R.id.nav_internal_storage:
+                        ((MainFragment)currentFragment).loadPathInternal(true);
+                        break;
+                    case R.id.nav_sd_card:
+                        /*
+                        L'accesso alla sd card non è stato implementato per ragioni tempistiche.
+                        Ho scelto di non rimuovere la struttura sottostante, che ho disabilitato
+                        (nascondendo gli elementi corrispondendit)
+                        */
+                        break;
+                    case R.id.nav_external_storage:
+                        /*
+                        L'accesso allo storage esterno non è stato implementato per ragioni tempistiche.
+                        Ho scelto di non rimuovere la struttura sottostante, che ho disabilitato
+                        (nascondendo gli elementi corrispondendit)
+                        */
+                        break;
+                    default:
+                        break;
+                }
             }
 
-            /*if(destination.getId() == R.id.nav_recents) {
-                toolbar.setVisibility(View.GONE);
-                bottomNavigationView.setVisibility(View.GONE);
-            } else {
-                toolbar.setVisibility(View.VISIBLE);
-                bottomNavigationView.setVisibility(View.VISIBLE);
-            }*/
         });
     }
 
