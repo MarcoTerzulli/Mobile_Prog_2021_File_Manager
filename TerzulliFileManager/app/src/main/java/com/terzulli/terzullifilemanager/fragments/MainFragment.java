@@ -19,6 +19,7 @@ import static com.terzulli.terzullifilemanager.utils.Utils.strSortBySize;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateDirectoryName;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileName;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -345,6 +346,13 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return "";
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    public void refreshAdapterItems(){
+        if (currentAdapter instanceof FileItemsAdapter) {
+            ((FileItemsAdapter) currentAdapter).notifyDataSetChanged();
+        }
+    }
+
     public void refreshList() {
 
         switch (pathHomeFriendlyName) {
@@ -393,7 +401,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         if (currentAdapter instanceof FileItemsAdapter && ((FileItemsAdapter)currentAdapter).isSelectionModeEnabled()) {
             ((FileItemsAdapter)currentAdapter).clearSelection();
-            refreshList();
+            refreshAdapterItems();
+            //refreshList();
         } else {
             if (!isInHomePath()) {
                 // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory

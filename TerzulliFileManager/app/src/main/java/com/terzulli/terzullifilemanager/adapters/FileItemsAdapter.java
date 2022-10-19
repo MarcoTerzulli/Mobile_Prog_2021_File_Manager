@@ -63,12 +63,11 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         this.activityReference = activityReference;
 
         selectedFilesManager = new SelectedFilesManager();
-
     }
 
     public void deselectAll() {
         clearSelection();
-        mainFragment.refreshList();
+        mainFragment.refreshAdapterItems();
     }
 
     public void infoSelectedFile() {
@@ -769,7 +768,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         selectedFilesList.addAll(Arrays.asList(filesAndDirs));
         selectedFilesManager.setSelectedFiles(selectedFilesList);
 
-        mainFragment.refreshList();
+        mainFragment.refreshAdapterItems();
     }
 
     @NonNull
