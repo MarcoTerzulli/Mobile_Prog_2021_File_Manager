@@ -3,12 +3,18 @@ package com.terzulli.terzullifilemanager.database.entities;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "Item", foreignKeys = {@ForeignKey(entity = TableLog.class,
+@Entity(tableName = "Item",
+        foreignKeys = {@ForeignKey(entity = TableLog.class,
         parentColumns = "id",
         childColumns = "fk_log_id",
-        onDelete = ForeignKey.CASCADE)})
+        onDelete = ForeignKey.CASCADE)},
+        indices = {
+            @Index(value = {"fk_log_id", "origin_path"}, unique = true)
+        }
+)
 public class TableItem {
     @PrimaryKey(autoGenerate = true)
     private int id;

@@ -40,6 +40,7 @@ public class Utils {
     public static final String strLocationVideosFriendlyName = "Videos";
     public static final String strLocationImagesFriendlyName = "Images";
     public static final String strLocationDownloadsFriendlyName = "Downloads";
+    public static final String strLocationLogsFriendlyName = "Logs";
 
     public static void sortByName(File[] files, final boolean ascending) {
         if (files == null)

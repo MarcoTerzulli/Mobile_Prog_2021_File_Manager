@@ -3,11 +3,24 @@ package com.terzulli.terzullifilemanager.database.entities;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import com.terzulli.terzullifilemanager.database.converters.DateConverter;
 
 import java.util.Date;
 
 @Entity(tableName = "Log")
+@TypeConverters({DateConverter.class})
 public class TableLog {
+    public TableLog(Date timestamp, String result, String operationType, String originPath, String destinationPath, String description) {
+        this.timestamp = timestamp;
+        this.result = result;
+        this.operationType = operationType;
+        this.originPath = originPath;
+        this.destinationPath = destinationPath;
+        this.description = description;
+    }
+
     @PrimaryKey(autoGenerate = true)
     private int id;
 
@@ -46,6 +59,14 @@ public class TableLog {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Date getTimestamp() {

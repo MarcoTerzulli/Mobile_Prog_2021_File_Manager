@@ -11,6 +11,7 @@ import static com.terzulli.terzullifilemanager.utils.Utils.strLocationAudioFrien
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationDownloadsFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationImagesFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationInternalFriendlyName;
+import static com.terzulli.terzullifilemanager.utils.Utils.strLocationLogsFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationRecentsFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strLocationVideosFriendlyName;
 import static com.terzulli.terzullifilemanager.utils.Utils.strSortByDate;
@@ -53,6 +54,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.adapters.FileItemsAdapter;
+import com.terzulli.terzullifilemanager.adapters.LogItemsAdapter;
+import com.terzulli.terzullifilemanager.database.LogDatabase;
+import com.terzulli.terzullifilemanager.database.entities.TableLog;
 import com.terzulli.terzullifilemanager.utils.RecentsFilesManager;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
@@ -118,6 +122,16 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
+    public void initializeEmptyLogsLayout(boolean showEmptyLayout) {
+        RelativeLayout logsEmptyPlaceHolder = view.findViewById(R.id.items_empty_logs_placeholder);
+
+        if (showEmptyLayout) {
+            logsEmptyPlaceHolder.setVisibility(View.VISIBLE);
+        } else {
+            logsEmptyPlaceHolder.setVisibility(View.INVISIBLE);
+        }
+    }
+
     private void displayEmptyLayoutWhileWaiting() {
         swipeRefreshLayout.setRefreshing(true);
 
@@ -129,6 +143,48 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 updateBreadCrumbList(null, null);
             breadcrumbsView.setVisibility(View.GONE);
         }, 10);
+    }
+
+    public void loadLogs() {
+
+        pathHomeFriendlyName = strLocationLogsFriendlyName;
+        setActionBarTitle(strLocationLogsFriendlyName);
+
+        // forzo la posizione della scrollview a 0 per prevenire inconsistenze e crash se è in corso
+        // un'animazione di scroll mentre setto un nuovo adapter
+        recyclerView.scrollToPosition(0);
+        breadcrumbsView.setVisibility(View.GONE);
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+
+        long loadingTicket = ++activeLoadingsCounter;
+
+        executor.execute(() -> {
+            LogDatabase logDatabase = LogDatabase.getInstance(view.getContext());
+            ArrayList<TableLog> logsList = (ArrayList<TableLog>) logDatabase.logDao().getAll();
+
+            handler.post(() -> {
+                // se nel frattempo l'utente ha scelto di caricare un'altra schermata,
+                // annullo questo caricamento
+
+                if (activeLoadingsCounter <= loadingTicket) {
+
+                    updateBreadCrumbList(null, null);
+                    breadcrumbsView.setVisibility(View.GONE);
+
+                    // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
+                    initializeEmptyLogsLayout(logsList == null || logsList.size() == 0);
+                    initializeEmptyDirectoryLayout(false);
+
+                    currentAdapter = new LogItemsAdapter(view.getContext(), logsList, this, requireActivity());
+                    recyclerView.setAdapter(currentAdapter);
+                    recyclerView.scrollToPosition(0);
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            });
+        });
     }
 
     public void loadSelection(final File[] filesAndDirs, String newActionBarTitle) {
@@ -163,6 +219,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                     // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
                     initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
+                    initializeEmptyLogsLayout(false);
 
                     currentAdapter = new FileItemsAdapter(view.getContext(), filesAndDirs, this, requireActivity());
                     recyclerView.setAdapter(currentAdapter);
@@ -238,6 +295,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                     // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
                     initializeEmptyDirectoryLayout(finalFilesAndDirs == null || finalFilesAndDirs.length == 0);
+                    initializeEmptyLogsLayout(false);
 
                     currentAdapter = new FileItemsAdapter(view.getContext(), finalFilesAndDirs, this, requireActivity());
                     recyclerView.setAdapter(currentAdapter);
@@ -367,6 +425,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 break;
             case strLocationImagesFriendlyName:
                 displayImagesFiles();
+                break;
+            case strLocationLogsFriendlyName:
+                loadLogs();
                 break;
             default:
                 loadPath(currentPath, true, false);
@@ -1100,8 +1161,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             }
         });
 
-        //loadPath(currentPath, true);
-        refreshList();
+        //refreshList(); // TODO test
 
         return view;
     }
@@ -1116,6 +1176,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             setActionBarTitle(lastActionBarTitle);
 
         activityReference = requireActivity();
+
         if (!((MainActivity)activityReference).isSearchActive())
             refreshList();
     }

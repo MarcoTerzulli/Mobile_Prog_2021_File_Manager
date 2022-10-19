@@ -36,7 +36,6 @@
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-
         <RelativeLayout
             android:id="@+id/items_empty_directory_placeholder"
             android:layout_width="wrap_content"
@@ -61,6 +60,35 @@
                 android:layout_marginTop="@dimen/padding_normal"
                 android:layout_marginEnd="@dimen/padding_normal"
                 android:text="@string/frag_no_items"
+                android:textAlignment="center"
+                android:textSize="@dimen/text_extra_big" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/items_empty_logs_placeholder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true">
+
+            <ImageView
+                android:id="@+id/items_empty_logs_icon"
+                android:layout_width="@dimen/items_empty_folder_icon_size"
+                android:layout_height="@dimen/items_empty_folder_icon_size"
+                android:layout_centerHorizontal="true"
+                android:contentDescription="@string/frag_no_items"
+                android:scaleType="fitXY"
+                app:srcCompat="@drawable/ic_folder_off" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/items_empty_logs_icon"
+                android:layout_marginStart="@dimen/padding_normal"
+                android:layout_marginTop="@dimen/padding_normal"
+                android:layout_marginEnd="@dimen/padding_normal"
+                android:text="@string/frag_no_logs"
                 android:textAlignment="center"
                 android:textSize="@dimen/text_extra_big" />
 

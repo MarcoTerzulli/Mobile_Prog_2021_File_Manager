@@ -4,7 +4,10 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.TypeConverters;
+import androidx.room.Update;
 
+import com.terzulli.terzullifilemanager.database.converters.DateConverter;
 import com.terzulli.terzullifilemanager.database.entities.TableItem;
 import com.terzulli.terzullifilemanager.database.entities.TableLog;
 
@@ -12,7 +15,18 @@ import java.util.Date;
 import java.util.List;
 
 @Dao
+@TypeConverters({DateConverter.class})
 public interface LogDao {
+
+    @Insert
+    void insert(TableLog log);
+
+    @Update
+    void update(TableLog log);
+
+    @Delete
+    void delete(TableLog log);
+
     @Query("SELECT * FROM Log ORDER BY timestamp DESC")
     List<TableLog> getAll();
 
@@ -49,10 +63,4 @@ public interface LogDao {
 
     @Query("DELETE FROM Log WHERE timestamp < :specifiedDate")
     void deleteLogsOlderThanDate(Date specifiedDate);
-
-    @Insert
-    void insert(TableLog log);
-
-    @Delete
-    void delete(TableLog log);
 }
