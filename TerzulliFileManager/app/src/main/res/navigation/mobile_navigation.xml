@@ -53,4 +53,10 @@
         android:title="@string/drawer_menu_storage_external"
         tools:layout="@layout/fragment_main" />
 
+    <fragment
+        android:id="@+id/nav_logs"
+        android:name="com.terzulli.terzullifilemanager.fragments.LogFragment"
+        android:title="@string/drawer_menu_logs"
+        tools:layout="@layout/fragment_log" />
+
 </navigation>

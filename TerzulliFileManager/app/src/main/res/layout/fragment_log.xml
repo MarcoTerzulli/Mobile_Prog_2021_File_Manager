@@ -5,8 +5,6 @@
     android:id="@+id/fragment_log"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="@dimen/padding_extra_big"
-    android:paddingEnd="@dimen/padding_extra_big"
     tools:context=".fragments.LogFragment">
 
     <ScrollView
@@ -18,7 +16,9 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/padding_extra_big"
+            android:paddingEnd="@dimen/padding_extra_big">
 
             <LinearLayout
                 android:id="@+id/log_op_type_container"
@@ -261,14 +261,14 @@
 
         </RelativeLayout>
     </ScrollView>
-
-
-
+    
     <RelativeLayout
         android:id="@+id/log_retry_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:paddingStart="@dimen/padding_extra_big"
+        android:paddingEnd="@dimen/padding_extra_big"
         android:theme="@style/Theme.TerzulliFileManager.CopyMoveBar">
 
         <TextView

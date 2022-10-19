@@ -40,6 +40,8 @@
     <string name="drawer_menu_storage_internal">Internal Storage</string>
     <string name="drawer_menu_storage_external">USB Storage</string>
     <string name="drawer_menu_location">Locations</string>
+    <string name="drawer_menu_logs">Logs</string>
+    <string name="drawer_menu_advanced">Advanced</string>
     <string name="drawer_menu_download">Downloads</string>
     <string name="drawer_menu_recent">Recents</string>
     <string name="drawer_menu_media_images">Images</string>
