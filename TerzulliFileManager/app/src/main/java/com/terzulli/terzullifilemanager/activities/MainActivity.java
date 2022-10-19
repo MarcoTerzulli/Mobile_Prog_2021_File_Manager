@@ -27,7 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
 import com.terzulli.terzullifilemanager.R;
-import com.terzulli.terzullifilemanager.adapters.ItemsAdapter;
+import com.terzulli.terzullifilemanager.adapters.FileItemsAdapter;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
@@ -63,8 +63,8 @@ public class MainActivity extends PermissionsActivity
                 if(currentFragment instanceof MainFragment) {
                     RecyclerView.Adapter currentAdapter = ((MainFragment)currentFragment).getCurrentAdapter();
 
-                    if(currentAdapter instanceof ItemsAdapter) {
-                        ((ItemsAdapter)currentAdapter).submitSearchQuery(newText);
+                    if(currentAdapter instanceof FileItemsAdapter) {
+                        ((FileItemsAdapter)currentAdapter).submitSearchQuery(newText);
                     }
                 }
 
@@ -84,8 +84,8 @@ public class MainActivity extends PermissionsActivity
                 if(currentFragment instanceof MainFragment) {
                     RecyclerView.Adapter currentAdapter = ((MainFragment)currentFragment).getCurrentAdapter();
 
-                    if(currentAdapter instanceof ItemsAdapter) {
-                        ((ItemsAdapter)currentAdapter).saveCurrentFilesBeforeQuerySubmit();
+                    if(currentAdapter instanceof FileItemsAdapter) {
+                        ((FileItemsAdapter)currentAdapter).saveCurrentFilesBeforeQuerySubmit();
                     }
                 }
 
@@ -157,7 +157,8 @@ public class MainActivity extends PermissionsActivity
         menuActualCase = menuCase;
 
         Fragment currentFragment = getForegroundFragment();
-        if(currentFragment instanceof MainFragment) {
+        if(currentFragment instanceof MainFragment &&
+                ((MainFragment)currentFragment).isCurrentAdapterForFiles()) {
             switch (menuActualCase) {
                 case 1:
                     // 1 file selezionato
@@ -483,35 +484,35 @@ public class MainActivity extends PermissionsActivity
 
             RecyclerView.Adapter currentAdapter = ((MainFragment)currentFragment).getCurrentAdapter();
 
-            if(currentAdapter instanceof ItemsAdapter) {
+            if(currentAdapter instanceof FileItemsAdapter) {
                 switch (item.getItemId()) {
                     case R.id.menu_new_directory:
-                        ((ItemsAdapter)currentAdapter).createNewDirectory();
+                        ((FileItemsAdapter)currentAdapter).createNewDirectory();
                         break;
                     case R.id.menu_open_with:
-                        ((ItemsAdapter)currentAdapter).openWithSelectedFile();
+                        ((FileItemsAdapter)currentAdapter).openWithSelectedFile();
                         break;
                     case R.id.menu_sort_by:
                         ((MainFragment)currentFragment).displaySortByDialog();
                         break;
                     case R.id.menu_select_all:
-                        ((ItemsAdapter)currentAdapter).selectAll();
+                        ((FileItemsAdapter)currentAdapter).selectAll();
                         break;
                     case R.id.menu_deselect_all:
-                        ((ItemsAdapter)currentAdapter).deselectAll();
+                        ((FileItemsAdapter)currentAdapter).deselectAll();
                         break;
                     case R.id.menu_copy_to:
                         closeSearchView();
-                        ((ItemsAdapter)currentAdapter).copyMoveSelection(true);
+                        ((FileItemsAdapter)currentAdapter).copyMoveSelection(true);
                         break;
                     case R.id.menu_move_to:
-                        ((ItemsAdapter)currentAdapter).copyMoveSelection(false);
+                        ((FileItemsAdapter)currentAdapter).copyMoveSelection(false);
                         break;
                     case R.id.menu_compress:
-                        ((ItemsAdapter)currentAdapter).compressSelection();
+                        ((FileItemsAdapter)currentAdapter).compressSelection();
                         break;
                     case R.id.menu_get_info:
-                        ((ItemsAdapter)currentAdapter).infoSelectedFile();
+                        ((FileItemsAdapter)currentAdapter).infoSelectedFile();
                         break;
                     case R.id.menu_show_hidden:
                         sharedPrefEditor.putBoolean("showHidden", true);
@@ -524,23 +525,20 @@ public class MainActivity extends PermissionsActivity
                         ((MainFragment)currentFragment).refreshList();
                         break;
                     case R.id.menu_rename:
-                        ((ItemsAdapter)currentAdapter).renameSelectedFile();
+                        ((FileItemsAdapter)currentAdapter).renameSelectedFile();
                         break;
                     case R.id.menu_delete:
-                        ((ItemsAdapter)currentAdapter).deleteSelectedFiles();
+                        ((FileItemsAdapter)currentAdapter).deleteSelectedFiles();
                         break;
                     case R.id.menu_share:
-                        ((ItemsAdapter)currentAdapter).shareSelectedFiles();
+                        ((FileItemsAdapter)currentAdapter).shareSelectedFiles();
                         break;
                     default:
                         // non dovremmo mai arrivarci
                         return false;
                 }
             }
-
-
         }
-
 
         return super.onOptionsItemSelected(item);
 
@@ -607,13 +605,11 @@ public class MainActivity extends PermissionsActivity
                 toolbar, R.string.app_name, R.string.app_name) {
             public void onDrawerClosed(View view)
             {
-                //getActionBar().setTitle(mTitle);
                 // calling onPrepareOptionsMenu() to show action bar icons
                 invalidateOptionsMenu();
             }
 
             public void onDrawerOpened(View drawerView) {
-                //setActionBar().setTitle("Settings");
                 // calling onPrepareOptionsMenu() to hide action bar icons
                 invalidateOptionsMenu();
             }

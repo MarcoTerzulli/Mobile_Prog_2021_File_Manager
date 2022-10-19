@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_log"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="@dimen/padding_extra_big"
+    android:paddingEnd="@dimen/padding_extra_big"
+    tools:context=".fragments.LogFragment">
+
+    <ScrollView
+        android:id="@+id/log_content_scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/log_retry_bar"
+        android:layout_alignParentTop="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/log_op_type_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/log_op_type_descr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Type"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_type_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/action_copy"
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/log_op_timestamp_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_type_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/log_op_timestamp_descr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Timestamp"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_timestamp_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="2022-10-18 18:21:48.610"
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/log_op_result_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_timestamp_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/log_op_result_descr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Result"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_result_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Failed"
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/log_op_retried_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_result_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/log_op_retried_descr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Retried"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_retried_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="True"
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/log_op_number_of_items_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_retried_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/log_op_number_of_items_descr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Number of Items"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_number_of_items_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="10"
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/log_op_number_of_failed_items_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_number_of_items_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/log_op_number_of_failed_items_descr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Number of failed Items "
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_number_of_failed_items_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="10"
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/log_op_error_reason_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_number_of_failed_items_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/log_op_error_reason_descr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Error Description"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_error_reason_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet fringilla urna. Fusce consequat vehicula volutpat. Ut dictum elit nibh, sit amet hendrerit odio molestie eleifend. Maecenas viverra tempor tortor, ac dignissim nibh ornare eu. "
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/log_op_files_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_error_reason_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium">
+
+                <TextView
+                    android:id="@+id/log_op_files_descr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Item List"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_files_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/log_op_files_descr"
+                    android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet fringilla urna. Fusce consequat vehicula volutpat. Ut dictum elit nibh, sit amet hendrerit odio molestie eleifend. Maecenas viverra tempor tortor, ac dignissim nibh ornare eu. "
+                    android:textSize="@dimen/text_normal" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/log_op_files_failed_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_files_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium">
+
+                <TextView
+                    android:id="@+id/log_op_files_failed_descr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Failed Items List"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_files_failed_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/log_op_files_failed_descr"
+                    android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet fringilla urna. Fusce consequat vehicula volutpat. Ut dictum elit nibh, sit amet hendrerit odio molestie eleifend. Maecenas viverra tempor tortor, ac dignissim nibh ornare eu. "
+                    android:textSize="@dimen/text_normal" />
+            </RelativeLayout>
+
+        </RelativeLayout>
+    </ScrollView>
+
+
+
+    <RelativeLayout
+        android:id="@+id/log_retry_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:theme="@style/Theme.TerzulliFileManager.CopyMoveBar">
+
+        <TextView
+            android:id="@+id/log_retry_bar_descr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="Retry the operation?"
+            android:textSize="@dimen/text_medium"
+            android:theme="@style/Theme.TerzulliFileManager.ItemNameColor" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/log_retry_bar_btn_cancel_operation"
+            style="@style/Theme.TerzulliFileManager.ButtonOutlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/log_retry_bar_confirm_operation"
+            android:enabled="true"
+            android:text="@string/button_dismiss"
+            android:textSize="@dimen/text_medium"
+            app:cornerRadius="@dimen/padding_tiny"
+            app:strokeColor="?android:colorPrimary"
+            app:strokeWidth="@dimen/padding_tiniest"
+            tools:ignore="RelativeOverlap" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/log_retry_bar_confirm_operation"
+            style="@style/Theme.TerzulliFileManager.ButtonColored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="@dimen/padding_normal"
+            android:enabled="true"
+            android:text="@string/button_retry"
+            android:textSize="@dimen/text_medium"
+            tools:ignore="RelativeOverlap" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

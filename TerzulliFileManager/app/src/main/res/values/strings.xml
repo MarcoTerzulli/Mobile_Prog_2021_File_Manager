@@ -49,8 +49,10 @@
     <!-- Various buttons -->
     <string name="button_ok">Ok</string>
     <string name="button_cancel">Cancel</string>
+    <string name="button_dismiss">Dismiss</string>
     <string name="button_save">Save</string>
     <string name="button_paste">Paste</string>
+    <string name="button_retry">Retry</string>
     <string name="button_extract">Extract</string>
     <string name="button_compress">Compress</string>
 
@@ -149,5 +151,7 @@
 
     <!-- Utils -->
     <string name="string_placeholder">Lorem ipsum…</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

@@ -12,7 +12,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,14 +49,14 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHolder> {
+public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.ItemsViewHolder> {
     private final Context context;
     private final SelectedFilesManager selectedFilesManager;
     private final MainFragment mainFragment;
     private final Activity activityReference;
     private File[] filesAndDirs;
 
-    public ItemsAdapter(Context context, File[] filesAndFolders, MainFragment mainFragment, Activity activityReference) {
+    public FileItemsAdapter(Context context, File[] filesAndFolders, MainFragment mainFragment, Activity activityReference) {
         this.context = context;
         filesAndDirs = filesAndFolders;
         this.mainFragment = mainFragment;
@@ -172,6 +171,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 try {
                     copyFileLowLevelOperation(fileToMove, newLocation);
                 } catch (IOException e) {
+                    // TODO salvare su log anziché fare return qui ed aggiungere file problematici ad una lista
+                    //  Il return si fa dopo
                     return -1;
                 }
             }
@@ -219,12 +220,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
         executor.execute(() -> {
 
-            //Background work here
             int nItems = selectedFilesManager.getSelectedFilesToCopyMove().size();
             int returnCode = copyMoveSelectionOperation(isCopy, destinationPath);
 
             handler.post(() -> {
-                //UI Thread work here
 
                 switch (returnCode) {
                     case 1:
@@ -238,9 +237,11 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                                 + " " + context.getResources().getString(R.string.action_copy_move_completed_third_part);
                         Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
 
+                        // TODO salvare su log operazione completata
                         break;
                     case -1:
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                        // TODO salvare su log errore e lista file problematici
                         break;
                     default:
                         break;
@@ -268,16 +269,21 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
                 switch (returnCode) {
                     case 1:
+                        // TODO salvare su log estrazione completata
                         Toast.makeText(context, R.string.action_extract_completed, Toast.LENGTH_SHORT).show();
                         break;
                     case -1:
+                        // TODO salvare su log errore estrazione
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
                         break;
                     case -2:
+                        // TODO salvare su log errore generico estrazione
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
                         Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
                         break;
                     case -3:
+                        // TODO salvare su log errore estrazione per password
                         Toast.makeText(context, R.string.error_check_password_not_supported, Toast.LENGTH_SHORT).show();
                         break;
                     default:
@@ -305,14 +311,17 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
                 switch (returnCode) {
                     case 1:
+                        // TODO salvare su log operazione di compressione completata
                         Toast.makeText(context, R.string.action_compress_completed, Toast.LENGTH_SHORT).show();
                         break;
                     case -1:
-                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        break;
-                    case -2:
+                        // TODO salvare su log errore compressione
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
                         Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                        break;
+                    case -2:
+                        // TODO salvare su log errore generico compressione
+                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
                         break;
                     default:
                         break;
@@ -367,7 +376,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 zipFile.extractAll(extractLocation.getPath());
 
             } catch (Exception e) {
-                Log.w("DEBUG", e.toString());
                 return -1;
             }
 
@@ -439,6 +447,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
                 deleteRecursive(file);
             }
 
+            // TODO salvare su log operazione completata
+
             if (mainFragment.getCurrentPath().equals(originalPath))
                 mainFragment.refreshList();
         }
@@ -497,8 +507,11 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
         } else {
             try (InputStream in = new FileInputStream(sourceLocation)) {
 
-                if (!outFile.exists())
-                    outFile.createNewFile();
+                /*if (!outFile.exists())
+                    outFile.createNewFile();*/
+
+                if (!outFile.exists() && outFile.createNewFile())
+                    throw new IOException("Cannot create file " + outFile.getAbsolutePath());
 
                 try (OutputStream out = new FileOutputStream(outFile)) {
                     byte[] buf = new byte[1024];
@@ -657,7 +670,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ItemsViewHol
 
                     Uri data = FileProvider.getUriForFile(context,
                             context.getApplicationContext().getPackageName() + ".provider", file);
-
 
                     intent.setDataAndType(data, type);
                     intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
