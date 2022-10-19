@@ -34,7 +34,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Type"
+                    android:text="@string/log_op_type"
                     android:textSize="@dimen/text_medium"
                     android:textStyle="bold" />
 
@@ -61,7 +61,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Timestamp"
+                    android:text="@string/log_op_timestamp"
                     android:textSize="@dimen/text_medium"
                     android:textStyle="bold" />
 
@@ -88,7 +88,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Result"
+                    android:text="@string/log_op_result"
                     android:textSize="@dimen/text_medium"
                     android:textStyle="bold" />
 
@@ -115,7 +115,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Retried"
+                    android:text="@string/log_op_retried"
                     android:textSize="@dimen/text_medium"
                     android:textStyle="bold" />
 
@@ -124,7 +124,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="True"
+                    android:text="@string/log_op_retried_true"
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -142,7 +142,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Number of Items"
+                    android:text="@string/log_op_number_of_items"
                     android:textSize="@dimen/text_medium"
                     android:textStyle="bold" />
 
@@ -169,7 +169,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Number of failed Items "
+                    android:text="@string/log_op_number_of_failed_items"
                     android:textSize="@dimen/text_medium"
                     android:textStyle="bold" />
 
@@ -196,7 +196,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Error Description"
+                    android:text="@string/log_op_error_descr"
                     android:textSize="@dimen/text_medium"
                     android:textStyle="bold" />
 
@@ -205,7 +205,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet fringilla urna. Fusce consequat vehicula volutpat. Ut dictum elit nibh, sit amet hendrerit odio molestie eleifend. Maecenas viverra tempor tortor, ac dignissim nibh ornare eu. "
+                    android:text="@string/string_placeholder_long"
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -221,7 +221,7 @@
                     android:id="@+id/log_op_files_descr"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Item List"
+                    android:text="@string/log_op_items_list"
                     android:textSize="@dimen/text_medium"
                     android:textStyle="bold" />
 
@@ -230,7 +230,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/log_op_files_descr"
-                    android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet fringilla urna. Fusce consequat vehicula volutpat. Ut dictum elit nibh, sit amet hendrerit odio molestie eleifend. Maecenas viverra tempor tortor, ac dignissim nibh ornare eu. "
+                    android:text="@string/string_placeholder_long"
                     android:textSize="@dimen/text_normal" />
             </RelativeLayout>
 
@@ -246,7 +246,7 @@
                     android:id="@+id/log_op_files_failed_descr"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Failed Items List"
+                    android:text="@string/log_op_items_failed_list"
                     android:textSize="@dimen/text_medium"
                     android:textStyle="bold" />
 
@@ -255,7 +255,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/log_op_files_failed_descr"
-                    android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet fringilla urna. Fusce consequat vehicula volutpat. Ut dictum elit nibh, sit amet hendrerit odio molestie eleifend. Maecenas viverra tempor tortor, ac dignissim nibh ornare eu. "
+                    android:text="@string/string_placeholder_long"
                     android:textSize="@dimen/text_normal" />
             </RelativeLayout>
 
@@ -276,7 +276,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:text="Retry the operation?"
+            android:text="@string/log_op_retry_operation"
             android:textSize="@dimen/text_medium"
             android:theme="@style/Theme.TerzulliFileManager.ItemNameColor" />
 

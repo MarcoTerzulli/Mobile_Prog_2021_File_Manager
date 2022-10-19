@@ -139,6 +139,20 @@
     <string name="intent_share_subject">Sharing Files</string>
     <string name="intent_share_text">Attached files</string>
 
+    <!-- Logs -->
+    <string name="log_op_type">Type</string>
+    <string name="log_op_timestamp">Timestamp</string>
+    <string name="log_op_result">Result</string>
+    <string name="log_op_retried">Retried</string>
+    <string name="log_op_retried_true">True</string>
+    <string name="log_op_retried_false">True</string>
+    <string name="log_op_number_of_items">Number of items</string>
+    <string name="log_op_number_of_failed_items">Number of failed items</string>
+    <string name="log_op_error_descr">Error description</string>
+    <string name="log_op_items_list">Items list</string>
+    <string name="log_op_items_failed_list">Failed items list</string>
+    <string name="log_op_retry_operation">Retry the operation?</string>
+
     <!-- Error -->
     <string name="error_access_to_root_directory">You don\'t have to permission to access this location</string>
     <string name="error_generic">Something went wrong…</string>
@@ -151,7 +165,6 @@
 
     <!-- Utils -->
     <string name="string_placeholder">Lorem ipsum…</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="string_placeholder_long">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet fringilla urna. Fusce consequat vehicula volutpat. Ut dictum elit nibh, sit amet hendrerit odio molestie eleifend. Maecenas viverra tempor tortor, ac dignissim nibh ornare eu.</string>
 
 </resources>
