@@ -812,22 +812,26 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
             if (!isSelectionModeEnabled()) {
                 itemOpenerHandler(selectedFile);
             } else {
-                toggleItemSelection(selectedFile, holder, true, false);
+                //toggleItemSelection(selectedFile, holder, true, false);
+                toggleItemSelection(selectedFile, holder);
             }
         });
 
         // gestione selezione item con long click
         holder.itemView.setOnLongClickListener(view -> {
-            toggleItemSelection(selectedFile, holder, false, false);
+            //toggleItemSelection(selectedFile, holder, false, false);
+            toggleItemSelection(selectedFile, holder);
 
             return true;
         });
 
         // gestione selezione item con click sull'icona
-        holder.itemIcon.setOnClickListener(view -> toggleItemSelection(selectedFile, holder, true, false));
+        //holder.itemIcon.setOnClickListener(view -> toggleItemSelection(selectedFile, holder, true, false));
+        holder.itemIcon.setOnClickListener(view -> toggleItemSelection(selectedFile, holder));
 
         // ripristino lo stato di selezione precedente
-        toggleItemSelection(selectedFile, holder, false, true);
+        //toggleItemSelection(selectedFile, holder, false, true);
+        recoverItemSelectionState(selectedFile, holder);
     }
 
     private void itemOpenerHandler(File selectedFile) {
@@ -893,41 +897,35 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
     }
 
-    private void toggleItemSelection(File selectedFile, @NonNull ItemsViewHolder holder, boolean unselect, boolean recoverLastState) {
-        //File selectedFile = filesAndDirs[position];
+    private void recoverItemSelectionState(File selectedFile, @NonNull ItemsViewHolder holder) {
+        setItemSelectedMode(selectedFile, holder, checkIfItemWasSelected(selectedFile));
+    }
+
+    private void toggleItemSelection(File selectedFile, @NonNull ItemsViewHolder holder) {
+        setItemSelectedMode(selectedFile, holder, !checkIfItemWasSelected(selectedFile));
+    }
+
+    private void setItemSelectedMode(File selectedFile, @NonNull ItemsViewHolder holder, boolean select) {
         int color;
         boolean setSelectedIcon = false;
 
-        if (!recoverLastState) {
-            // comportamento normale
-            if (selectedFilesManager.getSelectedFiles().contains(selectedFile) && unselect) {
-                // unselect
+        if (!select) {
+            // unselect
+            if(selectedFilesManager.getSelectedFiles().contains(selectedFile))
                 selectedFilesManager.removeSelectedFile(selectedFile);
 
-                TypedValue outValue = new TypedValue();
-                context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-                color = outValue.data;
+            TypedValue outValue = new TypedValue();
+            context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+            color = outValue.data;
 
-                setItemBackgroundColor(color, holder);
-            } else {
-                // select
+            setItemBackgroundColor(color, holder);
+        } else {
+            // select
+            if(!selectedFilesManager.getSelectedFiles().contains(selectedFile))
                 selectedFilesManager.addSelectedFile(selectedFile);
 
-                color = ContextCompat.getColor(context, R.color.item_selected_light);
-                setSelectedIcon = true;
-            }
-        } else {
-            // comportamento di ripristino dello stato (ignora il toggle)
-            if (checkIfItemWasSelected(selectedFile)) {
-                color = ContextCompat.getColor(context, R.color.item_selected_light);
-                setSelectedIcon = true;
-            } else {
-                TypedValue outValue = new TypedValue();
-                context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-                color = outValue.data;
-
-                setItemBackgroundColor(color, holder);
-            }
+            color = ContextCompat.getColor(context, R.color.item_selected_light);
+            setSelectedIcon = true;
         }
 
         setItemBackgroundColor(color, holder);

@@ -143,12 +143,6 @@ public class MainActivity extends PermissionsActivity
      *
      * @param menuCase casistica scelta
      */
-    /* vecchio
-
-     * - 8: selezione generica dentro zip
-     * - 9: selezione completa dentro zip
-     * - 10: nessuna selezione attiva, ma la cartella corrente è uno zip
-     */
     public void updateMenuItems(int menuCase) {
 
         if (toolbarMenu == null || toolbarMenu.findItem(R.id.menu_search) == null)

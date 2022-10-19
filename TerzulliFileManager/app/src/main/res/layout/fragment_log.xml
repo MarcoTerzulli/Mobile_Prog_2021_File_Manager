@@ -261,7 +261,7 @@
 
         </RelativeLayout>
     </ScrollView>
-    
+
     <RelativeLayout
         android:id="@+id/log_retry_bar"
         android:layout_width="wrap_content"
