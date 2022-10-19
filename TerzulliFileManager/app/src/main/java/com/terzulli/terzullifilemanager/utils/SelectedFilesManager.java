@@ -11,18 +11,18 @@ public class SelectedFilesManager {
     private static ArrayList<File> selectedFilesToCompress = new ArrayList<>();
     private static boolean copyMoveOperationTypeIsCopy = false;
     private static File fileToExtract = null;
-    private static String operationStartPath;
+    private static String operationOriginPath;
 
     public SelectedFilesManager() {
         // non si fa nulla
     }
 
-    public String getOperationStartPath() {
-        return operationStartPath;
+    public String getOperationOriginPath() {
+        return operationOriginPath;
     }
 
-    public void setOperationStartPath(String operationStartPath) {
-        SelectedFilesManager.operationStartPath = operationStartPath;
+    public void setOperationOriginPath(String operationStartPath) {
+        SelectedFilesManager.operationOriginPath = operationStartPath;
     }
 
     public File getFileToExtract() {

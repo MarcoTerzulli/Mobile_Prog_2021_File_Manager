@@ -145,6 +145,8 @@
     <string name="log_op_type">Type</string>
     <string name="log_op_timestamp">Timestamp</string>
     <string name="log_op_result">Result</string>
+    <string name="log_op_start_path">Origin path</string>
+    <string name="log_op_dest_path">Destination path</string>
     <string name="log_op_retried">Retried</string>
     <string name="log_op_retried_true">True</string>
     <string name="log_op_retried_false">True</string>
@@ -166,6 +168,8 @@
     <string name="error_check_password_not_supported">The extraction of archives protected by a password is unsopported</string>
 
     <!-- Utils -->
+    <string name="number_placeholder">10</string>
+    <string name="timestamp_placeholder">2022-10-18 18:21:48.610</string>
     <string name="string_placeholder">Lorem ipsum…</string>
     <string name="string_placeholder_long">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet fringilla urna. Fusce consequat vehicula volutpat. Ut dictum elit nibh, sit amet hendrerit odio molestie eleifend. Maecenas viverra tempor tortor, ac dignissim nibh ornare eu.</string>
 

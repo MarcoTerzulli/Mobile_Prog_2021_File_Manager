@@ -70,7 +70,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="2022-10-18 18:21:48.610"
+                    android:text="@string/timestamp_placeholder"
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -151,7 +151,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="10"
+                    android:text="@string/number_placeholder"
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -178,7 +178,61 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="10"
+                    android:text="@string/number_placeholder"
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/log_op_start_path_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_number_of_items_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/log_op_start_path_descr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/log_op_start_path"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_start_path_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/string_placeholder"
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/log_op_destination_path_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_start_path_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/log_op_destination_path_descr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/log_op_dest_path"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_destination_path_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/string_placeholder"
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -186,7 +240,7 @@
                 android:id="@+id/log_op_error_reason_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/log_op_number_of_failed_items_container"
+                android:layout_below="@+id/log_op_destination_path_container"
                 android:paddingTop="@dimen/padding_medium"
                 android:paddingBottom="@dimen/padding_medium"
                 android:weightSum="2">

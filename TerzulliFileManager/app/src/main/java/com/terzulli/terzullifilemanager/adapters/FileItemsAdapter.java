@@ -82,7 +82,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         if (selectedFilesManager.getSelectedFiles().size() == 0)
             return;
 
-        selectedFilesManager.setOperationStartPath(mainFragment.getCurrentPath());
+        selectedFilesManager.setOperationOriginPath(mainFragment.getCurrentPath());
         selectedFilesManager.setCopyMoveOperationTypeIsCopy(isCopy);
         saveSelectionForCopyMove();
         clearSelection();
@@ -95,7 +95,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         if (selectedFilesManager.getSelectedFiles().size() == 0)
             return;
 
-        selectedFilesManager.setOperationStartPath(mainFragment.getCurrentPath());
+        selectedFilesManager.setOperationOriginPath(mainFragment.getCurrentPath());
         saveSelectionForCompress();
         clearSelection();
         mainFragment.refreshList();
@@ -162,17 +162,19 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         clearSelection();
         selectedFilesManager.clearSelectionFromCopyMove();
 
+        ArrayList<File> filesWithErrors = new ArrayList<>();
         File newLocation = new File(destinationPath);
+
         if (newLocation.exists()) {
             // copy
             for (File fileToMove : filesToCopyMove) {
-
                 try {
                     copyFileLowLevelOperation(fileToMove, newLocation);
                 } catch (IOException e) {
                     // TODO salvare su log anziché fare return qui ed aggiungere file problematici ad una lista
                     //  Il return si fa dopo
-                    return -1;
+                    filesWithErrors.add(fileToMove);
+                    //return -1;
                 }
             }
 
@@ -182,7 +184,15 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                     deleteRecursive(fileToMove);
                 }
             }
+        } else {
+            filesWithErrors.add(newLocation);
+            // todo salvare su log
+            return -2;
         }
+
+        // todo SALVARE SU LOG
+        if(filesWithErrors.size() != 0)
+            return -1;
 
         return 1;
     }
@@ -238,7 +248,11 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
                         // TODO salvare su log operazione completata
                         break;
-                    case -1:
+                    case -1: // errore durante la copia
+                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                        // TODO salvare su log errore e lista file problematici
+                        break;
+                    case -2: // la nuova location non esiste
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
                         // TODO salvare su log errore e lista file problematici
                         break;
@@ -442,24 +456,28 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
             filestoDelete.addAll(selectedFilesManager.getSelectedFiles());
             clearSelection();
 
+            ArrayList<File> filesWithErrors = new ArrayList<>();
+
             for (File file : filestoDelete) {
-                deleteRecursive(file);
+                if(!deleteRecursive(file))
+                    filesWithErrors.add(file);
             }
 
             // TODO salvare su log operazione completata
+            // todo utilizzare filesWithErrors
 
             if (mainFragment.getCurrentPath().equals(originalPath))
                 mainFragment.refreshList();
         }
     }
 
-    private void deleteRecursive(File file) {
+    private boolean deleteRecursive(File file) {
         if (file.isDirectory()) {
             for (File child : Objects.requireNonNull(file.listFiles()))
                 deleteRecursive(child);
         }
 
-        file.delete();
+        return file.delete();
     }
 
     private void copyFileLowLevelOperation(File sourceLocation, File targetLocation)
@@ -718,8 +736,8 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         }
     }
 
-    public String getOperationStartPath() {
-        return selectedFilesManager.getOperationStartPath();
+    public String getOperationOriginPath() {
+        return selectedFilesManager.getOperationOriginPath();
     }
 
     public void saveCurrentFilesBeforeQuerySubmit() {

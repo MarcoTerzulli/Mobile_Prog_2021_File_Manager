@@ -662,7 +662,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         btnCancel.setOnClickListener(view -> {
             if (currentAdapter instanceof FileItemsAdapter) {
 
-                if (((FileItemsAdapter)currentAdapter).getOperationStartPath().equals(currentPath))
+                if (((FileItemsAdapter)currentAdapter).getOperationOriginPath().equals(currentPath))
                     ((FileItemsAdapter)currentAdapter).recoverSelectionFromCopyMove();
                 else
                     ((FileItemsAdapter)currentAdapter).clearSelectionFromCopyMove();
@@ -726,7 +726,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         btnCancel.setOnClickListener(view -> {
             if (currentAdapter instanceof FileItemsAdapter) {
-                if (((FileItemsAdapter)currentAdapter).getOperationStartPath().equals(currentPath))
+                if (((FileItemsAdapter)currentAdapter).getOperationOriginPath().equals(currentPath))
                     ((FileItemsAdapter)currentAdapter).recoverSelectionFromCompress();
                 else
                     ((FileItemsAdapter)currentAdapter).clearSelectionFromCompress();
