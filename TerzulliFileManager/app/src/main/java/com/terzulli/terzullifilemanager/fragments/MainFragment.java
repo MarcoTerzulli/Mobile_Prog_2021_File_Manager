@@ -93,6 +93,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private Activity activityReference;
     private SharedPreferences sharedPreferences;
     private RecyclerView.Adapter currentAdapter;
+    private boolean shouldExecuteOnResume = false;
 
     public MainFragment() {
         // Required empty public constructor
@@ -146,7 +147,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             if (isACustomLocationDisplayed())
                 updateBreadCrumbList(null, null);
             breadcrumbsView.setVisibility(View.GONE);
-        }, 10);
+        }, 1);
     }
 
     public void loadLogs() {
@@ -161,7 +162,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
-
 
         long loadingTicket = ++activeLoadingsCounter;
 
@@ -420,22 +420,23 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         switch (pathHomeFriendlyName) {
             case strLocationRecentsFriendlyName:
-                displayRecentsFiles();
+                loadRecentsFiles();
                 break;
             case strLocationAudioFriendlyName:
-                displayAudioFiles();
+                loadAudioFiles();
                 break;
             case strLocationVideosFriendlyName:
-                displayVideosFiles();
+                loadVideosFiles();
                 break;
             case strLocationImagesFriendlyName:
-                displayImagesFiles();
+                loadImagesFiles();
                 break;
             case strLocationLogsFriendlyName:
                 loadLogs();
                 break;
             default:
-                loadPath(currentPath, true, false);
+                loadPath(currentPath, false, true);
+                //loadPath(currentPath, true, false);
                 break;
         }
     }
@@ -666,6 +667,51 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
     }
 
+    public void displayClearLogHistoryDialog() {
+
+        String message = view.getResources().getString(R.string.log_op_clear_history_dialog);
+
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
+        alertBuilder.setMessage(message);
+
+        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> executeClearLogHistoryOperationOnThread());
+        alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {
+        });
+
+        alertBuilder.show();
+    }
+
+    private void executeClearLogHistoryOperationOnThread() {
+        if (currentAdapter instanceof LogItemsAdapter) {
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Handler handler = new Handler(Looper.getMainLooper());
+            long loadingTicket = ++activeLoadingsCounter;
+
+            executor.execute(() -> {
+                LogDatabase logDatabase = LogDatabase.getInstance(view.getContext());
+                assert logDatabase != null;
+                Objects.requireNonNull(logDatabase.logDao()).deleteAllLogs();
+
+                handler.post(() -> {
+                    // se nel frattempo l'utente ha scelto di caricare un'altra schermata,
+                    // annullo questo caricamento
+                    if (activeLoadingsCounter <= loadingTicket) {
+                        loadLogs();
+                    }
+                });
+            });
+
+            /*activityReference.runOnUiThread(() -> {
+                LogDatabase logDatabase = LogDatabase.getInstance(view.getContext());
+                assert logDatabase != null;
+                Objects.requireNonNull(logDatabase.logDao()).deleteAllLogs();
+                loadLogs();
+            });*/
+        }
+
+    }
+
 
     /**
      * @param selectionType   tipologia di selezione:
@@ -772,6 +818,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
 
         btnConfirm.setOnClickListener(view -> {
+            // TODO verificare di non essere in recents, images ecc
+            // TODO mostrare un toast ma non cancellare la selezione
             if (currentAdapter instanceof FileItemsAdapter)
                 ((FileItemsAdapter)currentAdapter).executeCopyMoveOperationOnThread(isCopy, currentPath);
         });
@@ -799,6 +847,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         btnConfirm.setOnClickListener(view -> {
             hideCopyMoveExtractBar();
+            // TODO verificare di non essere in recents, images ecc
+            // TODO mostrare un toast ma non cancellare la selezione
 
             if (currentAdapter instanceof FileItemsAdapter)
                 ((FileItemsAdapter)currentAdapter).executeExtractOperationOnThread(getCurrentPath());
@@ -835,6 +885,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
 
         btnConfirm.setOnClickListener(view -> {
+            // TODO verificare di non essere in recents, images ecc
+            // TODO mostrare un toast ma non cancellare la selezione
             if (currentAdapter instanceof FileItemsAdapter)
                 ((FileItemsAdapter)currentAdapter).executeCompressOperationOnThread(currentPath);
         });
@@ -954,7 +1006,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         pathHomeFriendlyName = strLocationInternalFriendlyName;
 
         loadPath(path, false, reloadBreadCrumb);
-        reloadBreadCrumb(path);
+        //reloadBreadCrumb(path);
     }
 
     public void loadPathInternal(boolean reloadBreadCrumb) {
@@ -962,10 +1014,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         pathHomeFriendlyName = strLocationInternalFriendlyName;
 
         loadPath(path, false, reloadBreadCrumb);
+        //reloadBreadCrumb(path);
     }
 
-    public void displayVideosFiles() {
-        currentPath = getInternalStoragePath();
+    public void loadVideosFiles() {
         currentPath = getInternalStoragePath();
 
         displayEmptyLayoutWhileWaiting();
@@ -982,7 +1034,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_videos));
     }
 
-    public void displayAudioFiles() {
+    public void loadAudioFiles() {
         currentPath = getInternalStoragePath();
 
         displayEmptyLayoutWhileWaiting();
@@ -999,7 +1051,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_audio));
     }
 
-    public void displayImagesFiles() {
+    public void loadImagesFiles() {
         currentPath = getInternalStoragePath();
 
         displayEmptyLayoutWhileWaiting();
@@ -1016,7 +1068,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
     }
 
-    public void displayRecentsFiles() {
+    public void loadRecentsFiles() {
         currentPath = getInternalStoragePath();
 
         RecentsFilesManager recentsFilesManager = new RecentsFilesManager(sharedPreferences);
@@ -1198,7 +1250,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             }
         });
 
-        //refreshList(); // TODO test
+        refreshList();
+
 
         return view;
     }
@@ -1207,15 +1260,18 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onResume() {
         super.onResume();
 
-        if (lastActionBarTitle.length() == 0)
-            setActionBarTitle(getCurrentDirectoryName());
-        else
-            setActionBarTitle(lastActionBarTitle);
+        if(shouldExecuteOnResume) {
+            if (lastActionBarTitle.length() == 0)
+                setActionBarTitle(getCurrentDirectoryName());
+            else
+                setActionBarTitle(lastActionBarTitle);
 
-        activityReference = requireActivity();
+            activityReference = requireActivity();
 
-        if (!((MainActivity)activityReference).isSearchActive())
-            refreshList();
+            if (!((MainActivity)activityReference).isSearchActive())
+                refreshList();
+        } else
+            shouldExecuteOnResume = true;
     }
 
     private String getSelectedBreadcrumbPath(int depth) {

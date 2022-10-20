@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.navigation.NavigationView;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.adapters.FileItemsAdapter;
+import com.terzulli.terzullifilemanager.adapters.LogItemsAdapter;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
@@ -157,6 +158,11 @@ public class MainActivity extends PermissionsActivity
         Fragment currentFragment = getForegroundFragment();
         if(currentFragment instanceof MainFragment &&
                 ((MainFragment)currentFragment).isCurrentAdapterForFiles()) {
+
+            // rendo sempre visibili alcuni item
+            toolbarMenu.findItem(R.id.menu_delete).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            toolbarMenu.findItem(R.id.menu_share).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
             switch (menuActualCase) {
                 case 1:
                     // 1 file selezionato
@@ -213,10 +219,14 @@ public class MainActivity extends PermissionsActivity
             }
         } else if (currentFragment instanceof MainFragment &&
                 ((MainFragment)currentFragment).isCurrentAdapterForLogs()) {
+
+            // rendo nascosti alcuni item
+            toolbarMenu.findItem(R.id.menu_delete).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
+            toolbarMenu.findItem(R.id.menu_share).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
+
             toolbarMenu.findItem(R.id.menu_clear_logs).setVisible(true);
             disableMenu();
         }
-
 
     }
 
@@ -547,8 +557,14 @@ public class MainActivity extends PermissionsActivity
                     case R.id.menu_share:
                         ((FileItemsAdapter)currentAdapter).shareSelectedFiles();
                         break;
+                    default:
+                        // non dovremmo mai arrivarci
+                        return false;
+                }
+            } else if(currentAdapter instanceof LogItemsAdapter) {
+                switch (item.getItemId()) {
                     case R.id.menu_clear_logs:
-                        // TODO dialog per cancellazione log dal database
+                        ((MainFragment)currentFragment).displayClearLogHistoryDialog();
                         break;
                     default:
                         // non dovremmo mai arrivarci
@@ -645,16 +661,16 @@ public class MainActivity extends PermissionsActivity
 
                 switch (destination.getId()) {
                     case R.id.nav_recents:
-                        ((MainFragment)currentFragment).displayRecentsFiles();
+                        ((MainFragment)currentFragment).loadRecentsFiles();
                         break;
                     case R.id.nav_images:
-                        ((MainFragment)currentFragment).displayImagesFiles();
+                        ((MainFragment)currentFragment).loadImagesFiles();
                         break;
                     case R.id.nav_videos:
-                        ((MainFragment)currentFragment).displayVideosFiles();
+                        ((MainFragment)currentFragment).loadVideosFiles();
                         break;
                     case R.id.nav_audio:
-                        ((MainFragment)currentFragment).displayAudioFiles();
+                        ((MainFragment)currentFragment).loadAudioFiles();
                         break;
                     case R.id.nav_download:
                         ((MainFragment)currentFragment).loadPathDownload(true);

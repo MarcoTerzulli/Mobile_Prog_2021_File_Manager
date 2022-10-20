@@ -16,7 +16,8 @@
         <moe.feng.common.view.breadcrumbs.BreadcrumbsView
             android:id="@+id/fragment_main_breadcrumbs"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize" />
+            android:layout_height="?attr/actionBarSize"
+            android:visibility="gone" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/fragment_main_swipe_refresh_layout"
@@ -41,7 +42,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true">
+            android:layout_centerVertical="true"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/items_empty_folder_icon"
@@ -70,7 +72,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true">
+            android:layout_centerVertical="true"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/items_empty_logs_icon"

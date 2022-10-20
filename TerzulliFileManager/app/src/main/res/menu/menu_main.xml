@@ -9,13 +9,13 @@
         android:id="@+id/menu_share"
         android:icon="@drawable/ic_menu_share_filled"
         android:title="@string/action_share"
-        app:showAsAction="always" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/menu_delete"
         android:icon="@drawable/ic_menu_delete"
         android:title="@string/action_delete"
-        app:showAsAction="always" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/menu_search"
@@ -97,7 +97,7 @@
 
     <item
         android:id="@+id/menu_clear_logs"
-        android:title="@string/action_extract"
+        android:title="@string/action_clear_logs"
         app:showAsAction="never" />
 
     <!--

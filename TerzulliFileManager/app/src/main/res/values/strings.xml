@@ -83,6 +83,7 @@
     <string name="selected_file_lowercase">selected</string>
 
     <!-- File/Dir delete strings -->
+    <string name="delete_dialog_title">Delete</string>
     <string name="delete_single_dir_first_part">Delete folder</string>
     <string name="delete_single_dir_second_part">and its contents?</string>
     <string name="delete_single_file">Delete</string>
@@ -165,6 +166,7 @@
     <string name="log_op_items_list">Items list</string>
     <string name="log_op_items_failed_list">Failed items list</string>
     <string name="log_op_retry_operation">Retry the operation?</string>
+    <string name="log_op_clear_history_dialog">Do you want to clear the logs history? \n\nWarning: this operation cannot be undone</string>
 
     <!-- Error -->
     <string name="error_access_to_root_directory">You don\'t have to permission to access this location</string>

@@ -65,4 +65,7 @@ interface LogDao {
 
     @Query("DELETE FROM Log WHERE timestamp < :specifiedDate")
     fun deleteLogsOlderThanDate(specifiedDate: Date?)
+
+    @Query("DELETE FROM Log")
+    fun deleteAllLogs()
 }
