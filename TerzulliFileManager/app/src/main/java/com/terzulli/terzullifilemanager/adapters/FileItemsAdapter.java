@@ -168,7 +168,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         selectedFilesManager.setCopyMoveOperationTypeIsCopy(isCopy);
         saveSelectionForCopyMove();
         clearSelection();
-        mainFragment.refreshList();
+        mainFragment.refreshList(false);
 
         mainFragment.displayCopyMoveBar(isCopy, selectedFilesManager.getSelectedFilesToCopyMove().size());
     }
@@ -180,7 +180,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         selectedFilesManager.setOperationOriginPath(mainFragment.getCurrentPath());
         saveSelectionForCompress();
         clearSelection();
-        mainFragment.refreshList();
+        mainFragment.refreshList(false);
 
         mainFragment.displayCompressToBar(selectedFilesManager.getSelectedFilesToCompress().size());
     }
@@ -353,7 +353,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                 }
 
                 if (mainFragment.getCurrentPath().equals(destinationPath))
-                    mainFragment.refreshList();
+                    mainFragment.refreshList(false);
             });
         });
     }
@@ -405,7 +405,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                         operationErrorDescription, new File(selectedFilesManager.getFileToExtract().getPath()), "");
 
                 if (mainFragment.getCurrentPath().equals(extractPath))
-                    mainFragment.refreshList();
+                    mainFragment.refreshList(false);
             });
         });
     }
@@ -439,7 +439,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                 }
 
                 if (mainFragment.getCurrentPath().equals(compressPath))
-                    mainFragment.refreshList();
+                    mainFragment.refreshList(false);
             });
         });
     }
@@ -593,7 +593,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                     operationErrorDescription, filestoDelete, filesWithErrors);
 
             if (mainFragment.getCurrentPath().equals(originalPath))
-                mainFragment.refreshList();
+                mainFragment.refreshList(false);
         }
     }
 

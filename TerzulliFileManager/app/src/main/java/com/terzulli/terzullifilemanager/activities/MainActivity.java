@@ -103,7 +103,7 @@ public class MainActivity extends PermissionsActivity
 
                 Fragment currentFragment = getForegroundFragment();
                 if(currentFragment instanceof MainFragment) {
-                    new Handler().postDelayed(((MainFragment)currentFragment)::refreshList, 10);
+                    new Handler().postDelayed(() -> ((MainFragment)currentFragment).refreshList(false), 10);
                 }
 
                 return true;
@@ -541,12 +541,12 @@ public class MainActivity extends PermissionsActivity
                     case R.id.menu_show_hidden:
                         sharedPrefEditor.putBoolean("showHidden", true);
                         sharedPrefEditor.apply();
-                        ((MainFragment)currentFragment).refreshList();
+                        ((MainFragment)currentFragment).refreshList(false);
                         break;
                     case R.id.menu_dont_show_hidden:
                         sharedPrefEditor.putBoolean("showHidden", false);
                         sharedPrefEditor.apply();
-                        ((MainFragment)currentFragment).refreshList();
+                        ((MainFragment)currentFragment).refreshList(false);
                         break;
                     case R.id.menu_rename:
                         ((FileItemsAdapter)currentAdapter).renameSelectedFile();
@@ -618,10 +618,8 @@ public class MainActivity extends PermissionsActivity
 
         // ricarico il contenuto ora che ho i permessi per lo storage
         if (currentFragment instanceof MainFragment) {
-            ((MainFragment)currentFragment).refreshList();
+            ((MainFragment)currentFragment).refreshList(false);
         }
-
-
     }
 
     public void checkForSystemPermissions() {

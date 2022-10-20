@@ -416,7 +416,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    public void refreshList() {
+    public void refreshList(boolean forceKeepBreadcrumb) {
 
         switch (pathHomeFriendlyName) {
             case strLocationRecentsFriendlyName:
@@ -435,7 +435,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 loadLogs();
                 break;
             default:
-                loadPath(currentPath, false, true);
+                if(forceKeepBreadcrumb)
+                    loadPath(currentPath, true, false);
+                else
+                    loadPath(currentPath, false, true);
                 //loadPath(currentPath, true, false);
                 break;
         }
@@ -512,7 +515,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             String operationErrorDescription = "";
 
             if (from.exists() && from.renameTo(to)) {
-                refreshList();
+                refreshList(false);
                 ((FileItemsAdapter)currentAdapter).clearSelection();
             } else {
                 operationSuccess = false;
@@ -609,7 +612,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 operationSuccess = false;
                 operationErrorDescription = view.getResources().getString(R.string.error_cannot_create_folder);
             } else
-                refreshList();
+                refreshList(false);
         }
 
         // salvataggio risultato operazione su log
@@ -811,10 +814,9 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 else
                     ((FileItemsAdapter)currentAdapter).clearSelectionFromCopyMove();
             }
-
-
+            
             hideCopyMoveExtractBar();
-            refreshList();
+            refreshList(false);
         });
 
         btnConfirm.setOnClickListener(view -> {
@@ -842,7 +844,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 ((FileItemsAdapter)currentAdapter).clearFileToExtractSelection();
 
             hideCopyMoveExtractBar();
-            refreshList();
+            refreshList(false);
         });
 
         btnConfirm.setOnClickListener(view -> {
@@ -881,7 +883,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             }
 
             hideCopyMoveExtractBar();
-            refreshList();
+            refreshList(false);
         });
 
         btnConfirm.setOnClickListener(view -> {
@@ -904,7 +906,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             sharedPrefEditor.putBoolean("sortOrderAscending", true);
             sharedPrefEditor.apply();
 
-            refreshList();
+            refreshList(false);
         });
 
         alertBuilder.setNegativeButton(R.string.sort_descending, (dialog, which) -> {
@@ -912,7 +914,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             sharedPrefEditor.putBoolean("sortOrderAscending", false);
             sharedPrefEditor.apply();
 
-            refreshList();
+            refreshList(false);
         });
 
         String[] items = {activityReference.getResources().getString(R.string.sort_name),
@@ -1250,9 +1252,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             }
         });
 
-        refreshList();
-
-
+        refreshList(false);
+        
         return view;
     }
 
@@ -1269,7 +1270,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             activityReference = requireActivity();
 
             if (!((MainActivity)activityReference).isSearchActive())
-                refreshList();
+                refreshList(false);
         } else
             shouldExecuteOnResume = true;
     }
@@ -1288,6 +1289,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     @Override
     public void onRefresh() {
-        refreshList();
+        refreshList(true);
     }
 }
