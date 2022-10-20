@@ -1,5 +1,13 @@
 package com.terzulli.terzullifilemanager.adapters;
 
+import static com.terzulli.terzullifilemanager.utils.Utils.strOperationCompress;
+import static com.terzulli.terzullifilemanager.utils.Utils.strOperationCopy;
+import static com.terzulli.terzullifilemanager.utils.Utils.strOperationDelete;
+import static com.terzulli.terzullifilemanager.utils.Utils.strOperationExtract;
+import static com.terzulli.terzullifilemanager.utils.Utils.strOperationMove;
+import static com.terzulli.terzullifilemanager.utils.Utils.strOperationNewFolder;
+import static com.terzulli.terzullifilemanager.utils.Utils.strOperationRename;
+
 import android.app.Activity;
 import android.content.Context;
 import android.util.TypedValue;
@@ -9,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -59,17 +66,37 @@ public class LogItemsAdapter extends RecyclerView.Adapter<LogItemsAdapter.ItemsV
 
         TableLog selectedLog = logsList.get(position);
 
-        //icona
-        //setItemIcon(selectedFile, holder, false);
-
-        // background
-        TypedValue backgroundColor = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, backgroundColor, true);
+        // nome
+        switch (selectedLog.getOperationType()) {
+            case strOperationNewFolder:
+                holder.itemName.setText(context.getResources().getString(R.string.log_op_type_new_folder));
+                break;
+            case strOperationCompress:
+                holder.itemName.setText(context.getResources().getString(R.string.log_op_type_compress));
+                break;
+            case strOperationExtract:
+                holder.itemName.setText(context.getResources().getString(R.string.log_op_type_extract));
+                break;
+            case strOperationCopy:
+                holder.itemName.setText(context.getResources().getString(R.string.log_op_type_copy));
+                break;
+            case strOperationMove:
+                holder.itemName.setText(context.getResources().getString(R.string.log_op_type_move));
+                break;
+            case strOperationRename:
+                holder.itemName.setText(context.getResources().getString(R.string.log_op_type_rename));
+                break;
+            case strOperationDelete:
+                holder.itemName.setText(context.getResources().getString(R.string.log_op_type_delete));
+                break;
+            default:
+                // non dovremmo mai arrivarci
+                holder.itemName.setText(selectedLog.getOperationType());
+        }
 
         // dettagli
-        holder.itemName.setText(selectedLog.getOperationType());
         holder.itemDetails.setVisibility(View.VISIBLE);
-        holder.itemDetails.setText(Utils.formatDateDetailsFull(selectedLog.getTimestamp()));
+        holder.itemDetails.setText(Utils.formatDateDetailsFullWithMilliseconds(selectedLog.getTimestamp()));
 
         // colori ed icona
         int color = ContextCompat.getColor(context, R.color.log_success);
@@ -86,6 +113,10 @@ public class LogItemsAdapter extends RecyclerView.Adapter<LogItemsAdapter.ItemsV
         holder.itemName.setTextColor(color);
         holder.itemDetails.setTextColor(color);
         DrawableCompat.setTint(DrawableCompat.wrap(holder.itemIcon.getDrawable()), color);
+
+        // background
+        TypedValue backgroundColor = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, backgroundColor, true);
 
         holder.itemView.setOnClickListener(view -> {
             // todo gestione visualizzazione dettagli log

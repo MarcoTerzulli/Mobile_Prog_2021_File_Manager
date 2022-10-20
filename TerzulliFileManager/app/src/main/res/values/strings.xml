@@ -143,6 +143,13 @@
     <string name="intent_share_text">Attached files</string>
 
     <!-- Logs -->
+    <string name="log_op_type_new_folder">New Folder</string>
+    <string name="log_op_type_compress">Compress</string>
+    <string name="log_op_type_extract">Extract</string>
+    <string name="log_op_type_copy">Copy</string>
+    <string name="log_op_type_move">Move</string>
+    <string name="log_op_type_rename">Rename</string>
+    <string name="log_op_type_delete">Delete</string>
     <string name="log_op_type">Type</string>
     <string name="log_op_timestamp">Timestamp</string>
     <string name="log_op_result">Result</string>

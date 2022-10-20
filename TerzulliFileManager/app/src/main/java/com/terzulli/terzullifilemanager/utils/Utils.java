@@ -193,6 +193,13 @@ public class Utils {
         return formatter.format(date);
     }
 
+    @SuppressLint("SimpleDateFormat")
+    public static String formatDateDetailsFullWithMilliseconds(Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy, HH:mm:ss.SSS");
+
+        return formatter.format(date);
+    }
+
     @SuppressLint("DefaultLocale")
     public static String humanReadableByteCountSI(long bytes) {
         if (-1000 < bytes && bytes < 1000) {

@@ -7,11 +7,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.SearchView;
@@ -30,14 +28,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.navigation.NavigationView;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.adapters.FileItemsAdapter;
-import com.terzulli.terzullifilemanager.adapters.LogItemsAdapter;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
-import com.terzulli.terzullifilemanager.database.entities.TableLog;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
