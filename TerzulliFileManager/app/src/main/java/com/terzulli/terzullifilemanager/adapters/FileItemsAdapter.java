@@ -34,7 +34,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
-import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.RecentsFilesManager;
 import com.terzulli.terzullifilemanager.utils.SelectedFilesManager;
@@ -52,7 +51,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
     private final MainFragment mainFragment;
     private final Activity activityReference;
     private File[] filesAndDirs;
-    private LogDatabase logDatabase;
 
     public FileItemsAdapter(Context context, File[] filesAndFolders, MainFragment mainFragment, Activity activityReference) {
         this.context = context;
@@ -61,7 +59,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         this.activityReference = activityReference;
 
         selectedFilesManager = new SelectedFilesManager();
-        logDatabase = LogDatabase.getInstance(context);
     }
 
     public void deselectAll() {
