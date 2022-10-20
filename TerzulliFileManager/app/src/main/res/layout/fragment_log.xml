@@ -43,7 +43,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/action_copy"
+                    android:text=""
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -70,7 +70,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/timestamp_placeholder"
+                    android:text=""
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -97,7 +97,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Failed"
+                    android:text=""
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -125,7 +125,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/log_op_retried_true"
+                    android:text=""
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -152,7 +152,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/number_placeholder"
+                    android:text=""
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -179,7 +179,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/number_placeholder"
+                    android:text=""
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -207,7 +207,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/string_placeholder"
+                    android:text=""
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -235,7 +235,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/string_placeholder"
+                    android:text=""
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -263,7 +263,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/string_placeholder_long"
+                    android:text=""
                     android:textSize="@dimen/text_medium" />
             </LinearLayout>
 
@@ -288,7 +288,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/log_op_files_descr"
-                    android:text="@string/string_placeholder_long"
+                    android:text=""
                     android:textSize="@dimen/text_normal" />
             </RelativeLayout>
 
@@ -314,7 +314,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/log_op_files_failed_descr"
-                    android:text="@string/string_placeholder_long"
+                    android:text=""
                     android:textSize="@dimen/text_normal" />
             </RelativeLayout>
 
