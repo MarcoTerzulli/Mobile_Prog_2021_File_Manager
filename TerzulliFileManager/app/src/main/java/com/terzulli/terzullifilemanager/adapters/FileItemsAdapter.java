@@ -1,9 +1,12 @@
 package com.terzulli.terzullifilemanager.adapters;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.compressSelectedFilesOperation;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.copyMoveSelectionOperation;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.deleteSelectedFilesOperation;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.extractSelectedFileOperation;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
 import static com.terzulli.terzullifilemanager.utils.Utils.isFileAZipArchive;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationMove;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -32,25 +35,14 @@ import com.squareup.picasso.Picasso;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
-import com.terzulli.terzullifilemanager.database.entities.TableItem;
-import com.terzulli.terzullifilemanager.database.entities.TableLog;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.RecentsFilesManager;
 import com.terzulli.terzullifilemanager.utils.SelectedFilesManager;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
-import net.lingala.zip4j.ZipFile;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -70,81 +62,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
         selectedFilesManager = new SelectedFilesManager();
         logDatabase = LogDatabase.getInstance(context);
-    }
-
-    /**
-     * Funzione per inserimento asincrono di log nel database
-     * @param logDatabase istanza del database
-     * @param timestamp timestamp dell' 'operazione
-     * @param operationSuccess flag che indica se l'operazione è andata a buon fine
-     * @param operationType tipologia operazione
-     * @param originPath path di origine dell'operazione
-     * @param destinationPath (eventuale) path di destinazione dell'operazione
-     * @param description descrizione dell'operazione
-     * @param operationItems lista di item coinvolti
-     * @param operationFailedItems lista di item per cui l'operazione non è andata a buon fine
-     */
-    public static void insertOpLogIntoDatabase(LogDatabase logDatabase, Date timestamp, boolean operationSuccess,
-                                               String operationType, String originPath, String destinationPath,
-                                               String description, ArrayList<File> operationItems,
-                                               ArrayList<File> operationFailedItems) {
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        executor.execute(() -> {
-            // creazione entry nella tabella log
-            TableLog tableLog = new TableLog(timestamp, operationSuccess, operationType, originPath,
-                    destinationPath, description);
-            long logId = logDatabase.logDao().insert(tableLog);
-
-            // insert andata a buon fine
-            if(logId != -1) {
-                // inserimento entry nella tabella
-                for (File opItem : operationItems) {
-                    boolean failed = operationFailedItems.contains(opItem);
-
-                    TableItem tableItem = new TableItem((int) logId, opItem.getName(), opItem.getAbsolutePath(),
-                            "", failed);
-                    logDatabase.itemDao().insert(tableItem);
-                }
-            }
-        });
-    }
-
-    /**
-     * Funzione per inserimento asincrono di log nel database
-     * @param logDatabase istanza del database
-     * @param timestamp timestamp dell' 'operazione
-     * @param operationSuccess flag che indica se l'operazione è andata a buon fine
-     * @param operationType tipologia operazione
-     * @param originPath path di origine dell'operazione
-     * @param destinationPath path di destinazione dell'operazione
-     * @param description descrizione dell'operazione
-     * @param operationItem item su cui è stata svolta l'operazione
-     * @param itemNewName (eventuale) nuovo nome dell'item
-     */
-    public static void insertOpLogIntoDatabase(LogDatabase logDatabase, Date timestamp, boolean operationSuccess,
-                                               String operationType, String originPath, String destinationPath,
-                                               String description, File operationItem, String itemNewName) {
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        executor.execute(() -> {
-            // creazione entry nella tabella log
-            TableLog tableLog = new TableLog(timestamp, operationSuccess, operationType, originPath,
-                    destinationPath, description);
-            long logId = logDatabase.logDao().insert(tableLog);
-
-            // insert andata a buon fine
-            if(logId != -1) {
-                // inserimento entry nella tabella
-                TableItem tableItem = new TableItem((int) logId, operationItem.getName(), operationItem.getAbsolutePath(),
-                        itemNewName, !operationSuccess);
-                logDatabase.itemDao().insert(tableItem);
-            }
-        });
-
-
     }
 
     public void deselectAll() {
@@ -180,7 +97,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         selectedFilesManager.setOperationOriginPath(mainFragment.getCurrentPath());
         saveSelectionForCompress();
         clearSelection();
-        mainFragment.refreshList(false);
+        mainFragment.refreshList(true);
 
         mainFragment.displayCompressToBar(selectedFilesManager.getSelectedFilesToCompress().size());
     }
@@ -225,73 +142,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         mainFragment.loadSelection(searchedResultsArr, "");
     }
 
-    /**
-     * FUnzione interna per la copia o spostamento di file e cartelle (ricorsiva)
-     *
-     * @param isCopy          indica se l'operazione è di copia (true) o spostamento (false)
-     * @param destinationPath path di destinazione
-     * @return codice di esecuzione:
-     * - 1: operazione completata con successo
-     * - -1: generata eccezione durante l'operazione
-     */
-    public int copyMoveSelectionOperation(boolean isCopy, String destinationPath) {
-        ArrayList<File> filesToCopyMove = new ArrayList<>(selectedFilesManager.getSelectedFilesToCopyMove().size());
-        filesToCopyMove.addAll(selectedFilesManager.getSelectedFilesToCopyMove());
-
-        if (filesToCopyMove.size() == 0)
-            return -1;
-
-        clearSelection();
-        selectedFilesManager.clearSelectionFromCopyMove();
-        File newLocation = new File(destinationPath);
-
-        ArrayList<File> filesWithErrors = new ArrayList<>();
-        String operationType = Utils.strOperationCopy;
-        if(!isCopy)
-            operationType = strOperationMove;
-        String operationErrorDescription = "";
-        int returnCode = 1;
-
-        if (newLocation.exists()) {
-            // copy
-            for (File fileToMove : filesToCopyMove) {
-                try {
-                    copyFileLowLevelOperation(fileToMove, newLocation);
-                } catch (IOException e) {
-                    filesWithErrors.add(fileToMove);
-                    returnCode = -1;
-                    //return -1;
-                }
-            }
-
-            // delete if the operation is move
-            if (!isCopy) {
-                for (File fileToMove : filesToCopyMove) {
-                    deleteRecursive(fileToMove);
-                }
-            }
-        } else {
-            filesWithErrors.add(newLocation);
-            returnCode = -2;
-        }
-
-        if(returnCode == -1) {
-            if(isCopy)
-                operationErrorDescription = context.getResources().getString(R.string.error_copy_generic);
-            else
-                operationErrorDescription = context.getResources().getString(R.string.error_move_generic);
-        }
-        else if (returnCode == -2)
-            operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir);
-
-        // salvataggio risultato operazione su log
-        FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                new Date(), (returnCode == 1), operationType, "", destinationPath,
-                operationErrorDescription, filesToCopyMove, filesWithErrors);
-
-        return returnCode;
-    }
-
     public void renameSelectedFile() {
         // controllo se c'è esattamente un file / cartella selezionato
         if (checkSelectedFilesType() == 1 || checkSelectedFilesType() == 2
@@ -322,40 +172,49 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         else
             Toast.makeText(context, R.string.action_move_started, Toast.LENGTH_SHORT).show();
 
-        executor.execute(() -> {
+        ArrayList<File> filesToCopyMove = new ArrayList<>(selectedFilesManager.getSelectedFilesToCopyMove().size());
+        filesToCopyMove.addAll(selectedFilesManager.getSelectedFilesToCopyMove());
 
-            int nItems = selectedFilesManager.getSelectedFilesToCopyMove().size();
-            int returnCode = copyMoveSelectionOperation(isCopy, destinationPath);
+        if (filesToCopyMove.size() != 0) {
+            clearSelection();
+            selectedFilesManager.clearSelectionFromCopyMove();
 
-            handler.post(() -> {
+            executor.execute(() -> {
 
-                switch (returnCode) {
-                    case 1:
-                        String toastMessage;
-                        if (isCopy)
-                            toastMessage = context.getResources().getString(R.string.action_copy_completed_first_part);
-                        else
-                            toastMessage = context.getResources().getString(R.string.action_move_completed_first_part);
+                int nItems = selectedFilesManager.getSelectedFilesToCopyMove().size();
+                int returnCode = copyMoveSelectionOperation(isCopy, destinationPath, filesToCopyMove, context);
 
-                        toastMessage += " " + nItems + " " + context.getResources().getString(R.string.action_copy_move_completed_second_part_v2)
-                                + " " + context.getResources().getString(R.string.action_copy_move_completed_third_part);
-                        Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
+                handler.post(() -> {
 
-                        break;
-                    case -1: // errore durante la copia
-                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        break;
-                    case -2: // la nuova location non esiste
-                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        break;
-                }
+                    switch (returnCode) {
+                        case 1:
+                            String toastMessage;
+                            if (isCopy)
+                                toastMessage = context.getResources().getString(R.string.action_copy_completed_first_part);
+                            else
+                                toastMessage = context.getResources().getString(R.string.action_move_completed_first_part);
 
-                if (mainFragment.getCurrentPath().equals(destinationPath))
-                    mainFragment.refreshList(false);
+                            toastMessage += " " + nItems + " " + context.getResources().getString(R.string.action_copy_move_completed_second_part_v2)
+                                    + " " + context.getResources().getString(R.string.action_copy_move_completed_third_part);
+                            Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
+
+                            break;
+                        case -1: // errore durante la copia
+                            Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                            break;
+                        case -2: // la nuova location non esiste
+                            Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                            break;
+                        default:
+                            break;
+                    }
+
+                    if (mainFragment.getCurrentPath().equals(destinationPath))
+                        mainFragment.refreshList(true);
+                });
             });
-        });
+        }
+
     }
 
     public void executeExtractOperationOnThread(String extractPath) {
@@ -368,11 +227,10 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         executor.execute(() -> {
 
             int returnCode = extractSelectedFileOperation(new File(selectedFilesManager.getFileToExtract().getPath()),
-                    extractPath);
+                    extractPath, context);
+            selectedFilesManager.setFileToExtract(null);
 
             handler.post(() -> {
-                String operationType = Utils.strOperationExtract;
-                String operationErrorDescription = "";
 
                 switch (returnCode) {
                     case 1:
@@ -382,30 +240,22 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                         //  errore estrazione
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
                         Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
-                        operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_complete);
                         break;
                     case -2:
                         // errore generico estrazione
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
                         Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
-                        operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir);
                         break;
                     case -3:
                         // errore estrazione per password
                         Toast.makeText(context, R.string.error_check_password_not_supported, Toast.LENGTH_SHORT).show();
-                        operationErrorDescription = context.getResources().getString(R.string.error_check_password_not_supported);
                         break;
                     default:
                         break;
                 }
 
-                // salvataggio risultato operazione su log
-                FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                        new Date(), (returnCode == 1), operationType, extractPath, "",
-                        operationErrorDescription, new File(selectedFilesManager.getFileToExtract().getPath()), "");
-
                 if (mainFragment.getCurrentPath().equals(extractPath))
-                    mainFragment.refreshList(false);
+                    mainFragment.refreshList(true);
             });
         });
     }
@@ -417,254 +267,75 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         mainFragment.hideCopyMoveExtractBar();
         Toast.makeText(context, R.string.action_compression_started, Toast.LENGTH_SHORT).show();
 
-        executor.execute(() -> {
 
-            int returnCode = compressSelectedFilesOperation(compressPath);
-
-            handler.post(() -> {
-
-                switch (returnCode) {
-                    case 1:
-                        Toast.makeText(context, R.string.action_compress_completed, Toast.LENGTH_SHORT).show();
-                        break;
-                    case -1:
-                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
-                        break;
-                    case -2:
-                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        break;
-                }
-
-                if (mainFragment.getCurrentPath().equals(compressPath))
-                    mainFragment.refreshList(false);
-            });
-        });
-    }
-
-    /**
-     * Funzione interna per l'estrazione di un archivio zip
-     *
-     * @param fileToExtract archivio da estrarre
-     * @param extractPath   path in cui estrarre l'archivio
-     * @return codice di esecuzione:
-     * - 1: estrazione andata a buon fine
-     * - -1: errore durante l'estrazione dello zip
-     * - -2: errore durante la creazione della cartella di estrazione. Nome duplicato (superati tentativi max) o mancanza permessi storage
-     * - -3: archivio protetto da password
-     */
-    private int extractSelectedFileOperation(File fileToExtract, String extractPath) {
-        if (fileToExtract != null) {
-            selectedFilesManager.setFileToExtract(null);
-
-            String newName = fileToExtract.getName().substring(0, fileToExtract.getName().length() - ".zip".length());
-            String originalName = newName;
-            File extractLocation = new File(extractPath, newName);
-            int i, maxRetries = 10000;
-
-            // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
-            for (i = 1; i < maxRetries; i++) {
-                extractLocation = new File(extractPath, newName);
-
-                if (extractLocation.exists())
-                    newName = originalName + " (" + i + ")";
-                else
-                    break;
-            }
-
-            if (i == maxRetries || !extractLocation.mkdirs()) {
-                return -2;
-            }
-
-            try {
-                ZipFile zipFile = new ZipFile(fileToExtract.getPath());
-                if (zipFile.isEncrypted()) {
-                    return -3;
-                }
-
-                zipFile.extractAll(extractLocation.getPath());
-
-            } catch (Exception e) {
-                return -1;
-            }
-
-            return 1;
-        }
-        return -1;
-    }
-
-    /**
-     * Funzione interna per la compressione di file in un archivio zip
-     *
-     * @param compressPath path in cui creare l'archivio
-     * @return codice di esecuzione:
-     * - 1: estrazione andata a buon fine
-     * - -1: errore durante la creazione dello zip
-     * - -2: errore Nome archivio duplicato (superati tentativi max) o mancanza permessi storage
-     */
-    private int compressSelectedFilesOperation(String compressPath) {
         ArrayList<File> filesToCompress = new ArrayList<>(selectedFilesManager.getSelectedFilesToCompress().size());
         filesToCompress.addAll(selectedFilesManager.getSelectedFilesToCompress());
 
-        int returnCode = 1;
-        ArrayList<File> filesWithErrors = new ArrayList<>();
-        String operationType = Utils.strOperationCompress;
-        String operationErrorDescription = "";
-
-        if (filesToCompress.size() == 0)
-            returnCode = -1;
-        else {
+        if (filesToCompress.size() != 0) {
             clearSelection();
             selectedFilesManager.setSelectedFilesToCompress(new ArrayList<>());
 
-            String newName = "archive";
-            String originalName = newName;
-            File extractLocation = new File(compressPath, newName + ".zip");
-            int i, maxRetries = 10000;
+            executor.execute(() -> {
 
-            // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
-            for (i = 1; i < maxRetries; i++) {
-                extractLocation = new File(compressPath, newName + ".zip");
+                int returnCode = compressSelectedFilesOperation(compressPath, filesToCompress, context);
 
-                if (extractLocation.exists())
-                    newName = originalName + " (" + i + ")";
-                else
-                    break;
-            }
+                handler.post(() -> {
 
-            if (i == maxRetries) {
-                returnCode = -2;
-            } else {
-
-                ZipFile zipFile = new ZipFile(extractLocation.getPath());
-
-                for (File fileToCompress : filesToCompress) {
-                    try {
-                        if (fileToCompress.isDirectory())
-                            zipFile.addFolder(fileToCompress);
-                        else
-                            zipFile.addFile(fileToCompress);
-                    } catch (Exception e) {
-                        filesWithErrors.add(fileToCompress);
-                        returnCode = -1;
+                    switch (returnCode) {
+                        case 1:
+                            Toast.makeText(context, R.string.action_compress_completed, Toast.LENGTH_SHORT).show();
+                            break;
+                        case -1:
+                            Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                            break;
+                        case -2:
+                            Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                            break;
+                        default:
+                            break;
                     }
-                }
-            }
 
+                    if (mainFragment.getCurrentPath().equals(compressPath))
+                        mainFragment.refreshList(true);
+                });
+            });
         }
 
-        if(returnCode == -1)
-            operationErrorDescription = context.getResources().getString(R.string.error_compression_cannot_compress_file);
-        else if (returnCode == -2)
-            operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir);
 
-        // salvataggio risultato operazione su log
-        FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                new Date(), (returnCode == 1), operationType, "", compressPath,
-                operationErrorDescription, filesToCompress, filesWithErrors);
-
-
-        return returnCode;
     }
 
-    public void deleteSelectedFilesOperation(String originalPath) {
+    public void executeDeleteOperationOnThread(String currentPath) {
+        String toastMessage = context.getResources().getString(R.string.delete_toast_first_part)
+                + " " + selectedFilesManager.getSelectedFiles().size() + " ";
+        if (selectedFilesManager.getSelectedFiles().size() == 1)
+            toastMessage += context.getResources().getString(R.string.delete_toast_single_second_part);
+        else
+            toastMessage += context.getResources().getString(R.string.delete_toast_multiple_second_part);
+
+        Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
         if (isSelectionModeEnabled()) {
             ArrayList<File> filestoDelete = new ArrayList<>(selectedFilesManager.getSelectedFiles().size());
             filestoDelete.addAll(selectedFilesManager.getSelectedFiles());
             clearSelection();
 
-            ArrayList<File> filesWithErrors = new ArrayList<>();
+            executor.execute(() -> {
+                int returnCode = deleteSelectedFilesOperation(currentPath, filestoDelete, context);
 
-            for (File file : filestoDelete) {
-                if(!deleteRecursive(file))
-                    filesWithErrors.add(file);
-            }
+                handler.post(() -> {
+                    if (returnCode == -1)
+                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
 
-            String operationType = Utils.strOperationDelete;
-            String operationErrorDescription = "";
-            if(!filesWithErrors.isEmpty())
-                operationErrorDescription = context.getResources().getString(R.string.error_cannot_delete_item);
-
-            // salvataggio risultato operazione su log
-            FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(context), new Date(),
-                    filesWithErrors.isEmpty(), operationType, originalPath, "",
-                    operationErrorDescription, filestoDelete, filesWithErrors);
-
-            if (mainFragment.getCurrentPath().equals(originalPath))
-                mainFragment.refreshList(false);
-        }
-    }
-
-    private boolean deleteRecursive(File file) {
-        if (file.isDirectory()) {
-            for (File child : Objects.requireNonNull(file.listFiles()))
-                deleteRecursive(child);
+                    if (mainFragment.getCurrentPath().equals(currentPath))
+                        mainFragment.refreshList(true);
+                });
+            });
         }
 
-        return file.delete();
-    }
-
-    private void copyFileLowLevelOperation(File sourceLocation, File targetLocation)
-            throws IOException {
-
-        File outFile = new File(targetLocation, sourceLocation.getName());
-
-        // rinomina in caso di duplicato
-        String originalName = sourceLocation.getName();
-        String newName = sourceLocation.getName();
-        int retries, maxRetries = 10000;
-
-        // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
-        for (retries = 1; retries < maxRetries; retries++) {
-            outFile = new File(targetLocation, newName);
-
-            if (outFile.exists()) {
-                if (outFile.isDirectory())
-                    newName = originalName + " (" + retries + ")";
-                else
-                    newName = originalName.substring(0, originalName.indexOf(".")) +
-                            " (" + retries + ")" + originalName.substring(originalName.indexOf("."));
-            } else
-                break;
-        }
-
-        if (retries == maxRetries) {
-            throw new IOException("Cannot create file or directory " + outFile.getAbsolutePath());
-        }
-
-        if (sourceLocation.isDirectory()) {
-            // creo test/livello1
-            if (!outFile.exists() && !outFile.mkdirs()) {
-                throw new IOException("Cannot create directory " + outFile.getAbsolutePath());
-            }
-
-            String[] children = sourceLocation.list();
-
-            for (int i = 0; i < Objects.requireNonNull(children).length; i++) {
-                // copia ricorsiva
-                copyFileLowLevelOperation(new File(sourceLocation, children[i]),
-                        outFile);
-            }
-        } else {
-            try (InputStream in = new FileInputStream(sourceLocation)) {
-
-                /*if (!outFile.exists())
-                    outFile.createNewFile();*/
-
-                if (!outFile.exists() && outFile.createNewFile())
-                    throw new IOException("Cannot create file " + outFile.getAbsolutePath());
-
-                try (OutputStream out = new FileOutputStream(outFile)) {
-                    byte[] buf = new byte[1024];
-                    int len;
-                    while ((len = in.read(buf)) > 0) {
-                        out.write(buf, 0, len);
-                    }
-                }
-            }
-        }
     }
 
     public void deleteSelectedFiles() {

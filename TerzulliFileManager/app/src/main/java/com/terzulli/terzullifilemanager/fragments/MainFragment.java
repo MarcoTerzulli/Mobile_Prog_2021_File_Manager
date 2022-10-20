@@ -57,6 +57,7 @@ import com.terzulli.terzullifilemanager.adapters.FileItemsAdapter;
 import com.terzulli.terzullifilemanager.adapters.LogItemsAdapter;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.database.entities.TableLog;
+import com.terzulli.terzullifilemanager.utils.FileFunctions;
 import com.terzulli.terzullifilemanager.utils.RecentsFilesManager;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
@@ -521,7 +522,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             }
 
             // salvataggio risultato operazione su log
-            FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(view.getContext()),
+            FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(view.getContext()),
                     new Date(), operationSuccess, operationType, dir.getAbsolutePath(), "",
                     operationErrorDescription, file, newName);
         }
@@ -614,7 +615,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
 
         // salvataggio risultato operazione su log
-        FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(view.getContext()),
+        FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(view.getContext()),
                 new Date(), operationSuccess, operationType, currentDirectory.getAbsolutePath(), "",
                 operationErrorDescription, newDir, "");
     }
@@ -756,28 +757,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
         alertBuilder.setMessage(message);
 
-        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> executeDeleteOperationOnThread(selectedFilesQt));
+        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> {
+            if (currentAdapter instanceof FileItemsAdapter)
+                ((FileItemsAdapter)currentAdapter).executeDeleteOperationOnThread(currentPath);
+        });
         alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {
         });
 
         alertBuilder.show();
-    }
-
-    private void executeDeleteOperationOnThread(int selectedFilesQt) {
-        if (currentAdapter instanceof FileItemsAdapter) {
-
-            activityReference.runOnUiThread(() -> {
-                String toastMessage = view.getResources().getString(R.string.delete_toast_first_part) + " " + selectedFilesQt + " ";
-                if (selectedFilesQt == 1)
-                    toastMessage += view.getResources().getString(R.string.delete_toast_single_second_part);
-                else
-                    toastMessage += view.getResources().getString(R.string.delete_toast_multiple_second_part);
-
-                Toast.makeText(view.getContext(), toastMessage, Toast.LENGTH_SHORT).show();
-                ((FileItemsAdapter)currentAdapter).deleteSelectedFilesOperation(currentPath);
-            });
-        }
-
     }
 
     public void displayCopyMoveBar(boolean isCopy, int selectedItemsQt) {
