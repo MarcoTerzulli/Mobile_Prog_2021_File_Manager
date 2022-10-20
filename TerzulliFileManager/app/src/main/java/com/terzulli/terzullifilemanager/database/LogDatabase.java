@@ -21,33 +21,14 @@ public abstract class LogDatabase extends RoomDatabase {
 
     private static LogDatabase instance;
 
-    // on below line we are getting instance for our database.
     public static synchronized LogDatabase getInstance(Context context) {
-        // below line is to check if
-        // the instance is null or not.
         if (instance == null) {
-            // if the instance is null we
-            // are creating a new instance
-            instance =
-                    // for creating a instance for our database
-                    // we are creating a database builder and passing
-                    // our database class with our database name.
-                    Room.databaseBuilder(context.getApplicationContext(),
+            instance = Room.databaseBuilder(context.getApplicationContext(),
                                     LogDatabase.class, databaseName)
                             .fallbackToDestructiveMigration()
-                            //.addCallback(roomCallback)
                             .build();
         }
-        // after creating an instance
-        // we are returning our instance
         return instance;
     }
-
-    /*private static LogDatabase.Callback roomCallback = new RoomDatabase.Callback() {
-        @Override
-        public void onCreate(@NonNull SupportSQLiteDatabase db) {
-            super.onCreate(db);
-        }
-    };*/
 
 }

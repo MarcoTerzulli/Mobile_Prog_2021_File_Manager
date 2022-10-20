@@ -307,6 +307,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                     recyclerView.scrollToPosition(0);
                     swipeRefreshLayout.setRefreshing(false);
+                    setActionBarTitle(getCurrentDirectoryName()); // aggiorno il titolo con il nome della nuov adirectory
 
                     ((FileItemsAdapter)currentAdapter).recoverEventuallyActiveCopyMoveOperation();
                     ((FileItemsAdapter)currentAdapter).recoverEventuallyActiveExtractOperation();

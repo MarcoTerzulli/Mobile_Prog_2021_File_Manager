@@ -12,12 +12,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.database.entities.TableLog;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
+import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,47 +57,40 @@ public class LogItemsAdapter extends RecyclerView.Adapter<LogItemsAdapter.ItemsV
             return;
         }
 
-        TableLog selectedFile = logsList.get(position);
+        TableLog selectedLog = logsList.get(position);
 
         //icona
         //setItemIcon(selectedFile, holder, false);
 
         // background
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        TypedValue backgroundColor = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, backgroundColor, true);
 
         // dettagli
-        holder.itemName.setText(selectedFile.getOperationType());
+        holder.itemName.setText(selectedLog.getOperationType());
         holder.itemDetails.setVisibility(View.VISIBLE);
+        holder.itemDetails.setText(Utils.formatDateDetailsFull(selectedLog.getTimestamp()));
 
-
-        /*holder.itemName.setText(selectedFile.getName());
-        if (selectedFile.isDirectory()) {
-            // questo permette di centrare la textview con il nome all'interno del container
-            holder.itemDetails.setText("");
-            holder.itemDetails.setVisibility(View.GONE);
-        } else {
-            holder.itemDetails.setText(formatFileDetails(selectedFile));
-            holder.itemDetails.setVisibility(View.VISIBLE);
-        }*/
+        // colori ed icona
+        int color = ContextCompat.getColor(context, R.color.log_success);
+        if(!selectedLog.getOperationSuccess()) {
+            if(selectedLog.isRetried()) {
+                color = ContextCompat.getColor(context, R.color.log_retried);
+                holder.itemIcon.setImageResource(R.drawable.ic_log_warning);
+            } else {
+                color = ContextCompat.getColor(context, R.color.log_error);
+                holder.itemIcon.setImageResource(R.drawable.ic_log_error);
+            }
+        } else
+            holder.itemIcon.setImageResource(R.drawable.ic_log_success);
+        holder.itemName.setTextColor(color);
+        holder.itemDetails.setTextColor(color);
+        DrawableCompat.setTint(DrawableCompat.wrap(holder.itemIcon.getDrawable()), color);
 
         holder.itemView.setOnClickListener(view -> {
-
+            // todo gestione visualizzazione dettagli log
         });
 
-        // gestione selezione item con long click
-        holder.itemView.setOnLongClickListener(view -> {
-
-            return true;
-        });
-
-        // gestione selezione item con click sull'icona
-        //holder.itemIcon.setOnClickListener(view -> toggleItemSelection(selectedFile, holder, true, false));
-        //holder.itemIcon.setOnClickListener(view -> toggleItemSelection(selectedFile, holder));
-
-        // ripristino lo stato di selezione precedente
-        //toggleItemSelection(selectedFile, holder, false, true);
-        //recoverItemSelectionState(selectedFile, holder);
     }
 
     private void itemOpenerHandler(File selectedFile) {
