@@ -159,13 +159,15 @@
     <string name="log_op_dest_path">Destination path</string>
     <string name="log_op_retried">Retried</string>
     <string name="log_op_retried_true">True</string>
-    <string name="log_op_retried_false">True</string>
+    <string name="log_op_retried_false">False</string>
     <string name="log_op_number_of_items">Number of items</string>
     <string name="log_op_number_of_failed_items">Number of failed items</string>
     <string name="log_op_error_descr">Error description</string>
     <string name="log_op_items_list">Items list</string>
     <string name="log_op_items_failed_list">Failed items list</string>
     <string name="log_op_retry_operation">Retry the operation?</string>
+    <string name="log_op_failed">Failed</string>
+    <string name="log_op_success">Success</string>
     <string name="log_op_clear_history_dialog">Do you want to clear the logs history? \n\nWarning: this operation cannot be undone</string>
 
     <!-- Error -->

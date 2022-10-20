@@ -112,9 +112,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         if (supportActionBar != null)
             Objects.requireNonNull(supportActionBar).setTitle(title);
-
-        /*if (supportActionBar != null)
-            Log.d("DEBUG title", "titolo impostato  " + Objects.requireNonNull(supportActionBar).getTitle());*/
     }
 
     public void initializeEmptyDirectoryLayout(boolean showEmptyLayout) {
@@ -167,7 +164,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         executor.execute(() -> {
             LogDatabase logDatabase = LogDatabase.getInstance(view.getContext());
-            ArrayList<TableLog> logsList = (ArrayList<TableLog>) logDatabase.logDao().getAll();
+            assert logDatabase != null;
+            ArrayList<TableLog> logsList = (ArrayList<TableLog>) Objects.requireNonNull(logDatabase.logDao()).getAll();
 
             handler.post(() -> {
                 // se nel frattempo l'utente ha scelto di caricare un'altra schermata,

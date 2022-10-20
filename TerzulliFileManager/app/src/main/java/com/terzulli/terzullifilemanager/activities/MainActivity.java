@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.SearchView;
@@ -19,6 +20,7 @@ import androidx.core.view.GravityCompat;
 import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -31,9 +33,11 @@ import com.terzulli.terzullifilemanager.adapters.FileItemsAdapter;
 import com.terzulli.terzullifilemanager.adapters.LogItemsAdapter;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.databinding.ActivityMainBinding;
+import com.terzulli.terzullifilemanager.fragments.LogFragment;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -129,6 +133,18 @@ public class MainActivity extends PermissionsActivity
     // metodo specifico per navHostFragment: restituisce il fragment corrente
     public Fragment getForegroundFragment() {
         return navHostFragment == null ? null : navHostFragment.getChildFragmentManager().getFragments().get(0);
+    }
+
+    public Fragment getVisibleFragment(){
+        FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
+        List<Fragment> fragments = fragmentManager.getFragments();
+        if(fragments != null){
+            for(Fragment fragment : fragments){
+                if(fragment != null && fragment.isVisible())
+                    return fragment;
+            }
+        }
+        return null;
     }
 
     /**
@@ -395,13 +411,17 @@ public class MainActivity extends PermissionsActivity
 
         actionBarDrawerToggle.setToolbarNavigationClickListener(v -> {
             Fragment actualFragment = getForegroundFragment();
+            LogFragment logFragment = (LogFragment)getSupportFragmentManager().findFragmentByTag("log_fragment");
 
-            if (actualFragment instanceof MainFragment) {
+            if (logFragment != null && logFragment.isVisible()) {
+                ((LogFragment)logFragment).goBack();
+            } else if (actualFragment instanceof MainFragment) {
                 if (((MainFragment)actualFragment).goBack())
                     activity.finish();
                 else
                     setActionBarToggleDefault();
             }
+
         });
 
         drawer.addDrawerListener(actionBarDrawerToggle);
@@ -479,7 +499,7 @@ public class MainActivity extends PermissionsActivity
 
     }
 
-    /*private Fragment getVisibleFragment() {
+    /*private Fragment getForegroundFragment() {
         FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
         List<Fragment> fragmentsList = fragmentManager.getFragments();
 
@@ -597,17 +617,21 @@ public class MainActivity extends PermissionsActivity
 
     @Override
     public void onBackPressed() {
-
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             Fragment currentFragment = getForegroundFragment();
 
-            if (currentFragment instanceof MainFragment) {
-                if (((MainFragment)currentFragment).goBack())
-                    finish();
+            LogFragment logFragment = (LogFragment)getSupportFragmentManager().findFragmentByTag("log_fragment");
+            if (logFragment != null && logFragment.isVisible()) {
+                ((LogFragment)logFragment).goBack();
             } else {
-                super.onBackPressed();
+                if (currentFragment instanceof MainFragment) {
+                    if (((MainFragment)currentFragment).goBack())
+                        finish();
+                } else {
+                    super.onBackPressed();
+                }
             }
         }
     }

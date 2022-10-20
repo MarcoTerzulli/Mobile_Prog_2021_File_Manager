@@ -10,6 +10,7 @@ import static com.terzulli.terzullifilemanager.utils.Utils.strOperationRename;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,8 +25,10 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.terzulli.terzullifilemanager.R;
+import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.database.entities.TableLog;
+import com.terzulli.terzullifilemanager.fragments.LogFragment;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
@@ -119,7 +122,18 @@ public class LogItemsAdapter extends RecyclerView.Adapter<LogItemsAdapter.ItemsV
         context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, backgroundColor, true);
 
         holder.itemView.setOnClickListener(view -> {
-            // todo gestione visualizzazione dettagli log
+            if(activityReference instanceof MainActivity) {
+
+                LogFragment logFragment = new LogFragment();
+
+                Bundle args = new Bundle();
+                args.putInt("logId", selectedLog.getId());
+                logFragment.setArguments(args);
+
+                ((MainActivity)activityReference).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_fragment_content, logFragment, "log_fragment")
+                        .commit();
+            }
         });
 
     }

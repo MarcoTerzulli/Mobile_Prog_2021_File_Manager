@@ -108,7 +108,8 @@
                 android:layout_below="@+id/log_op_result_container"
                 android:paddingTop="@dimen/padding_medium"
                 android:paddingBottom="@dimen/padding_medium"
-                android:weightSum="2">
+                android:weightSum="2"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/log_op_retried_descr"
@@ -186,10 +187,11 @@
                 android:id="@+id/log_op_start_path_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/log_op_number_of_items_container"
+                android:layout_below="@+id/log_op_number_of_failed_items_container"
                 android:paddingTop="@dimen/padding_medium"
                 android:paddingBottom="@dimen/padding_medium"
-                android:weightSum="2">
+                android:weightSum="2"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/log_op_start_path_descr"
@@ -216,7 +218,8 @@
                 android:layout_below="@+id/log_op_start_path_container"
                 android:paddingTop="@dimen/padding_medium"
                 android:paddingBottom="@dimen/padding_medium"
-                android:weightSum="2">
+                android:weightSum="2"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/log_op_destination_path_descr"
@@ -243,7 +246,8 @@
                 android:layout_below="@+id/log_op_destination_path_container"
                 android:paddingTop="@dimen/padding_medium"
                 android:paddingBottom="@dimen/padding_medium"
-                android:weightSum="2">
+                android:weightSum="2"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/log_op_error_reason_descr"
@@ -294,7 +298,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/log_op_files_container"
                 android:paddingTop="@dimen/padding_medium"
-                android:paddingBottom="@dimen/padding_medium">
+                android:paddingBottom="@dimen/padding_medium"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/log_op_files_failed_descr"
@@ -323,6 +328,7 @@
         android:layout_alignParentBottom="true"
         android:paddingStart="@dimen/padding_extra_big"
         android:paddingEnd="@dimen/padding_extra_big"
+        android:visibility="gone"
         android:theme="@style/Theme.TerzulliFileManager.CopyMoveBar">
 
         <TextView
