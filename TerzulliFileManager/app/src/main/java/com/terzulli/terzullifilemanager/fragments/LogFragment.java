@@ -204,7 +204,9 @@ public class LogFragment extends Fragment {
         log_retry_bar = view.findViewById(R.id.log_retry_bar);
 
         loadLogContent();
-        ((MainActivity)requireActivity()).setActionBarToggleBackButton();
+        if(requireActivity() instanceof MainActivity) {
+            ((MainActivity)requireActivity()).setActionBarToggleBackButton();
+        }
 
         return view;
     }

@@ -243,7 +243,6 @@ public class MainActivity extends PermissionsActivity
             toolbarMenu.findItem(R.id.menu_clear_logs).setVisible(true);
             disableMenu();
         }
-
     }
 
     private void setMenuItemsOneFileSelected() {
