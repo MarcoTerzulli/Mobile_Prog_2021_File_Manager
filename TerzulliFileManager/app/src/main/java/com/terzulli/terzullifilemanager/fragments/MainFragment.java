@@ -102,6 +102,10 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return (currentAdapter instanceof FileItemsAdapter);
     }
 
+    public boolean isCurrentAdapterForLogs() {
+        return (currentAdapter instanceof LogItemsAdapter);
+    }
+
     public void setActionBarTitle(String title) {
         lastActionBarTitle = title;
 
@@ -461,22 +465,32 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public boolean goBack() {
 
-        if (currentAdapter instanceof FileItemsAdapter && ((FileItemsAdapter)currentAdapter).isSelectionModeEnabled()) {
-            ((FileItemsAdapter)currentAdapter).clearSelection();
-            refreshAdapterItems();
-            //refreshList();
-        } else {
-            if (!isInHomePath()) {
-                // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
-                loadPath(getParentPath(), true, false);
+        if(currentAdapter instanceof FileItemsAdapter) {
+            if (((FileItemsAdapter)currentAdapter).isSelectionModeEnabled()) {
+                ((FileItemsAdapter)currentAdapter).clearSelection();
+                refreshAdapterItems();
+                //refreshList();
             } else {
-                int backPressedInterval = 2000;
-                if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
-                    return true; // la main activity deve invocare finish
-                else {
-                    timeBackPressed = System.currentTimeMillis();
-                    Toast.makeText(view.getContext(), R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
+                if (!isInHomePath()) {
+                    // se non siamo nella home, la gestione è quella classica nel tornare indietro nelle directory
+                    loadPath(getParentPath(), true, false);
+                } else {
+                    int backPressedInterval = 2000;
+                    if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
+                        return true; // la main activity deve invocare finish
+                    else {
+                        timeBackPressed = System.currentTimeMillis();
+                        Toast.makeText(view.getContext(), R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
+                    }
                 }
+            }
+        } else if (currentAdapter instanceof LogItemsAdapter) {
+            int backPressedInterval = 2000;
+            if (timeBackPressed + backPressedInterval > System.currentTimeMillis())
+                return true; // la main activity deve invocare finish
+            else {
+                timeBackPressed = System.currentTimeMillis();
+                Toast.makeText(view.getContext(), R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
             }
         }
 

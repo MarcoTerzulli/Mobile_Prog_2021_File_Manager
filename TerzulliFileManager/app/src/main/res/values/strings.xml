@@ -23,6 +23,7 @@
     <string name="action_delete">Delete</string>
     <string name="action_share">Share</string>
     <string name="action_extract">Extract to…</string>
+    <string name="action_clear_logs">Clear logs</string>
 
     <!-- Activities Strings -->
     <string name="title_activity_main">MainActivity</string>

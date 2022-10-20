@@ -196,6 +196,8 @@ public class MainActivity extends PermissionsActivity
                     break;
             }
 
+            toolbarMenu.findItem(R.id.menu_clear_logs).setVisible(false);
+
             // nasconde alcune voci all'interno delle pagine "Images", "Recents", "Audio" e "Videos"
             if(((MainFragment)currentFragment).isACustomLocationDisplayed()) {
                 toolbarMenu.findItem(R.id.menu_new_directory).setVisible(false);
@@ -209,7 +211,9 @@ public class MainActivity extends PermissionsActivity
                 toolbarMenu.findItem(R.id.menu_show_hidden).setVisible(false);
                 toolbarMenu.findItem(R.id.menu_dont_show_hidden).setVisible(false);
             }
-        } else {
+        } else if (currentFragment instanceof MainFragment &&
+                ((MainFragment)currentFragment).isCurrentAdapterForLogs()) {
+            toolbarMenu.findItem(R.id.menu_clear_logs).setVisible(true);
             disableMenu();
         }
 
@@ -424,6 +428,7 @@ public class MainActivity extends PermissionsActivity
 
         executor.execute(() -> {
             LogDatabase logDatabase = LogDatabase.getInstance(this);
+            // TODO cancellazione dei log più vecchi di 30 gg
 
         });
     }
@@ -541,6 +546,9 @@ public class MainActivity extends PermissionsActivity
                         break;
                     case R.id.menu_share:
                         ((FileItemsAdapter)currentAdapter).shareSelectedFiles();
+                        break;
+                    case R.id.menu_clear_logs:
+                        // TODO dialog per cancellazione log dal database
                         break;
                     default:
                         // non dovremmo mai arrivarci
