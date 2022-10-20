@@ -1,7 +1,9 @@
 package com.terzulli.terzullifilemanager.database.entities;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -9,41 +11,41 @@ import com.terzulli.terzullifilemanager.database.converters.DateConverter;
 
 import java.util.Date;
 
-@Entity(tableName = "Log")
+@Entity(tableName = "Log",
+        indices = {
+                @Index(value = "timestamp", unique = true)
+        })
 @TypeConverters({DateConverter.class})
 public class TableLog {
-    public TableLog(Date timestamp, String result, String operationType, String originPath, String destinationPath, String description) {
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    @ColumnInfo(name = "timestamp")
+    @NonNull
+    private Date timestamp;
+    @ColumnInfo(name = "operation_success")
+    private boolean operationSuccess;
+    @ColumnInfo(name = "type")
+    @NonNull
+    private String operationType;
+    @ColumnInfo(name = "origin_path")
+    private String originPath;
+    @ColumnInfo(name = "destination_path")
+    private String destinationPath;
+    @ColumnInfo(name = "retried")
+    private boolean retried;
+    @ColumnInfo(name = "description")
+    @NonNull
+    private String description;
+
+    public TableLog(@NonNull Date timestamp, boolean operationSuccess, @NonNull String operationType,
+                    String originPath, String destinationPath, @NonNull String description) {
         this.timestamp = timestamp;
-        this.result = result;
+        this.operationSuccess = operationSuccess;
         this.operationType = operationType;
         this.originPath = originPath;
         this.destinationPath = destinationPath;
         this.description = description;
     }
-
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-
-    @ColumnInfo(name = "timestamp")
-    private Date timestamp;
-
-    @ColumnInfo(name = "result")
-    private String result;
-
-    @ColumnInfo(name = "type")
-    private String operationType;
-
-    @ColumnInfo(name = "origin_path")
-    private String originPath;
-
-    @ColumnInfo(name = "destination_path")
-    private String destinationPath;
-
-    @ColumnInfo(name = "retried")
-    private boolean retried;
-
-    @ColumnInfo(name = "description")
-    private String description;
 
     public boolean isRetried() {
         return retried;
@@ -61,35 +63,38 @@ public class TableLog {
         this.id = id;
     }
 
+    @NonNull
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(@NonNull String description) {
         this.description = description;
     }
 
+    @NonNull
     public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(@NonNull Date timestamp) {
         this.timestamp = timestamp;
     }
 
-    public String getResult() {
-        return result;
+    public boolean getOperationSuccess() {
+        return operationSuccess;
     }
 
-    public void setResult(String result) {
-        this.result = result;
+    public void setOperationSuccess(boolean operationSuccess) {
+        this.operationSuccess = operationSuccess;
     }
 
+    @NonNull
     public String getOperationType() {
         return operationType;
     }
 
-    public void setOperationType(String operationType) {
+    public void setOperationType(@NonNull String operationType) {
         this.operationType = operationType;
     }
 

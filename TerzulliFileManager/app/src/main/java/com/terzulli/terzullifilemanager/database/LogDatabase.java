@@ -13,10 +13,11 @@ import com.terzulli.terzullifilemanager.database.daos.LogDao;
 import com.terzulli.terzullifilemanager.database.entities.TableItem;
 import com.terzulli.terzullifilemanager.database.entities.TableLog;
 
-@Database(entities = {TableLog.class, TableItem.class}, version = 1)
+@Database(entities = {TableLog.class, TableItem.class}, version = 2)
 public abstract class LogDatabase extends RoomDatabase {
     public abstract ItemDao itemDao();
     public abstract LogDao logDao();
+    public static final String databaseName = "LogDatabase";
 
     private static LogDatabase instance;
 
@@ -32,7 +33,7 @@ public abstract class LogDatabase extends RoomDatabase {
                     // we are creating a database builder and passing
                     // our database class with our database name.
                     Room.databaseBuilder(context.getApplicationContext(),
-                                    LogDatabase.class, "LogDatabase")
+                                    LogDatabase.class, databaseName)
                             .fallbackToDestructiveMigration()
                             //.addCallback(roomCallback)
                             .build();

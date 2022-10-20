@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.terzulli.terzullifilemanager.R;
+import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.database.entities.TableLog;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 
@@ -26,6 +27,7 @@ public class LogItemsAdapter extends RecyclerView.Adapter<LogItemsAdapter.ItemsV
     private final MainFragment mainFragment;
     private final Activity activityReference;
     private ArrayList<TableLog> logsList;
+    private LogDatabase logDatabase;
 
     public LogItemsAdapter(Context context, ArrayList<TableLog> logsList, MainFragment mainFragment, Activity activityReference) {
         this.context = context;
@@ -34,6 +36,8 @@ public class LogItemsAdapter extends RecyclerView.Adapter<LogItemsAdapter.ItemsV
 
         this.logsList = new ArrayList<>(logsList.size());
         this.logsList.addAll(logsList);
+
+        logDatabase = LogDatabase.getInstance(context);
     }
 
     @NonNull

@@ -1,5 +1,6 @@
 package com.terzulli.terzullifilemanager.database.entities;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -18,21 +19,27 @@ import androidx.room.PrimaryKey;
 public class TableItem {
     @PrimaryKey(autoGenerate = true)
     private int id;
-
     @ColumnInfo(name = "fk_log_id")
-    private String logId;
-
+    private int logId;
     @ColumnInfo(name = "name")
+    @NonNull
     private String name;
-
     @ColumnInfo(name = "origin_path")
+    @NonNull
     private String originPath;
-
     @ColumnInfo(name = "new_name")
     private String newName;
-
     @ColumnInfo(name = "op_failed")
     private boolean opFailed;
+
+    public TableItem(int logId, @NonNull String name, @NonNull String originPath, String newName,
+                     boolean opFailed) {
+        this.logId = logId;
+        this.name = name;
+        this.originPath = originPath;
+        this.newName = newName;
+        this.opFailed = opFailed;
+    }
 
     public boolean isOpFailed() {
         return opFailed;
@@ -50,19 +57,21 @@ public class TableItem {
         this.id = id;
     }
 
+    @NonNull
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@NonNull String name) {
         this.name = name;
     }
 
+    @NonNull
     public String getOriginPath() {
         return originPath;
     }
 
-    public void setOriginPath(String originPath) {
+    public void setOriginPath(@NonNull String originPath) {
         this.originPath = originPath;
     }
 
@@ -74,11 +83,11 @@ public class TableItem {
         this.newName = newName;
     }
 
-    public String getLogId() {
+    public int getLogId() {
         return logId;
     }
 
-    public void setLogId(String logId) {
+    public void setLogId(int logId) {
         this.logId = logId;
     }
 }

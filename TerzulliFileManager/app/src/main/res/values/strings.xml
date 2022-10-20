@@ -167,6 +167,14 @@
     <string name="error_check_permissions">Please make sure you have granted the "File and media" permission to the application</string>
     <string name="error_check_password">Maybe the password was incorrect.</string>
     <string name="error_check_password_not_supported">The extraction of archives protected by a password is unsopported</string>
+    <string name="error_cannot_rename">Could not rename the selected item</string>
+    <string name="error_cannot_create_folder">Could not create a folder with this name</string>
+    <string name="error_cannot_delete_item">Could not delete the specified item</string>
+    <string name="error_compression_cannot_compress_file">Could not compress some of the specified items</string>
+    <string name="error_extraction_cannot_create_dest_dir">Could not create the destination folder</string>
+    <string name="error_extraction_cannot_complete">Something went wrong during the extraction operation</string>
+    <string name="error_copy_generic">Something went wrong during the copy operation</string>
+    <string name="error_move_generic">Something went wrong during the move operation</string>
 
     <!-- Utils -->
     <string name="number_placeholder">10</string>

@@ -3,6 +3,7 @@ package com.terzulli.terzullifilemanager.database.daos;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.TypeConverters;
 import androidx.room.Update;
@@ -18,8 +19,8 @@ import java.util.List;
 @TypeConverters({DateConverter.class})
 public interface LogDao {
 
-    @Insert
-    void insert(TableLog log);
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    long insert(TableLog log);
 
     @Update
     void update(TableLog log);
@@ -29,6 +30,9 @@ public interface LogDao {
 
     @Query("SELECT * FROM Log ORDER BY timestamp DESC")
     List<TableLog> getAll();
+
+    @Query("SELECT Log.id FROM Log WHERE Log.timestamp = :timestamp")
+    int getIdByTimestamp(Date timestamp);
 
     @Query("SELECT * FROM Log WHERE id = :id ORDER BY timestamp DESC")
     TableLog findById(int id);

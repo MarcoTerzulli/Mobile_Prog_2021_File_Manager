@@ -491,11 +491,22 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             File from = new File(dir, file.getName());
             File to = new File(dir, newName);
 
+            boolean operationSuccess = true;
+            String operationType = Utils.strOperationRename;
+            String operationErrorDescription = "";
+
             if (from.exists() && from.renameTo(to)) {
                 refreshList();
                 ((FileItemsAdapter)currentAdapter).clearSelection();
+            } else {
+                operationSuccess = false;
+                operationErrorDescription = view.getResources().getString(R.string.error_cannot_rename);
             }
-            // TODO salvare su log operazione completata se il file esiste e rename va a buon fine
+
+            // salvataggio risultato operazione su log
+            FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(view.getContext()),
+                    new Date(), operationSuccess, operationType, dir.getAbsolutePath(), "",
+                    operationErrorDescription, file, newName);
         }
     }
 
@@ -568,16 +579,27 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 break;
         }
 
-        // TODO salvare su log risultato creazione directory
+        boolean operationSuccess = true;
+        String operationType = Utils.strOperationNewFolder;
+        String operationErrorDescription = "";
 
         if (i == maxRetries) {
             Toast.makeText(view.getContext(), R.string.error_generic, Toast.LENGTH_SHORT).show();
+            operationSuccess = false;
+            operationErrorDescription = view.getResources().getString(R.string.error_cannot_create_folder);
         } else {
-            if (!newDir.mkdirs())
+            if (!newDir.mkdirs()) {
                 Toast.makeText(view.getContext(), R.string.error_generic, Toast.LENGTH_SHORT).show();
-            else
+                operationSuccess = false;
+                operationErrorDescription = view.getResources().getString(R.string.error_cannot_create_folder);
+            } else
                 refreshList();
         }
+
+        // salvataggio risultato operazione su log
+        FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(view.getContext()),
+                new Date(), operationSuccess, operationType, currentDirectory.getAbsolutePath(), "",
+                operationErrorDescription, newDir, "");
     }
 
     public void displayNewDirectoryDialog() {

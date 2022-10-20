@@ -3,6 +3,7 @@ package com.terzulli.terzullifilemanager.adapters;
 import static android.content.Context.MODE_PRIVATE;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
 import static com.terzulli.terzullifilemanager.utils.Utils.isFileAZipArchive;
+import static com.terzulli.terzullifilemanager.utils.Utils.strOperationMove;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -30,6 +31,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
+import com.terzulli.terzullifilemanager.database.LogDatabase;
+import com.terzulli.terzullifilemanager.database.entities.TableItem;
+import com.terzulli.terzullifilemanager.database.entities.TableLog;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.RecentsFilesManager;
 import com.terzulli.terzullifilemanager.utils.SelectedFilesManager;
@@ -45,6 +49,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -55,6 +60,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
     private final MainFragment mainFragment;
     private final Activity activityReference;
     private File[] filesAndDirs;
+    private LogDatabase logDatabase;
 
     public FileItemsAdapter(Context context, File[] filesAndFolders, MainFragment mainFragment, Activity activityReference) {
         this.context = context;
@@ -63,6 +69,82 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         this.activityReference = activityReference;
 
         selectedFilesManager = new SelectedFilesManager();
+        logDatabase = LogDatabase.getInstance(context);
+    }
+
+    /**
+     * Funzione per inserimento asincrono di log nel database
+     * @param logDatabase istanza del database
+     * @param timestamp timestamp dell' 'operazione
+     * @param operationSuccess flag che indica se l'operazione è andata a buon fine
+     * @param operationType tipologia operazione
+     * @param originPath path di origine dell'operazione
+     * @param destinationPath (eventuale) path di destinazione dell'operazione
+     * @param description descrizione dell'operazione
+     * @param operationItems lista di item coinvolti
+     * @param operationFailedItems lista di item per cui l'operazione non è andata a buon fine
+     */
+    public static void insertOpLogIntoDatabase(LogDatabase logDatabase, Date timestamp, boolean operationSuccess,
+                                               String operationType, String originPath, String destinationPath,
+                                               String description, ArrayList<File> operationItems,
+                                               ArrayList<File> operationFailedItems) {
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        executor.execute(() -> {
+            // creazione entry nella tabella log
+            TableLog tableLog = new TableLog(timestamp, operationSuccess, operationType, originPath,
+                    destinationPath, description);
+            long logId = logDatabase.logDao().insert(tableLog);
+
+            // insert andata a buon fine
+            if(logId != -1) {
+                // inserimento entry nella tabella
+                for (File opItem : operationItems) {
+                    boolean failed = operationFailedItems.contains(opItem);
+
+                    TableItem tableItem = new TableItem((int) logId, opItem.getName(), opItem.getAbsolutePath(),
+                            "", failed);
+                    logDatabase.itemDao().insert(tableItem);
+                }
+            }
+        });
+    }
+
+    /**
+     * Funzione per inserimento asincrono di log nel database
+     * @param logDatabase istanza del database
+     * @param timestamp timestamp dell' 'operazione
+     * @param operationSuccess flag che indica se l'operazione è andata a buon fine
+     * @param operationType tipologia operazione
+     * @param originPath path di origine dell'operazione
+     * @param destinationPath path di destinazione dell'operazione
+     * @param description descrizione dell'operazione
+     * @param operationItem item su cui è stata svolta l'operazione
+     * @param itemNewName (eventuale) nuovo nome dell'item
+     */
+    public static void insertOpLogIntoDatabase(LogDatabase logDatabase, Date timestamp, boolean operationSuccess,
+                                               String operationType, String originPath, String destinationPath,
+                                               String description, File operationItem, String itemNewName) {
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        executor.execute(() -> {
+            // creazione entry nella tabella log
+            TableLog tableLog = new TableLog(timestamp, operationSuccess, operationType, originPath,
+                    destinationPath, description);
+            long logId = logDatabase.logDao().insert(tableLog);
+
+            // insert andata a buon fine
+            if(logId != -1) {
+                // inserimento entry nella tabella
+                TableItem tableItem = new TableItem((int) logId, operationItem.getName(), operationItem.getAbsolutePath(),
+                        itemNewName, !operationSuccess);
+                logDatabase.itemDao().insert(tableItem);
+            }
+        });
+
+
     }
 
     public void deselectAll() {
@@ -161,9 +243,14 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
         clearSelection();
         selectedFilesManager.clearSelectionFromCopyMove();
+        File newLocation = new File(destinationPath);
 
         ArrayList<File> filesWithErrors = new ArrayList<>();
-        File newLocation = new File(destinationPath);
+        String operationType = Utils.strOperationCopy;
+        if(!isCopy)
+            operationType = strOperationMove;
+        String operationErrorDescription = "";
+        int returnCode = 1;
 
         if (newLocation.exists()) {
             // copy
@@ -171,9 +258,8 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                 try {
                     copyFileLowLevelOperation(fileToMove, newLocation);
                 } catch (IOException e) {
-                    // TODO salvare su log anziché fare return qui ed aggiungere file problematici ad una lista
-                    //  Il return si fa dopo
                     filesWithErrors.add(fileToMove);
+                    returnCode = -1;
                     //return -1;
                 }
             }
@@ -186,15 +272,24 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
             }
         } else {
             filesWithErrors.add(newLocation);
-            // todo salvare su log
-            return -2;
+            returnCode = -2;
         }
 
-        // todo SALVARE SU LOG
-        if(filesWithErrors.size() != 0)
-            return -1;
+        if(returnCode == -1) {
+            if(isCopy)
+                operationErrorDescription = context.getResources().getString(R.string.error_copy_generic);
+            else
+                operationErrorDescription = context.getResources().getString(R.string.error_move_generic);
+        }
+        else if (returnCode == -2)
+            operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir);
 
-        return 1;
+        // salvataggio risultato operazione su log
+        FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
+                new Date(), (returnCode == 1), operationType, "", destinationPath,
+                operationErrorDescription, filesToCopyMove, filesWithErrors);
+
+        return returnCode;
     }
 
     public void renameSelectedFile() {
@@ -246,15 +341,12 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                                 + " " + context.getResources().getString(R.string.action_copy_move_completed_third_part);
                         Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
 
-                        // TODO salvare su log operazione completata
                         break;
                     case -1: // errore durante la copia
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        // TODO salvare su log errore e lista file problematici
                         break;
                     case -2: // la nuova location non esiste
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        // TODO salvare su log errore e lista file problematici
                         break;
                     default:
                         break;
@@ -279,29 +371,38 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                     extractPath);
 
             handler.post(() -> {
+                String operationType = Utils.strOperationExtract;
+                String operationErrorDescription = "";
 
                 switch (returnCode) {
                     case 1:
-                        // TODO salvare su log estrazione completata
                         Toast.makeText(context, R.string.action_extract_completed, Toast.LENGTH_SHORT).show();
                         break;
                     case -1:
-                        // TODO salvare su log errore estrazione
+                        //  errore estrazione
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
                         Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                        operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_complete);
                         break;
                     case -2:
-                        // TODO salvare su log errore generico estrazione
+                        // errore generico estrazione
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
                         Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                        operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir);
                         break;
                     case -3:
-                        // TODO salvare su log errore estrazione per password
+                        // errore estrazione per password
                         Toast.makeText(context, R.string.error_check_password_not_supported, Toast.LENGTH_SHORT).show();
+                        operationErrorDescription = context.getResources().getString(R.string.error_check_password_not_supported);
                         break;
                     default:
                         break;
                 }
+
+                // salvataggio risultato operazione su log
+                FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
+                        new Date(), (returnCode == 1), operationType, extractPath, "",
+                        operationErrorDescription, new File(selectedFilesManager.getFileToExtract().getPath()), "");
 
                 if (mainFragment.getCurrentPath().equals(extractPath))
                     mainFragment.refreshList();
@@ -324,16 +425,13 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
                 switch (returnCode) {
                     case 1:
-                        // TODO salvare su log operazione di compressione completata
                         Toast.makeText(context, R.string.action_compress_completed, Toast.LENGTH_SHORT).show();
                         break;
                     case -1:
-                        // TODO salvare su log errore compressione
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
                         Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
                         break;
                     case -2:
-                        // TODO salvare su log errore generico compressione
                         Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
                         break;
                     default:
@@ -410,44 +508,65 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         ArrayList<File> filesToCompress = new ArrayList<>(selectedFilesManager.getSelectedFilesToCompress().size());
         filesToCompress.addAll(selectedFilesManager.getSelectedFilesToCompress());
 
+        int returnCode = 1;
+        ArrayList<File> filesWithErrors = new ArrayList<>();
+        String operationType = Utils.strOperationCompress;
+        String operationErrorDescription = "";
+
         if (filesToCompress.size() == 0)
-            return -1;
+            returnCode = -1;
+        else {
+            clearSelection();
+            selectedFilesManager.setSelectedFilesToCompress(new ArrayList<>());
 
-        clearSelection();
-        selectedFilesManager.setSelectedFilesToCompress(new ArrayList<>());
+            String newName = "archive";
+            String originalName = newName;
+            File extractLocation = new File(compressPath, newName + ".zip");
+            int i, maxRetries = 10000;
 
-        String newName = "archive";
-        String originalName = newName;
-        File extractLocation = new File(compressPath, newName + ".zip");
-        int i, maxRetries = 10000;
+            // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
+            for (i = 1; i < maxRetries; i++) {
+                extractLocation = new File(compressPath, newName + ".zip");
 
-        // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
-        for (i = 1; i < maxRetries; i++) {
-            extractLocation = new File(compressPath, newName + ".zip");
-
-            if (extractLocation.exists())
-                newName = originalName + " (" + i + ")";
-            else
-                break;
-        }
-
-        if (i == maxRetries) {
-            return -2;
-        }
-
-        ZipFile zipFile = new ZipFile(extractLocation.getPath());
-
-        for (File fileToCompress : filesToCompress) {
-            try {
-                if (fileToCompress.isDirectory())
-                    zipFile.addFolder(fileToCompress);
+                if (extractLocation.exists())
+                    newName = originalName + " (" + i + ")";
                 else
-                    zipFile.addFile(fileToCompress);
-            } catch (Exception e) {
-                return -1;
+                    break;
             }
+
+            if (i == maxRetries) {
+                returnCode = -2;
+            } else {
+
+                ZipFile zipFile = new ZipFile(extractLocation.getPath());
+
+                for (File fileToCompress : filesToCompress) {
+                    try {
+                        if (fileToCompress.isDirectory())
+                            zipFile.addFolder(fileToCompress);
+                        else
+                            zipFile.addFile(fileToCompress);
+                    } catch (Exception e) {
+                        filesWithErrors.add(fileToCompress);
+                        returnCode = -1;
+                    }
+                }
+            }
+
         }
-        return 1;
+
+        if(returnCode == -1)
+            operationErrorDescription = context.getResources().getString(R.string.error_compression_cannot_compress_file);
+        else if (returnCode == -2)
+            operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir);
+
+        // salvataggio risultato operazione su log
+        FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
+                new Date(), (returnCode == 1), operationType, "", compressPath,
+                operationErrorDescription, filesToCompress, filesWithErrors);
+
+
+        return returnCode;
     }
 
     public void deleteSelectedFilesOperation(String originalPath) {
@@ -463,8 +582,15 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                     filesWithErrors.add(file);
             }
 
-            // TODO salvare su log operazione completata
-            // todo utilizzare filesWithErrors
+            String operationType = Utils.strOperationDelete;
+            String operationErrorDescription = "";
+            if(!filesWithErrors.isEmpty())
+                operationErrorDescription = context.getResources().getString(R.string.error_cannot_delete_item);
+
+            // salvataggio risultato operazione su log
+            FileItemsAdapter.insertOpLogIntoDatabase(LogDatabase.getInstance(context), new Date(),
+                    filesWithErrors.isEmpty(), operationType, originalPath, "",
+                    operationErrorDescription, filestoDelete, filesWithErrors);
 
             if (mainFragment.getCurrentPath().equals(originalPath))
                 mainFragment.refreshList();
