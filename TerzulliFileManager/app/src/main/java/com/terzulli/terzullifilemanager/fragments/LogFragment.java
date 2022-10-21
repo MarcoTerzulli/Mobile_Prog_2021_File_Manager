@@ -1,12 +1,12 @@
 package com.terzulli.terzullifilemanager.fragments;
 
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationCompress;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationCopy;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationDelete;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationExtract;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationMove;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationNewFolder;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationRename;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationCompress;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationCopy;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationDelete;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationExtract;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationMove;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationNewFolder;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationRename;
 
 import android.app.Activity;
 import android.os.Bundle;

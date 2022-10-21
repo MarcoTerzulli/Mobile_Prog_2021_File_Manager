@@ -43,6 +43,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -181,6 +182,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     initializeEmptyLogsLayout(logsList == null || logsList.size() == 0);
                     initializeEmptyDirectoryLayout(false);
 
+                    assert logsList != null;
                     currentAdapter = new LogItemsAdapter(view.getContext(), logsList, this, requireActivity());
                     recyclerView.setAdapter(currentAdapter);
                     recyclerView.scrollToPosition(0);
@@ -190,7 +192,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
     }
 
-    public void loadSelection(final File[] filesAndDirs, String newActionBarTitle) {
+    public void loadSelection(@NonNull final File[] filesAndDirs, @NonNull String newActionBarTitle) {
 
         if (newActionBarTitle != null && newActionBarTitle.length() != 0)
             setActionBarTitle(newActionBarTitle);
@@ -238,7 +240,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     }
 
-    public void loadPath(final String path, boolean updateBreadcrumb, boolean reloadBreadCrumb) {
+    public void loadPath(@NonNull final String path, boolean updateBreadcrumb, boolean reloadBreadCrumb) {
 
         if(currentAdapter != null) {
             if(currentAdapter instanceof FileItemsAdapter){
@@ -391,7 +393,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    private boolean isPathProtected(String path) {
+    private boolean isPathProtected(@NonNull String path) {
         return (!pathRoot.equals(path) && pathRoot.contains(path));
     }
 
@@ -500,8 +502,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return false;
     }
 
-    private void renameFile(File file, String newName) {
-        if (file == null || !(currentAdapter instanceof FileItemsAdapter))
+    private void renameFile(@NonNull File file, @NonNull String newName) {
+        if (!(currentAdapter instanceof FileItemsAdapter))
             return;
 
         File dir = file.getParentFile();
@@ -510,7 +512,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             File to = new File(dir, newName);
 
             boolean operationSuccess = true;
-            String operationType = Utils.strOperationRename;
+            String operationType = FileFunctions.strOperationRename;
             String operationErrorDescription = "";
 
             if (from.exists() && from.renameTo(to)) {
@@ -528,9 +530,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    public void displayRenameDialog(File file) {
-        if (file == null)
-            return;
+    public void displayRenameDialog(@NonNull File file) {
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
         alertBuilder.setTitle(R.string.action_rename);
@@ -579,7 +579,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
     }
 
-    private void createDirectory(File currentDirectory, String newDirectoryName) {
+    private void createDirectory(File currentDirectory, @NonNull String newDirectoryName) {
         if (currentDirectory == null)
             return;
 
@@ -598,7 +598,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
 
         boolean operationSuccess = true;
-        String operationType = Utils.strOperationNewFolder;
+        String operationType = FileFunctions.strOperationNewFolder;
         String operationErrorDescription = "";
 
         if (i == maxRetries) {
@@ -725,9 +725,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
      * @param fileName        nome dell'eventuale file (solo per selezione singola)
      * @param selectedFilesQt numero di file selezionati
      */
-    public void displayDeleteSelectionDialog(int selectionType, String fileName, int selectedFilesQt) {
-        if (fileName == null)
-            return;
+    public void displayDeleteSelectionDialog(int selectionType, @NonNull String fileName, int selectedFilesQt) {
 
         String message;
         switch (selectionType) {
@@ -762,6 +760,25 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 ((FileItemsAdapter)currentAdapter).executeDeleteOperationOnThread(currentPath);
         });
         alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {
+        });
+
+        alertBuilder.show();
+    }
+
+    public void displayErrorDialog(@NonNull String operationType, @NonNull String errorDescription) {
+
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
+        alertBuilder.setTitle(operationType + " " + view.getContext().getResources().getString(R.string.error));
+        alertBuilder.setMessage(errorDescription);
+
+        alertBuilder.setPositiveButton(R.string.button_show_logs, (dialog, whichButton) -> {
+            if(activityReference instanceof MainActivity)
+                ((MainActivity)activityReference).setActionBarToggleDefault();
+
+            loadLogs();
+        });
+
+        alertBuilder.setNegativeButton(R.string.button_dismiss, (dialog, whichButton) -> {
         });
 
         alertBuilder.show();
@@ -1073,7 +1090,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         loadSelection(recentsFilesArr, view.getResources().getString(R.string.drawer_menu_recent));
     }
 
-    private void findVideosFiles(ArrayList<File> fileList, Activity context) {
+    private void findVideosFiles(@NonNull ArrayList<File> fileList, @NonNull Activity context) {
         ArrayList<String> urlList = getAllVideosUrls(context);
 
         for (String uri : urlList) {
@@ -1082,7 +1099,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    private void findImagesFiles(ArrayList<File> fileList, Activity context) {
+    private void findImagesFiles(@NonNull ArrayList<File> fileList, @NonNull Activity context) {
         ArrayList<String> urlList = getAllImagesUrls(context);
 
         for (String uri : urlList) {
@@ -1091,7 +1108,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
     }
 
-    private void findAudioFiles(ArrayList<File> fileList, Activity context) {
+    private void findAudioFiles(@NonNull ArrayList<File> fileList, @NonNull Activity context) {
         ArrayList<String> urlList = getAllAudioUrls(context);
 
         for (String uri : urlList) {
@@ -1112,7 +1129,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 && !pathHomeFriendlyName.equals(strLocationDownloadsFriendlyName);
     }
 
-    private ArrayList<String> getAllImagesUrls(Activity context) {
+    private ArrayList<String> getAllImagesUrls(@NonNull Activity context) {
         ArrayList<String> urlList;
         final String[] projection = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
 
@@ -1136,7 +1153,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return urlList;
     }
 
-    private ArrayList<String> getAllVideosUrls(Activity context) {
+    private ArrayList<String> getAllVideosUrls(@NonNull Activity context) {
         ArrayList<String> urlList;
         final String[] projection = {MediaStore.Video.Media.DATA, MediaStore.Video.Media._ID};
 
@@ -1160,7 +1177,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return urlList;
     }
 
-    private ArrayList<String> getAllAudioUrls(Activity context) {
+    private ArrayList<String> getAllAudioUrls(@NonNull Activity context) {
         ArrayList<String> urlList;
         final String[] projection = {MediaStore.Audio.Media.DATA, MediaStore.Audio.Media._ID};
 

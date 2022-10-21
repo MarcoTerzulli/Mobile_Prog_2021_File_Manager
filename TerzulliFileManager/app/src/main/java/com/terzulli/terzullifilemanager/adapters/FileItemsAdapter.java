@@ -197,10 +197,20 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
                             break;
                         case -1: // errore durante la copia
-                            Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                            if (isCopy)
+                                mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_copy),
+                                        context.getResources().getString(R.string.error_copy_generic));
+                            else
+                                mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_move),
+                                        context.getResources().getString(R.string.error_move_generic));
                             break;
                         case -2: // la nuova location non esiste
-                            Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                            if (isCopy)
+                                mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_copy),
+                                        context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir));
+                            else
+                                mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_move),
+                                        context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir));
                             break;
                         default:
                             break;
@@ -235,17 +245,18 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                         break;
                     case -1:
                         //  errore estrazione
-                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                        mainFragment.displayErrorDialog(context.getResources().getString(R.string.button_extract),
+                                context.getResources().getString(R.string.error_extraction_cannot_complete));
                         break;
                     case -2:
                         // errore generico estrazione
-                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                        Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                        mainFragment.displayErrorDialog(context.getResources().getString(R.string.button_extract),
+                                context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir));
                         break;
                     case -3:
                         // errore estrazione per password
-                        Toast.makeText(context, R.string.error_check_password_not_supported, Toast.LENGTH_SHORT).show();
+                        mainFragment.displayErrorDialog(context.getResources().getString(R.string.button_extract),
+                                context.getResources().getString(R.string.error_check_password_not_supported));
                         break;
                     default:
                         break;
@@ -283,11 +294,12 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                             Toast.makeText(context, R.string.action_compress_completed, Toast.LENGTH_SHORT).show();
                             break;
                         case -1:
-                            Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
-                            Toast.makeText(context, R.string.error_check_permissions, Toast.LENGTH_LONG).show();
+                            mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_compress),
+                                    context.getResources().getString(R.string.error_compression_cannot_compress_file));
                             break;
                         case -2:
-                            Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                            mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_compress),
+                                    context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir));
                             break;
                         default:
                             break;
@@ -298,7 +310,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                 });
             });
         }
-
 
     }
 
@@ -324,8 +335,8 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                 int returnCode = deleteSelectedFilesOperation(currentPath, filestoDelete, context);
 
                 handler.post(() -> {
-                    if (returnCode == -1)
-                        Toast.makeText(context, R.string.error_generic, Toast.LENGTH_SHORT).show();
+                    if (returnCode == -1)mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_delete),
+                            context.getResources().getString(R.string.error_cannot_delete_item));
 
                     if (mainFragment.getCurrentPath().equals(currentPath))
                         mainFragment.refreshList(true);

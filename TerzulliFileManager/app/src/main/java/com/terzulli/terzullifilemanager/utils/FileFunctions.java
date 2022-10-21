@@ -1,8 +1,8 @@
 package com.terzulli.terzullifilemanager.utils;
 
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationMove;
-
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
@@ -24,6 +24,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class FileFunctions {
+    public static final String strOperationNewFolder = "new_folder";
+    public static final String strOperationCompress = "compress";
+    public static final String strOperationExtract = "extract";
+    public static final String strOperationCopy = "copy";
+    public static final String strOperationMove = "move";
+    public static final String strOperationRename = "rename";
+    public static final String strOperationDelete = "delete";
 
     /**
      * Funzione per inserimento asincrono di log nel database
@@ -37,10 +44,12 @@ public class FileFunctions {
      * @param operationItems lista di item coinvolti
      * @param operationFailedItems lista di item per cui l'operazione non è andata a buon fine
      */
-    public static void insertOpLogIntoDatabase(LogDatabase logDatabase, Date timestamp, boolean operationSuccess,
-                                               String operationType, String originPath, String destinationPath,
-                                               String description, ArrayList<File> operationItems,
-                                               ArrayList<File> operationFailedItems) {
+    public static void insertOpLogIntoDatabase(LogDatabase logDatabase, @NonNull Date timestamp,
+                                               boolean operationSuccess,
+                                               @NonNull String operationType, @NonNull String originPath,
+                                               @NonNull String destinationPath, @NonNull String description,
+                                               @NonNull ArrayList<File> operationItems,
+                                               @NonNull ArrayList<File> operationFailedItems) {
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -76,9 +85,11 @@ public class FileFunctions {
      * @param operationItem item su cui è stata svolta l'operazione
      * @param itemNewName (eventuale) nuovo nome dell'item
      */
-    public static void insertOpLogIntoDatabase(LogDatabase logDatabase, Date timestamp, boolean operationSuccess,
-                                               String operationType, String originPath, String destinationPath,
-                                               String description, File operationItem, String itemNewName) {
+    public static void insertOpLogIntoDatabase(LogDatabase logDatabase, @NonNull Date timestamp,
+                                               boolean operationSuccess,
+                                               @NonNull String operationType, @NonNull String originPath,
+                                               @NonNull String destinationPath, @NonNull String description,
+                                               @NonNull File operationItem, @NonNull String itemNewName) {
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -112,8 +123,8 @@ public class FileFunctions {
      * - -2: errore durante la creazione della cartella di estrazione. Nome duplicato (superati tentativi max) o mancanza permessi storage
      * - -3: archivio protetto da password
      */
-    public static int extractSelectedFileOperation(File fileToExtract, String extractPath, Context context) {
-        String operationType = Utils.strOperationExtract;
+    public static int extractSelectedFileOperation(File fileToExtract, @NonNull String extractPath,
+                                                   @NonNull Context context) {
         String operationErrorDescription = "";
         int returnCode = 1;
 
@@ -166,15 +177,15 @@ public class FileFunctions {
         }
 
         FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                new Date(), (returnCode == 1), operationType, extractPath, "",
+                new Date(), (returnCode == 1), strOperationExtract, extractPath, "",
                 operationErrorDescription, fileToExtract, "");
 
         return returnCode;
     }
 
 
-    public static int deleteSelectedFilesOperation(String originalPath, ArrayList<File> filestoDelete,
-                                                   Context context) {
+    public static int deleteSelectedFilesOperation(@NonNull String originalPath, @NonNull ArrayList<File> filestoDelete,
+                                                   @NonNull Context context) {
         ArrayList<File> filesWithErrors = new ArrayList<>();
 
         for (File file : filestoDelete) {
@@ -182,14 +193,13 @@ public class FileFunctions {
                 filesWithErrors.add(file);
         }
 
-        String operationType = Utils.strOperationDelete;
         String operationErrorDescription = "";
         if(!filesWithErrors.isEmpty())
             operationErrorDescription = context.getResources().getString(R.string.error_cannot_delete_item);
 
         // salvataggio risultato operazione su log
         FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context), new Date(),
-                filesWithErrors.isEmpty(), operationType, originalPath, "",
+                filesWithErrors.isEmpty(), strOperationDelete, originalPath, "",
                 operationErrorDescription, filestoDelete, filesWithErrors);
 
         if(!filesWithErrors.isEmpty())
@@ -215,12 +225,13 @@ public class FileFunctions {
      * - 1: operazione completata con successo
      * - -1: generata eccezione durante l'operazione
      */
-    public static int copyMoveSelectionOperation(boolean isCopy, String destinationPath,
-                                          ArrayList<File>filesToCopyMove, Context context) {
+    public static int copyMoveSelectionOperation(boolean isCopy, @NonNull String destinationPath,
+                                                 @NonNull ArrayList<File>filesToCopyMove,
+                                                 @NonNull Context context) {
         File newLocation = new File(destinationPath);
 
         ArrayList<File> filesWithErrors = new ArrayList<>();
-        String operationType = Utils.strOperationCopy;
+        String operationType = strOperationCopy;
         if(!isCopy)
             operationType = strOperationMove;
         String operationErrorDescription = "";
@@ -266,7 +277,7 @@ public class FileFunctions {
         return returnCode;
     }
 
-    private static void copyFileLowLevelOperation(File sourceLocation, File targetLocation)
+    private static void copyFileLowLevelOperation(@NonNull File sourceLocation, @NonNull File targetLocation)
             throws IOException {
 
         File outFile = new File(targetLocation, sourceLocation.getName());
@@ -333,11 +344,12 @@ public class FileFunctions {
      * - -1: errore durante la creazione dello zip
      * - -2: errore Nome archivio duplicato (superati tentativi max) o mancanza permessi storage
      */
-    public static int compressSelectedFilesOperation(String compressPath, ArrayList<File> filesToCompress, Context context) {
+    public static int compressSelectedFilesOperation(@NonNull String compressPath,
+                                                     @NonNull ArrayList<File> filesToCompress,
+                                                     @NonNull Context context) {
 
         int returnCode = 1;
         ArrayList<File> filesWithErrors = new ArrayList<>();
-        String operationType = Utils.strOperationCompress;
         String operationErrorDescription = "";
 
         String newName = "archive";
@@ -381,7 +393,7 @@ public class FileFunctions {
 
         // salvataggio risultato operazione su log
         FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                new Date(), (returnCode == 1), operationType, "", compressPath,
+                new Date(), (returnCode == 1), strOperationCompress, "", compressPath,
                 operationErrorDescription, filesToCompress, filesWithErrors);
 
 

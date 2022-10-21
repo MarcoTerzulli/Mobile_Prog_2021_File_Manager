@@ -1,12 +1,12 @@
 package com.terzulli.terzullifilemanager.adapters;
 
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationCompress;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationCopy;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationDelete;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationExtract;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationMove;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationNewFolder;
-import static com.terzulli.terzullifilemanager.utils.Utils.strOperationRename;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationCompress;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationCopy;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationDelete;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationExtract;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationMove;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationNewFolder;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationRename;
 
 import android.app.Activity;
 import android.content.Context;
@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -32,7 +31,6 @@ import com.terzulli.terzullifilemanager.fragments.LogFragment;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public class LogItemsAdapter extends RecyclerView.Adapter<LogItemsAdapter.ItemsViewHolder> {

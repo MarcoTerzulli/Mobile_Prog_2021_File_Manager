@@ -41,13 +41,6 @@ public class Utils {
     public static final String strLocationImagesFriendlyName = "Images";
     public static final String strLocationDownloadsFriendlyName = "Downloads";
     public static final String strLocationLogsFriendlyName = "Logs";
-    public static final String strOperationNewFolder = "new_folder";
-    public static final String strOperationCompress = "compress";
-    public static final String strOperationExtract = "extract";
-    public static final String strOperationCopy = "copy";
-    public static final String strOperationMove = "move";
-    public static final String strOperationRename = "rename";
-    public static final String strOperationDelete = "delete";
 
     public static void sortByName(File[] files, final boolean ascending) {
         if (files == null)

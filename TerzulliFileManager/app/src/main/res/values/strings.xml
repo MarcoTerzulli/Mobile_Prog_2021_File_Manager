@@ -58,6 +58,7 @@
     <string name="button_retry">Retry</string>
     <string name="button_extract">Extract</string>
     <string name="button_compress">Compress</string>
+    <string name="button_show_logs">Show Logs</string>
 
     <!-- Permissions -->
     <string name="grant">Grant</string>
@@ -187,6 +188,7 @@
     <string name="error_extraction_cannot_complete">Something went wrong during the extraction operation</string>
     <string name="error_copy_generic">Something went wrong during the copy operation</string>
     <string name="error_move_generic">Something went wrong during the move operation</string>
+    <string name="error">Error</string>
 
     <!-- Utils -->
     <string name="number_placeholder">10</string>
