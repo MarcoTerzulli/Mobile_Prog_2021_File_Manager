@@ -229,7 +229,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                 });
             });
         }
-
     }
 
     public void executeExtractOperationOnThread(String extractPath) {
@@ -416,6 +415,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
             for (File file : selectedFilesManager.getSelectedFiles()) {
                 filesToShare.add(FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file));
             }
+            clearSelection();
 
             intentShareFile.putExtra(Intent.EXTRA_SUBJECT, context.getResources().getString(R.string.intent_share_subject));
             intentShareFile.putExtra(Intent.EXTRA_TEXT, context.getResources().getString(R.string.intent_share_text));
