@@ -432,34 +432,41 @@ public class FileFunctions {
 
         String newName = "archive";
         String originalName = newName;
-        File extractLocation = new File(compressPath, newName + ".zip");
+        File compressedFile = new File(compressPath, newName + ".zip");
         int i, maxRetries = 10000;
 
-        // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
-        for (i = 1; i < maxRetries; i++) {
-            extractLocation = new File(compressPath, newName + ".zip");
-
-            if (extractLocation.exists())
-                newName = originalName + " (" + i + ")";
-            else
-                break;
-        }
-
-        if (i == maxRetries) {
-            returnCode = -2;
+        // controllo che la destinazione non sia uno dei file su cui sto effettuando l'operazione
+        if(filesToCompress.contains(new File(compressPath))) {
+            returnCode = -3;
+            filesWithErrors.addAll(filesToCompress);
+            // l'operazione viene interrotta
         } else {
+            // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
+            for (i = 1; i < maxRetries; i++) {
+                compressedFile = new File(compressPath, newName + ".zip");
 
-            ZipFile zipFile = new ZipFile(extractLocation.getPath());
+                if (compressedFile.exists())
+                    newName = originalName + " (" + i + ")";
+                else
+                    break;
+            }
 
-            for (File fileToCompress : filesToCompress) {
-                try {
-                    if (fileToCompress.isDirectory())
-                        zipFile.addFolder(fileToCompress);
-                    else
-                        zipFile.addFile(fileToCompress);
-                } catch (Exception e) {
-                    filesWithErrors.add(fileToCompress);
-                    returnCode = -1;
+            if (i == maxRetries) {
+                returnCode = -2;
+            } else {
+
+                ZipFile zipFile = new ZipFile(compressedFile.getPath());
+
+                for (File fileToCompress : filesToCompress) {
+                    try {
+                        if (fileToCompress.isDirectory())
+                            zipFile.addFolder(fileToCompress);
+                        else
+                            zipFile.addFile(fileToCompress);
+                    } catch (Exception e) {
+                        filesWithErrors.add(fileToCompress);
+                        returnCode = -1;
+                    }
                 }
             }
         }
@@ -468,6 +475,8 @@ public class FileFunctions {
             operationErrorDescription = context.getResources().getString(R.string.error_compression_cannot_compress_file);
         else if (returnCode == -2)
             operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir);
+        else if (returnCode == -3)
+            operationErrorDescription = context.getResources().getString(R.string.error_cannot_compress_into_itself);
 
         // salvataggio risultato operazione su log
         FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),

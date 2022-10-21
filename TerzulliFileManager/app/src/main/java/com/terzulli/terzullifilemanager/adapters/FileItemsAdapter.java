@@ -299,13 +299,17 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                         case 1:
                             Toast.makeText(context, R.string.action_compress_completed, Toast.LENGTH_SHORT).show();
                             break;
-                        case -1:
+                        case -1: // errore generico durante la compressione
                             mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_compress),
                                     context.getResources().getString(R.string.error_compression_cannot_compress_file));
                             break;
-                        case -2:
+                        case -2: // impossibile creare la cartella di destinazione
                             mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_compress),
                                     context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir));
+                            break;
+                        case -3: // la destinazione è compresa nei file da comprimere
+                            mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_compress),
+                                    context.getResources().getString(R.string.error_cannot_compress_into_itself));
                             break;
                         default:
                             break;

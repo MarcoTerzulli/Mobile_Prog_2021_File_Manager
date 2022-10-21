@@ -269,6 +269,7 @@ public class LogFragment extends Fragment {
                         Toast.makeText(view.getContext(), R.string.log_op_retried_successfully, Toast.LENGTH_SHORT).show();
                     else
                         Toast.makeText(view.getContext(), R.string.log_op_retried_error, Toast.LENGTH_SHORT).show();
+
                 });
             });
         });

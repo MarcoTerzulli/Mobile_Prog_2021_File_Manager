@@ -195,6 +195,7 @@
     <string name="error_cant_do_here">You cannot perform this operation here</string>
     <string name="error_cannot_copy_into_itself">Can\'t copy a folder into itself</string>
     <string name="error_cannot_move_into_itself">Can\'t copy a folder into itself</string>
+    <string name="error_cannot_compress_into_itself">Can\'t compress a folder into itself</string>
     <string name="error_rename_not_exists">The item that you\'re trying to rename does not exist</string>
 
     <!-- Utils -->
