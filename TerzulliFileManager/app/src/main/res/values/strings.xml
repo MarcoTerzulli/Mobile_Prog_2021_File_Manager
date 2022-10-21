@@ -189,6 +189,7 @@
     <string name="error_copy_generic">Something went wrong during the copy operation</string>
     <string name="error_move_generic">Something went wrong during the move operation</string>
     <string name="error">Error</string>
+    <string name="error_cant_do_here">You cannot perform this operation here</string>
 
     <!-- Utils -->
     <string name="number_placeholder">10</string>

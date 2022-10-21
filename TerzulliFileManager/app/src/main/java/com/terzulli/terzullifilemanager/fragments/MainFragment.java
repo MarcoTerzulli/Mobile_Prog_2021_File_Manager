@@ -822,10 +822,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
 
         btnConfirm.setOnClickListener(view -> {
-            // TODO verificare di non essere in recents, images ecc
-            // TODO mostrare un toast ma non cancellare la selezione
-            if (currentAdapter instanceof FileItemsAdapter)
-                ((FileItemsAdapter)currentAdapter).executeCopyMoveOperationOnThread(isCopy, currentPath);
+            if(isACustomLocationDisplayed())
+                Toast.makeText(view.getContext(), R.string.error_cant_do_here, Toast.LENGTH_SHORT).show();
+            else {
+                if (currentAdapter instanceof FileItemsAdapter)
+                    ((FileItemsAdapter)currentAdapter).executeCopyMoveOperationOnThread(isCopy, currentPath);
+            }
         });
     }
 
@@ -850,12 +852,13 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
 
         btnConfirm.setOnClickListener(view -> {
-            hideCopyMoveExtractBar();
-            // TODO verificare di non essere in recents, images ecc
-            // TODO mostrare un toast ma non cancellare la selezione
-
-            if (currentAdapter instanceof FileItemsAdapter)
-                ((FileItemsAdapter)currentAdapter).executeExtractOperationOnThread(getCurrentPath());
+            if(isACustomLocationDisplayed())
+                Toast.makeText(view.getContext(), R.string.error_cant_do_here, Toast.LENGTH_SHORT).show();
+            else {
+                hideCopyMoveExtractBar();
+                if (currentAdapter instanceof FileItemsAdapter)
+                    ((FileItemsAdapter) currentAdapter).executeExtractOperationOnThread(getCurrentPath());
+            }
         });
     }
 
@@ -889,10 +892,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
 
         btnConfirm.setOnClickListener(view -> {
-            // TODO verificare di non essere in recents, images ecc
-            // TODO mostrare un toast ma non cancellare la selezione
-            if (currentAdapter instanceof FileItemsAdapter)
-                ((FileItemsAdapter)currentAdapter).executeCompressOperationOnThread(currentPath);
+            if(isACustomLocationDisplayed())
+                Toast.makeText(view.getContext(), R.string.error_cant_do_here, Toast.LENGTH_SHORT).show();
+            else {
+                if (currentAdapter instanceof FileItemsAdapter)
+                    ((FileItemsAdapter) currentAdapter).executeCompressOperationOnThread(currentPath);
+            }
         });
     }
 
