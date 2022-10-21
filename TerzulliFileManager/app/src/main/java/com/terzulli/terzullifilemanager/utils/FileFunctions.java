@@ -1,8 +1,6 @@
 package com.terzulli.terzullifilemanager.utils;
 
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -182,6 +180,75 @@ public class FileFunctions {
         return returnCode;
     }
 
+    public static int createDirectoryOperation(@NonNull File currentDirectory, @NonNull String newDirectoryName,
+                                                  @NonNull Context context) {
+        int returnCode = 1;
+        String operationType = FileFunctions.strOperationNewFolder;
+        String operationErrorDescription = "";
+
+        File newDir = new File(currentDirectory, newDirectoryName);
+        String originalName = newDirectoryName;
+        int i, maxRetries = 10000;
+
+        // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
+        for (i = 1; i < maxRetries; i++) {
+            newDir = new File(currentDirectory, newDirectoryName);
+
+            if (newDir.exists())
+                newDirectoryName = originalName + " (" + i + ")";
+            else
+                break;
+        }
+
+        if (i == maxRetries) {
+            returnCode = -1;
+            operationErrorDescription = context.getResources().getString(R.string.error_cannot_create_folder);
+        } else {
+            if (!newDir.mkdirs()) {
+                returnCode = -1;
+                operationErrorDescription = context.getResources().getString(R.string.error_cannot_create_folder);
+            }
+        }
+
+        // salvataggio risultato operazione su log
+        FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
+                new Date(), (returnCode == 1), operationType, currentDirectory.getAbsolutePath(), currentDirectory.getAbsolutePath(),
+                operationErrorDescription, newDir, "");
+
+        return returnCode;
+    }
+
+    public static int renameSelectedFileOperation(@NonNull File file, @NonNull String newName,
+                                                   @NonNull Context context) {
+        int returnCode;
+        String operationType = FileFunctions.strOperationRename;
+        String operationErrorDescription = "";
+        String path = "";
+
+        File dir = file.getParentFile();
+        if (dir != null && dir.exists()) {
+            File from = new File(dir, file.getName());
+            File to = new File(dir, newName);
+            path = dir.getAbsolutePath();
+
+            if (from.exists() && from.renameTo(to)) {
+                returnCode = 1;
+            } else {
+                operationErrorDescription = context.getResources().getString(R.string.error_cannot_rename);
+                returnCode = -1;
+            }
+        } else {
+            returnCode = -2;
+            operationErrorDescription = context.getResources().getString(R.string.error_rename_not_exists);
+        }
+
+        // salvataggio risultato operazione su log
+        FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
+                new Date(), (returnCode == 1), operationType, path, "",
+                operationErrorDescription, file, newName);
+
+        return returnCode;
+    }
 
     public static int deleteSelectedFilesOperation(@NonNull String originalPath, @NonNull ArrayList<File> filestoDelete,
                                                    @NonNull Context context) {
@@ -250,7 +317,6 @@ public class FileFunctions {
                     } catch (IOException e) {
                         filesWithErrors.add(fileToMove);
                         returnCode = -1;
-                        //return -1;
                     }
                 }
 
@@ -407,7 +473,6 @@ public class FileFunctions {
         FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
                 new Date(), (returnCode == 1), strOperationCompress, "", compressPath,
                 operationErrorDescription, filesToCompress, filesWithErrors);
-
 
         return returnCode;
     }

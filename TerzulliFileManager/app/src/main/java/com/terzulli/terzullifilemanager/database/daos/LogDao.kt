@@ -61,6 +61,13 @@ interface LogDao {
     )
     fun countFailedItems(id: Int): Int
 
+    @Query(
+        "UPDATE Log " +
+        "SET retried = :retried " +
+        "WHERE id = :id"
+    )
+    fun updateRetried(id: Int, retried: Boolean)
+
     @Query("DELETE FROM Log WHERE timestamp < :specifiedDate")
     fun deleteLogsOlderThanDate(specifiedDate: Date?)
 

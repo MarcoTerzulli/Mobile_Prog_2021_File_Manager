@@ -158,6 +158,7 @@
     <string name="log_op_result">Result</string>
     <string name="log_op_start_path">Origin path</string>
     <string name="log_op_dest_path">Destination path</string>
+    <string name="log_op_new_name">New name</string>
     <string name="log_op_retried">Retried</string>
     <string name="log_op_retried_true">True</string>
     <string name="log_op_retried_false">False</string>
@@ -169,6 +170,8 @@
     <string name="log_op_retry_operation">Retry the operation?</string>
     <string name="log_op_failed">Failed</string>
     <string name="log_op_success">Success</string>
+    <string name="log_op_retried_successfully">Successfully retried the operation</string>
+    <string name="log_op_retried_error">Error during the retry operation</string>
     <string name="log_op_clear_history_dialog">Do you want to clear the logs history? \n\nWarning: this operation cannot be undone</string>
 
     <!-- Error -->
@@ -192,6 +195,7 @@
     <string name="error_cant_do_here">You cannot perform this operation here</string>
     <string name="error_cannot_copy_into_itself">Can\'t copy a folder into itself</string>
     <string name="error_cannot_move_into_itself">Can\'t copy a folder into itself</string>
+    <string name="error_rename_not_exists">The item that you\'re trying to rename does not exist</string>
 
     <!-- Utils -->
     <string name="number_placeholder">10</string>

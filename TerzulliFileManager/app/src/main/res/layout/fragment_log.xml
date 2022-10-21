@@ -240,10 +240,38 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/log_op_error_reason_container"
+                android:id="@+id/log_op_new_name_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/log_op_destination_path_container"
+                android:paddingTop="@dimen/padding_medium"
+                android:paddingBottom="@dimen/padding_medium"
+                android:weightSum="2"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/log_op_new_name_descr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/log_op_new_name"
+                    android:textSize="@dimen/text_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/log_op_new_name_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text=""
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/log_op_error_reason_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log_op_new_name_container"
                 android:paddingTop="@dimen/padding_medium"
                 android:paddingBottom="@dimen/padding_medium"
                 android:weightSum="2"

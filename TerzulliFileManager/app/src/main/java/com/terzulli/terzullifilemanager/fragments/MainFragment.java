@@ -1,6 +1,8 @@
 package com.terzulli.terzullifilemanager.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.createDirectoryOperation;
+import static com.terzulli.terzullifilemanager.utils.FileFunctions.renameSelectedFileOperation;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatDateDetailsFull;
 import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
 import static com.terzulli.terzullifilemanager.utils.Utils.humanReadableByteCountSI;
@@ -58,7 +60,6 @@ import com.terzulli.terzullifilemanager.adapters.FileItemsAdapter;
 import com.terzulli.terzullifilemanager.adapters.LogItemsAdapter;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.database.entities.TableLog;
-import com.terzulli.terzullifilemanager.utils.FileFunctions;
 import com.terzulli.terzullifilemanager.utils.RecentsFilesManager;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
@@ -223,7 +224,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                         breadcrumbsView.setVisibility(View.VISIBLE);
 
                     // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
-                    initializeEmptyDirectoryLayout(filesAndDirs == null || filesAndDirs.length == 0);
+                    initializeEmptyDirectoryLayout(filesAndDirs.length == 0);
                     initializeEmptyLogsLayout(false);
 
                     currentAdapter = new FileItemsAdapter(view.getContext(), filesAndDirs, this, requireActivity());
@@ -502,32 +503,36 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         return false;
     }
 
-    private void renameFile(@NonNull File file, @NonNull String newName) {
+    private void renameFileOnThread(@NonNull File file, @NonNull String newName) {
         if (!(currentAdapter instanceof FileItemsAdapter))
             return;
 
-        File dir = file.getParentFile();
-        if (dir != null && dir.exists()) {
-            File from = new File(dir, file.getName());
-            File to = new File(dir, newName);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
 
-            boolean operationSuccess = true;
-            String operationType = FileFunctions.strOperationRename;
-            String operationErrorDescription = "";
+        executor.execute(() -> {
+            int returnCode = renameSelectedFileOperation(file, newName, view.getContext());
 
-            if (from.exists() && from.renameTo(to)) {
-                refreshList(false);
-                ((FileItemsAdapter)currentAdapter).clearSelection();
-            } else {
-                operationSuccess = false;
-                operationErrorDescription = view.getResources().getString(R.string.error_cannot_rename);
-            }
+            handler.post(() -> {
 
-            // salvataggio risultato operazione su log
-            FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(view.getContext()),
-                    new Date(), operationSuccess, operationType, dir.getAbsolutePath(), "",
-                    operationErrorDescription, file, newName);
-        }
+                switch (returnCode) {
+                    case 1:
+                        refreshList(true);
+                        ((FileItemsAdapter)currentAdapter).clearSelection();
+                        break;
+                    case -1: // errore durante la rinominazione
+                         displayErrorDialog(view.getContext().getResources().getString(R.string.action_rename),
+                                 view.getContext().getResources().getString(R.string.error_cannot_rename));
+                        break;
+                    case -2: // il file non esiste
+                        displayErrorDialog(view.getContext().getResources().getString(R.string.action_rename),
+                                view.getContext().getResources().getString(R.string.error_rename_not_exists));
+                        break;
+                    default:
+                        break;
+                }
+            });
+        });
     }
 
     public void displayRenameDialog(@NonNull File file) {
@@ -540,7 +545,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         alertBuilder.setView(editText);
 
-        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> renameFile(file, editText.getText().toString()));
+        alertBuilder.setPositiveButton(R.string.button_ok, (dialog, whichButton) -> renameFileOnThread(file, editText.getText().toString()));
         alertBuilder.setNegativeButton(R.string.button_cancel, (dialog, whichButton) -> {
         });
 
@@ -571,7 +576,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     String newName = editText.getText().toString().replace("\n", "");
 
                     if (validateGenericFileName(file, newName)) {
-                        renameFile(file, newName);
+                        renameFileOnThread(file, newName);
                         alertDialog.cancel();
                     }
                 }
@@ -579,45 +584,31 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
     }
 
-    private void createDirectory(File currentDirectory, @NonNull String newDirectoryName) {
+    private void createDirectory(File currentDirectory, @NonNull final String newDirectoryName) {
         if (currentDirectory == null)
             return;
 
-        File newDir = new File(currentDirectory, newDirectoryName);
-        String originalName = newDirectoryName;
-        int i, maxRetries = 10000;
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
 
-        // gestione di omonimia, aggiunge " (i)" al nome (es. "Test (1)")
-        for (i = 1; i < maxRetries; i++) {
-            newDir = new File(currentDirectory, newDirectoryName);
+        executor.execute(() -> {
+            int returnCode = createDirectoryOperation(currentDirectory, newDirectoryName, view.getContext());
 
-            if (newDir.exists())
-                newDirectoryName = originalName + " (" + i + ")";
-            else
-                break;
-        }
+            handler.post(() -> {
 
-        boolean operationSuccess = true;
-        String operationType = FileFunctions.strOperationNewFolder;
-        String operationErrorDescription = "";
-
-        if (i == maxRetries) {
-            Toast.makeText(view.getContext(), R.string.error_generic, Toast.LENGTH_SHORT).show();
-            operationSuccess = false;
-            operationErrorDescription = view.getResources().getString(R.string.error_cannot_create_folder);
-        } else {
-            if (!newDir.mkdirs()) {
-                Toast.makeText(view.getContext(), R.string.error_generic, Toast.LENGTH_SHORT).show();
-                operationSuccess = false;
-                operationErrorDescription = view.getResources().getString(R.string.error_cannot_create_folder);
-            } else
-                refreshList(false);
-        }
-
-        // salvataggio risultato operazione su log
-        FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(view.getContext()),
-                new Date(), operationSuccess, operationType, currentDirectory.getAbsolutePath(), "",
-                operationErrorDescription, newDir, "");
+                switch (returnCode) {
+                    case 1:
+                        refreshList(true);
+                        break;
+                    case -1: // errore durante la rinominazione
+                        displayErrorDialog(view.getContext().getResources().getString(R.string.action_new_folder),
+                                view.getContext().getResources().getString(R.string.error_cannot_create_folder));
+                        break;
+                    default:
+                        break;
+                }
+            });
+        });
     }
 
     public void displayNewDirectoryDialog() {
@@ -703,13 +694,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     }
                 });
             });
-
-            /*activityReference.runOnUiThread(() -> {
-                LogDatabase logDatabase = LogDatabase.getInstance(view.getContext());
-                assert logDatabase != null;
-                Objects.requireNonNull(logDatabase.logDao()).deleteAllLogs();
-                loadLogs();
-            });*/
         }
 
     }
