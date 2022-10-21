@@ -29,18 +29,16 @@ interface LogDao {
 
     @Query(
         "SELECT * " +
-                "FROM Item AS ITEM, Log AS LOG " +
-                "WHERE ITEM.fk_log_id = LOG.id " +
-                "AND LOG.id = :id " +
+                "FROM Item AS ITEM " +
+                "WHERE ITEM.fk_log_id = :id " +
                 "ORDER BY ITEM.name"
     )
     fun findItemList(id: Int): List<TableItem?>?
 
     @Query(
         "SELECT * " +
-                "FROM Item AS ITEM, Log AS LOG " +
-                "WHERE ITEM.fk_log_id = LOG.id " +
-                "AND LOG.id = :id " +
+                "FROM Item AS ITEM " +
+                "WHERE ITEM.fk_log_id = :id " +
                 "AND ITEM.op_failed = 1 " +  // True viene mappato a 1
                 "ORDER BY ITEM.name"
     )

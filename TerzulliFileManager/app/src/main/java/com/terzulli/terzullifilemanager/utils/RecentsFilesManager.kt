@@ -46,5 +46,13 @@ class RecentsFilesManager(private val sharedPreferences: SharedPreferences) {
         } catch (e: ClassNotFoundException) {
             ArrayList()
         }
+
+        // rimuovo dalla lista eventuali elementi che non sono più esistenti
+        val filesNotFound = ArrayList<File>()
+        for(file in recentsFilesList!!) {
+            if(!file.exists())
+                filesNotFound.add(file);
+        }
+        recentsFilesList!!.removeAll(filesNotFound)
     }
 }

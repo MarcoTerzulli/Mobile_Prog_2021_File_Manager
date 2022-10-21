@@ -1,6 +1,8 @@
 package com.terzulli.terzullifilemanager.utils;
 
 import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -65,7 +67,7 @@ public class FileFunctions {
                 for (File opItem : operationItems) {
                     boolean failed = operationFailedItems.contains(opItem);
 
-                    TableItem tableItem = new TableItem((int) logId, opItem.getName(), opItem.getAbsolutePath(),
+                    TableItem tableItem = new TableItem((int) logId, opItem.getName() , opItem.getPath(),
                             "", failed);
                     Objects.requireNonNull(logDatabase.itemDao()).insert(tableItem);
                 }
@@ -102,15 +104,12 @@ public class FileFunctions {
             // insert andata a buon fine
             if(logId != -1) {
                 // inserimento entry nella tabella
-                TableItem tableItem = new TableItem((int) logId, operationItem.getName(), operationItem.getAbsolutePath(),
+                TableItem tableItem = new TableItem((int) logId, operationItem.getName(), operationItem.getPath(),
                         itemNewName, !operationSuccess);
                 Objects.requireNonNull(logDatabase.itemDao()).insert(tableItem);
             }
         });
     }
-
-
-
 
     /**
      * Funzione interna per l'estrazione di un archivio zip
@@ -238,21 +237,28 @@ public class FileFunctions {
         int returnCode = 1;
 
         if (newLocation.exists()) {
-            // copy
-            for (File fileToMove : filesToCopyMove) {
-                try {
-                    copyFileLowLevelOperation(fileToMove, newLocation);
-                } catch (IOException e) {
-                    filesWithErrors.add(fileToMove);
-                    returnCode = -1;
-                    //return -1;
-                }
-            }
-
-            // delete if the operation is move
-            if (!isCopy) {
+            // controllo che la destinazione non sia uno dei file su cui sto effettuando l'operazione
+            if(filesToCopyMove.contains(newLocation)) {
+                returnCode = -3;
+                filesWithErrors.addAll(filesToCopyMove);
+                // l'operazione viene interrotta
+            } else {
+                // copy
                 for (File fileToMove : filesToCopyMove) {
-                    deleteRecursive(fileToMove);
+                    try {
+                        copyFileLowLevelOperation(fileToMove, newLocation);
+                    } catch (IOException e) {
+                        filesWithErrors.add(fileToMove);
+                        returnCode = -1;
+                        //return -1;
+                    }
+                }
+
+                // delete if the operation is move
+                if (!isCopy) {
+                    for (File fileToMove : filesToCopyMove) {
+                        deleteRecursive(fileToMove);
+                    }
                 }
             }
         } else {
@@ -268,6 +274,12 @@ public class FileFunctions {
         }
         else if (returnCode == -2)
             operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir);
+        else if (returnCode == -3){
+            if(isCopy)
+                operationErrorDescription = context.getResources().getString(R.string.error_cannot_copy_into_itself);
+            else
+                operationErrorDescription = context.getResources().getString(R.string.error_cannot_move_into_itself);
+        }
 
         // salvataggio risultato operazione su log
         FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
@@ -321,7 +333,7 @@ public class FileFunctions {
         } else {
             try (InputStream in = new FileInputStream(sourceLocation)) {
 
-                if (!outFile.exists() && outFile.createNewFile())
+                if (!outFile.exists() && !outFile.createNewFile())
                     throw new IOException("Cannot create file " + outFile.getAbsolutePath());
 
                 try (OutputStream out = new FileOutputStream(outFile)) {

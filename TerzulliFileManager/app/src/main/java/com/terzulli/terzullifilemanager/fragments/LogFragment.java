@@ -15,9 +15,12 @@ import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -25,6 +28,7 @@ import android.widget.Toast;
 
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
+import com.terzulli.terzullifilemanager.adapters.FileItemsAdapter;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.database.entities.TableItem;
 import com.terzulli.terzullifilemanager.database.entities.TableLog;
@@ -109,10 +113,9 @@ public class LogFragment extends Fragment {
 
                     if(thisLog.isRetried()) {
                         retriedValue.setText(view.getResources().getString(R.string.log_op_retried_true));
-                        log_retry_bar.setVisibility(View.GONE);
                     } else {
                         retriedValue.setText(view.getResources().getString(R.string.log_op_retried_false));
-                        log_retry_bar.setVisibility(View.VISIBLE);
+                        displayRetryBar();
                     }
                 }
 
@@ -129,12 +132,16 @@ public class LogFragment extends Fragment {
                     destPathContainer.setVisibility(View.GONE);
 
                 if(!thisLog.getOperationSuccess()) {
+                    StringBuilder opFailedFilesText = new StringBuilder();
                     ArrayList<TableItem> failedItemsList = new ArrayList<>();
                     assert itemsList != null;
                     for (TableItem item : itemsList) {
-                        if (item.isOpFailed())
+                        if (item.isOpFailed()) {
+                            opFailedFilesText.append("<b>").append(item.getName()).append("</b><br>").append(item.getOriginPath()).append("<br><br>");
                             failedItemsList.add(item);
+                        }
                     }
+                    failedFilesValue.setText(Html.fromHtml(String.valueOf(opFailedFilesText), Html.FROM_HTML_MODE_LEGACY));
 
                     failedFilesContainer.setVisibility(View.VISIBLE);
                     nFailedItemsContainer.setVisibility(View.VISIBLE);
@@ -148,9 +155,28 @@ public class LogFragment extends Fragment {
                 assert itemsList != null;
                 nItemsValue.setText(itemsList.size() + "");
 
-
-                // todo riempimento item list
+                StringBuilder opFilesText = new StringBuilder();
+                for (TableItem item : itemsList) {
+                    opFilesText.append("<b>").append(item.getName()).append("</b><br>").append(item.getOriginPath()).append("<br><br>");
+                }
+                filesValue.setText(Html.fromHtml(String.valueOf(opFilesText), Html.FROM_HTML_MODE_LEGACY));
             });
+        });
+    }
+
+    public void displayRetryBar() {
+        log_retry_bar.setVisibility(View.VISIBLE);
+
+        Button btnCancel = view.findViewById(R.id.log_retry_bar_btn_cancel_operation);
+        Button btnConfirm = view.findViewById(R.id.log_retry_bar_confirm_operation);
+
+        btnCancel.setOnClickListener(view -> {
+            log_retry_bar.setVisibility(View.GONE);
+        });
+
+        btnConfirm.setOnClickListener(view -> {
+            // TODO riprovare operazione in background
+            // TODO settare il log come retried (ed eventualmente ricaricare la pagina?)
         });
     }
 

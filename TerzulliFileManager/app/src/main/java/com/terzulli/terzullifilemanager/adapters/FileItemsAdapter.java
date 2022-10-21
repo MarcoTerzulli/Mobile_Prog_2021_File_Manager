@@ -171,6 +171,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
         ArrayList<File> filesToCopyMove = new ArrayList<>(selectedFilesManager.getSelectedFilesToCopyMove().size());
         filesToCopyMove.addAll(selectedFilesManager.getSelectedFilesToCopyMove());
+        int nItems = selectedFilesManager.getSelectedFilesToCopyMove().size();
 
         if (filesToCopyMove.size() != 0) {
             clearSelection();
@@ -178,7 +179,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
             executor.execute(() -> {
 
-                int nItems = selectedFilesManager.getSelectedFilesToCopyMove().size();
                 int returnCode = copyMoveSelectionOperation(isCopy, destinationPath, filesToCopyMove, context);
 
                 handler.post(() -> {
@@ -211,6 +211,14 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                             else
                                 mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_move),
                                         context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir));
+                            break;
+                        case -3: // la nuova destinazione è uno dei file che sto spostando / copiando
+                            if (isCopy)
+                                mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_copy),
+                                        context.getResources().getString(R.string.error_cannot_copy_into_itself));
+                            else
+                                mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_move),
+                                        context.getResources().getString(R.string.error_cannot_move_into_itself));
                             break;
                         default:
                             break;
@@ -274,7 +282,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
         mainFragment.hideCopyMoveExtractBar();
         Toast.makeText(context, R.string.action_compression_started, Toast.LENGTH_SHORT).show();
-
 
         ArrayList<File> filesToCompress = new ArrayList<>(selectedFilesManager.getSelectedFilesToCompress().size());
         filesToCompress.addAll(selectedFilesManager.getSelectedFilesToCompress());

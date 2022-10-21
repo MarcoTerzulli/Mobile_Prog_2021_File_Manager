@@ -11,7 +11,7 @@ import com.terzulli.terzullifilemanager.database.LogDatabase
 import kotlin.jvm.Synchronized
 import androidx.room.Room
 
-@Database(entities = [TableLog::class, TableItem::class], version = 3)
+@Database(entities = [TableLog::class, TableItem::class], version = 5)
 abstract class LogDatabase : RoomDatabase() {
     abstract fun itemDao(): ItemDao?
     abstract fun logDao(): LogDao?
