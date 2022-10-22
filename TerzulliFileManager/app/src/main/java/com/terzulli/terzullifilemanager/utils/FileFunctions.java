@@ -189,12 +189,11 @@ public class FileFunctions {
      * @param context contesto
      * @return codice di esecuzione:
      * - 1: operazione completata con successo
-     * - -1: impossibile eseguire l'operazione 
+     * - -1: impossibile eseguire l'operazione
      */
     public static int createDirectoryOperation(@NonNull File currentDirectory, @NonNull String newDirectoryName,
                                                   @NonNull Context context) {
         int returnCode = 1;
-        String operationType = FileFunctions.strOperationNewFolder;
         String operationErrorDescription = "";
 
         File newDir = new File(currentDirectory, newDirectoryName);
@@ -223,7 +222,7 @@ public class FileFunctions {
 
         // salvataggio risultato operazione su log
         FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                new Date(), (returnCode == 1), operationType, currentDirectory.getAbsolutePath(), currentDirectory.getAbsolutePath(),
+                new Date(), (returnCode == 1), strOperationNewFolder, currentDirectory.getAbsolutePath(), currentDirectory.getAbsolutePath(),
                 operationErrorDescription, newDir, "");
 
         return returnCode;
@@ -243,7 +242,6 @@ public class FileFunctions {
     public static int renameSelectedFileOperation(@NonNull File file, @NonNull String newName,
                                                    @NonNull Context context) {
         int returnCode;
-        String operationType = FileFunctions.strOperationRename;
         String operationErrorDescription = "";
         String path = "";
 
@@ -266,7 +264,7 @@ public class FileFunctions {
 
         // salvataggio risultato operazione su log
         FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                new Date(), (returnCode == 1), operationType, path, "",
+                new Date(), (returnCode == 1), strOperationRename, path, "",
                 operationErrorDescription, file, newName);
 
         return returnCode;

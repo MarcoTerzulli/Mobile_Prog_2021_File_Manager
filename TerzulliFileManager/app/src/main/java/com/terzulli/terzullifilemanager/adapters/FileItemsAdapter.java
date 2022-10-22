@@ -492,6 +492,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         if (isSelectionModeEnabled()) {
             if (selectedFilesManager.getSelectedFiles().size() == 1) {
                 File file = selectedFilesManager.getSelectedFiles().get(0);
+                clearSelection();
 
                 MimeTypeMap map = MimeTypeMap.getSingleton();
                 String ext = Utils.getFileExtension(file);
@@ -499,7 +500,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    //Uri data = Uri.parse(file.getAbsolutePath());
 
                     Uri data = FileProvider.getUriForFile(context,
                             context.getApplicationContext().getPackageName() + ".provider", file);
@@ -645,25 +645,21 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
             if (!isSelectionModeEnabled()) {
                 itemOpenerHandler(selectedFile);
             } else {
-                //toggleItemSelection(selectedFile, holder, true, false);
                 toggleItemSelection(selectedFile, holder);
             }
         });
 
         // gestione selezione item con long click
         holder.itemView.setOnLongClickListener(view -> {
-            //toggleItemSelection(selectedFile, holder, false, false);
             toggleItemSelection(selectedFile, holder);
 
             return true;
         });
 
         // gestione selezione item con click sull'icona
-        //holder.itemIcon.setOnClickListener(view -> toggleItemSelection(selectedFile, holder, true, false));
         holder.itemIcon.setOnClickListener(view -> toggleItemSelection(selectedFile, holder));
 
         // ripristino lo stato di selezione precedente
-        //toggleItemSelection(selectedFile, holder, false, true);
         recoverItemSelectionState(selectedFile, holder);
     }
 
@@ -689,7 +685,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                 recentsFilesManager.addFileToRecentsFilesList(selectedFile);
 
                 if (isFileAZipArchive(selectedFile)) {
-                    //fileToExtract = selectedFile;
                     selectedFilesManager.setFileToExtract(selectedFile);
                     extractSelectedFile();
                 } else if (type.equals("application/vnd.android.package-archive")
@@ -697,7 +692,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
                     installApplication(selectedFile);
                 } else {
-
                     try {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
 

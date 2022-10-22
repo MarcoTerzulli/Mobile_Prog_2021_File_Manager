@@ -195,7 +195,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public void loadSelection(@NonNull final File[] filesAndDirs, @NonNull String newActionBarTitle) {
 
-        if (newActionBarTitle != null && newActionBarTitle.length() != 0)
+        if (newActionBarTitle.length() != 0)
             setActionBarTitle(newActionBarTitle);
 
         // forzo la posizione della scrollview a 0 per prevenire inconsistenze e crash se è in corso
