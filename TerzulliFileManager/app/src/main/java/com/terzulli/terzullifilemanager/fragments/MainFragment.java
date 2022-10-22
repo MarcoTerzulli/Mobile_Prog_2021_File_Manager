@@ -221,12 +221,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                 if (activeLoadingsCounter <= loadingTicket) {
 
-                    /*if (isACustomLocationDisplayed()){
-                        updateBreadCrumbList(null, null);
-                        breadcrumbsView.setVisibility(View.GONE);
-                    } else
-                        breadcrumbsView.setVisibility(View.VISIBLE);*/
-
                     // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
                     initializeEmptyDirectoryLayout(filesAndDirs.length == 0);
                     initializeEmptyLogsLayout(false);
