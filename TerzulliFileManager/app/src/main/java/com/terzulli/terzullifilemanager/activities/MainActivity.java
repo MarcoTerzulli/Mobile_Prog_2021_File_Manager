@@ -539,12 +539,12 @@ public class MainActivity extends PermissionsActivity
                     case R.id.menu_show_hidden:
                         sharedPrefEditor.putBoolean("showHidden", true);
                         sharedPrefEditor.apply();
-                        ((MainFragment)currentFragment).refreshList(false);
+                        ((MainFragment)currentFragment).refreshList(true);
                         break;
                     case R.id.menu_dont_show_hidden:
                         sharedPrefEditor.putBoolean("showHidden", false);
                         sharedPrefEditor.apply();
-                        ((MainFragment)currentFragment).refreshList(false);
+                        ((MainFragment)currentFragment).refreshList(true);
                         break;
                     case R.id.menu_rename:
                         ((FileItemsAdapter)currentAdapter).renameSelectedFile();
