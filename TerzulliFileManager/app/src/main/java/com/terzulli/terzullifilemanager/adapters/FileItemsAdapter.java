@@ -120,13 +120,15 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
     public void submitSearchQuery(final String searchQuery) {
         // recupero tutti i file originali del path corrente in caso siano state fatte query precedenti
-        recoverCurrentFilesBeforeQuerySubmit();
+        // NOTA: non aggiorno l'array filesAndDirs perché comporterebbe un aggiornamento dell'adapter
+        // con tutti i file, che poi verrebbero immediatamente aggiornata di nuovo per mostrare i risultati della query
+        File[] fileBeforeQuery = getCurrentFilesBeforeQuerySubmit();
         // salvo tutti i file del path corrente
-        saveCurrentFilesBeforeQuerySubmit();
+        saveCurrentFilesBeforeQuerySubmit(fileBeforeQuery);
 
         ArrayList<File> searchedResults = new ArrayList<>();
 
-        for (File file : filesAndDirs) {
+        for (File file : fileBeforeQuery) {
             if (file != null && file.getName().toLowerCase().contains(searchQuery.toLowerCase()))
                 searchedResults.add(file);
         }
@@ -559,12 +561,31 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         }
     }
 
+    public File[] getCurrentFilesBeforeQuerySubmit() {
+        File[] filesBeforeQuery = new File[selectedFilesManager.getCurrentFilesBeforeQuerySubmit().size()];
+
+        if (selectedFilesManager.getCurrentFilesBeforeQuerySubmit().size() != 0) {
+
+            int i = 0;
+            for (File file : selectedFilesManager.getCurrentFilesBeforeQuerySubmit())
+                filesBeforeQuery[i++] = file;
+
+            selectedFilesManager.clearCurrentFilesBeforeQuerySubmit();
+        }
+
+        return filesBeforeQuery;
+    }
+
     public String getOperationOriginPath() {
         return selectedFilesManager.getOperationOriginPath();
     }
 
     public void saveCurrentFilesBeforeQuerySubmit() {
         selectedFilesManager.setCurrentFilesBeforeQuerySubmit(filesAndDirs);
+    }
+
+    public void saveCurrentFilesBeforeQuerySubmit(File[] currentFiles) {
+        selectedFilesManager.setCurrentFilesBeforeQuerySubmit(currentFiles);
     }
 
     public void clearSelectionFromCopyMove() {

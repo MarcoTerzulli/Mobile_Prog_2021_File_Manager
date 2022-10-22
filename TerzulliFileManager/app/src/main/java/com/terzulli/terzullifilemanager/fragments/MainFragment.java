@@ -326,14 +326,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     }
 
-    public void hideBreadcrumb() {
-        breadcrumbsView.setVisibility(View.GONE);
-    }
-
-    public void showBreadcrumb() {
-        breadcrumbsView.setVisibility(View.VISIBLE);
-    }
-
     public RecyclerView.Adapter getCurrentAdapter() {
         return currentAdapter;
     }
