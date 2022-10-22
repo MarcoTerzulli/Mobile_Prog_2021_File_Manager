@@ -35,6 +35,7 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -201,6 +202,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         // forzo la posizione della scrollview a 0 per prevenire inconsistenze e crash se è in corso
         // un'animazione di scroll mentre setto un nuovo adapter
         recyclerView.scrollToPosition(0);
+        breadcrumbsView.setVisibility(View.GONE);
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
@@ -217,11 +219,11 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                 if (activeLoadingsCounter <= loadingTicket) {
 
-                    if (isACustomLocationDisplayed()){
+                    /*if (isACustomLocationDisplayed()){
                         updateBreadCrumbList(null, null);
                         breadcrumbsView.setVisibility(View.GONE);
                     } else
-                        breadcrumbsView.setVisibility(View.VISIBLE);
+                        breadcrumbsView.setVisibility(View.VISIBLE);*/
 
                     // se non ci sono file, imposto visibili gli elementi della schermata di default vuota
                     initializeEmptyDirectoryLayout(filesAndDirs.length == 0);
@@ -322,6 +324,14 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             });
         });
 
+    }
+
+    public void hideBreadcrumb() {
+        breadcrumbsView.setVisibility(View.GONE);
+    }
+
+    public void showBreadcrumb() {
+        breadcrumbsView.setVisibility(View.VISIBLE);
     }
 
     public RecyclerView.Adapter getCurrentAdapter() {

@@ -326,6 +326,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
     public void executeDeleteOperationOnThread(String currentPath) {
         String toastMessage = context.getResources().getString(R.string.delete_toast_first_part)
                 + " " + selectedFilesManager.getSelectedFiles().size() + " ";
+
         if (selectedFilesManager.getSelectedFiles().size() == 1)
             toastMessage += context.getResources().getString(R.string.delete_toast_single_second_part);
         else
@@ -347,6 +348,12 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                 handler.post(() -> {
                     if (returnCode == -1)mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_delete),
                             context.getResources().getString(R.string.error_cannot_delete_item));
+
+                    // forzo il reset del titolo e del menù
+                    if(activityReference instanceof MainActivity) {
+                        ((MainActivity) activityReference).setActionBarToggleDefault();
+                        ((MainActivity) activityReference).updateMenuItems(99); // default
+                    }
 
                     if (mainFragment.getCurrentPath().equals(currentPath))
                         mainFragment.refreshList(true);

@@ -90,6 +90,7 @@ public class MainActivity extends PermissionsActivity
                 Fragment currentFragment = getForegroundFragment();
 
                 if(currentFragment instanceof MainFragment) {
+                    ((MainFragment)currentFragment).hideBreadcrumb();
                     RecyclerView.Adapter currentAdapter = ((MainFragment)currentFragment).getCurrentAdapter();
 
                     if(currentAdapter instanceof FileItemsAdapter) {
