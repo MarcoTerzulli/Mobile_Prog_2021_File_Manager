@@ -202,6 +202,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         // forzo la posizione della scrollview a 0 per prevenire inconsistenze e crash se è in corso
         // un'animazione di scroll mentre setto un nuovo adapter
         recyclerView.scrollToPosition(0);
+        updateBreadCrumbList(null, null); // previene inconsistenze e crash
         breadcrumbsView.setVisibility(View.GONE);
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -296,7 +297,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 if (activeLoadingsCounter <= loadingTicket) {
 
                     if (isACustomLocationDisplayed()){
-                        updateBreadCrumbList(null, null);
+                        updateBreadCrumbList(null, null); // previene inconsistenze e crash
                         breadcrumbsView.setVisibility(View.GONE);
                     } else
                         breadcrumbsView.setVisibility(View.VISIBLE);
