@@ -188,6 +188,7 @@
     <string name="error_cannot_delete_item">Could not delete the specified item</string>
     <string name="error_compression_cannot_compress_file">Could not compress some of the specified items</string>
     <string name="error_extraction_cannot_create_dest_dir">Could not create the destination folder</string>
+    <string name="error_extraction_cannot_create_dest_file">Could not create the destination file</string>
     <string name="error_extraction_cannot_complete">Something went wrong during the extraction operation</string>
     <string name="error_copy_generic">Something went wrong during the copy operation</string>
     <string name="error_move_generic">Something went wrong during the move operation</string>

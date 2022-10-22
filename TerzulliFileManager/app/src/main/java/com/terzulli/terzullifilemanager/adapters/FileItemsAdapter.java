@@ -303,9 +303,9 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
                             mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_compress),
                                     context.getResources().getString(R.string.error_compression_cannot_compress_file));
                             break;
-                        case -2: // impossibile creare la cartella di destinazione
+                        case -2: // impossibile creare il file di destinazione
                             mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_compress),
-                                    context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir));
+                                    context.getResources().getString(R.string.error_extraction_cannot_create_dest_file));
                             break;
                         case -3: // la destinazione è compresa nei file da comprimere
                             mainFragment.displayErrorDialog(context.getResources().getString(R.string.action_compress),

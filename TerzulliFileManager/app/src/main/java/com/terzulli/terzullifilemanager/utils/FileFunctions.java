@@ -114,6 +114,7 @@ public class FileFunctions {
      *
      * @param fileToExtract archivio da estrarre
      * @param extractPath   path in cui estrarre l'archivio
+     * @param context contesto
      * @return codice di esecuzione:
      * - 1: estrazione andata a buon fine
      * - -1: errore durante l'estrazione dello zip
@@ -180,6 +181,16 @@ public class FileFunctions {
         return returnCode;
     }
 
+    /**
+     * Funzione per la creazione di directory
+     *
+     * @param currentDirectory path in cui creare la directory
+     * @param newDirectoryName nome della nuova directory
+     * @param context contesto
+     * @return codice di esecuzione:
+     * - 1: operazione completata con successo
+     * - -1: impossibile eseguire l'operazione 
+     */
     public static int createDirectoryOperation(@NonNull File currentDirectory, @NonNull String newDirectoryName,
                                                   @NonNull Context context) {
         int returnCode = 1;
@@ -218,6 +229,17 @@ public class FileFunctions {
         return returnCode;
     }
 
+    /**
+     * Funzione per la rinominazione di file
+     *
+     * @param file file su cui effettuare l'operazione
+     * @param newName nuovo nome del file
+     * @param context contesto
+     * @return codice di esecuzione:
+     * - 1: operazione completata con successo
+     * - -1: impossibile eseguire l'operazione
+     * - -2: il file non esiste
+     */
     public static int renameSelectedFileOperation(@NonNull File file, @NonNull String newName,
                                                    @NonNull Context context) {
         int returnCode;
@@ -250,6 +272,16 @@ public class FileFunctions {
         return returnCode;
     }
 
+    /**
+     * Funzione per la cancellazione di file
+     *
+     * @param originalPath path dei file da cancellare
+     * @param filestoDelete file da cancellare
+     * @param context contesto
+     * @return codice di esecuzione:
+     * - 1: operazione completata con successo
+     * - -1: impossibile eseguire l'operazione su alcuni file
+     */
     public static int deleteSelectedFilesOperation(@NonNull String originalPath, @NonNull ArrayList<File> filestoDelete,
                                                    @NonNull Context context) {
         ArrayList<File> filesWithErrors = new ArrayList<>();
@@ -283,13 +315,17 @@ public class FileFunctions {
     }
 
     /**
-     * FUnzione interna per la copia o spostamento di file e cartelle (ricorsiva)
+     * FUnzione per la copia o spostamento di file e cartelle (ricorsiva)
      *
      * @param isCopy          indica se l'operazione è di copia (true) o spostamento (false)
      * @param destinationPath path di destinazione
+     * @param filesToCopyMove file su cui eseguire l'operazione
+     * @param context contesto
      * @return codice di esecuzione:
      * - 1: operazione completata con successo
      * - -1: generata eccezione durante l'operazione
+     * - -2: impossible creare la directory di destinazione
+     * - -3: la directory di destinazione è uno dei file che si sta copiando /spostando
      */
     public static int copyMoveSelectionOperation(boolean isCopy, @NonNull String destinationPath,
                                                  @NonNull ArrayList<File>filesToCopyMove,
@@ -414,13 +450,16 @@ public class FileFunctions {
     }
 
     /**
-     * Funzione interna per la compressione di file in un archivio zip
+     * Funzione per la compressione di file in un archivio zip
      *
      * @param compressPath path in cui creare l'archivio
+     * @param filesToCompress file su cui eseguire l'operazione
+     * @param context contesto
      * @return codice di esecuzione:
      * - 1: estrazione andata a buon fine
      * - -1: errore durante la creazione dello zip
-     * - -2: errore Nome archivio duplicato (superati tentativi max) o mancanza permessi storage
+     * - -2: errore Impossibile creare il file di destinazione
+     * - -3: la directory di destinazione è uno dei file che si sta comprimendo
      */
     public static int compressSelectedFilesOperation(@NonNull String compressPath,
                                                      @NonNull ArrayList<File> filesToCompress,
@@ -474,7 +513,7 @@ public class FileFunctions {
         if(returnCode == -1)
             operationErrorDescription = context.getResources().getString(R.string.error_compression_cannot_compress_file);
         else if (returnCode == -2)
-            operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_create_dest_dir);
+            operationErrorDescription = context.getResources().getString(R.string.error_extraction_cannot_create_dest_file);
         else if (returnCode == -3)
             operationErrorDescription = context.getResources().getString(R.string.error_cannot_compress_into_itself);
 
