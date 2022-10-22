@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class FileFunctions {
+public class FileOperationsFunctions {
     public static final String strOperationNewFolder = "new_folder";
     public static final String strOperationCompress = "compress";
     public static final String strOperationExtract = "extract";
@@ -174,7 +174,7 @@ public class FileFunctions {
                 break;
         }
 
-        FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
+        FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
                 new Date(), (returnCode == 1), strOperationExtract, extractPath, "",
                 operationErrorDescription, fileToExtract, "");
 
@@ -221,7 +221,7 @@ public class FileFunctions {
         }
 
         // salvataggio risultato operazione su log
-        FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
+        FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
                 new Date(), (returnCode == 1), strOperationNewFolder, currentDirectory.getAbsolutePath(), currentDirectory.getAbsolutePath(),
                 operationErrorDescription, newDir, "");
 
@@ -263,7 +263,7 @@ public class FileFunctions {
         }
 
         // salvataggio risultato operazione su log
-        FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
+        FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
                 new Date(), (returnCode == 1), strOperationRename, path, "",
                 operationErrorDescription, file, newName);
 
@@ -294,7 +294,7 @@ public class FileFunctions {
             operationErrorDescription = context.getResources().getString(R.string.error_cannot_delete_item);
 
         // salvataggio risultato operazione su log
-        FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context), new Date(),
+        FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context), new Date(),
                 filesWithErrors.isEmpty(), strOperationDelete, originalPath, "",
                 operationErrorDescription, filestoDelete, filesWithErrors);
 
@@ -382,7 +382,7 @@ public class FileFunctions {
         }
 
         // salvataggio risultato operazione su log
-        FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
+        FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
                 new Date(), (returnCode == 1), operationType, "", destinationPath,
                 operationErrorDescription, filesToCopyMove, filesWithErrors);
 
@@ -516,7 +516,7 @@ public class FileFunctions {
             operationErrorDescription = context.getResources().getString(R.string.error_cannot_compress_into_itself);
 
         // salvataggio risultato operazione su log
-        FileFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
+        FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
                 new Date(), (returnCode == 1), strOperationCompress, "", compressPath,
                 operationErrorDescription, filesToCompress, filesWithErrors);
 

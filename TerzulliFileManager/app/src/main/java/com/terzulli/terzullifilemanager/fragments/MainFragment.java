@@ -1,8 +1,8 @@
 package com.terzulli.terzullifilemanager.fragments;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.createDirectoryOperation;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.renameSelectedFileOperation;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.createDirectoryOperation;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.renameSelectedFileOperation;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatDateDetailsFull;
 import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
 import static com.terzulli.terzullifilemanager.utils.Utils.humanReadableByteCountSI;
@@ -35,7 +35,6 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

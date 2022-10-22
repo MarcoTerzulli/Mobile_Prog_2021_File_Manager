@@ -1,10 +1,10 @@
 package com.terzulli.terzullifilemanager.adapters;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.compressSelectedFilesOperation;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.copyMoveSelectionOperation;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.deleteSelectedFilesOperation;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.extractSelectedFileOperation;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.compressSelectedFilesOperation;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.copyMoveSelectionOperation;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.deleteSelectedFilesOperation;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.extractSelectedFileOperation;
 import static com.terzulli.terzullifilemanager.utils.Utils.formatFileDetails;
 import static com.terzulli.terzullifilemanager.utils.Utils.isFileAZipArchive;
 

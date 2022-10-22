@@ -1,12 +1,12 @@
 package com.terzulli.terzullifilemanager.fragments;
 
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationCompress;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationCopy;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationDelete;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationExtract;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationMove;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationNewFolder;
-import static com.terzulli.terzullifilemanager.utils.FileFunctions.strOperationRename;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationCompress;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationCopy;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationDelete;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationExtract;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationMove;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationNewFolder;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationRename;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -29,7 +29,7 @@ import com.terzulli.terzullifilemanager.activities.MainActivity;
 import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.database.entities.TableItem;
 import com.terzulli.terzullifilemanager.database.entities.TableLog;
-import com.terzulli.terzullifilemanager.utils.FileFunctions;
+import com.terzulli.terzullifilemanager.utils.FileOperationsFunctions;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.io.File;
@@ -231,31 +231,31 @@ public class LogFragment extends Fragment {
                 if(!failedItemsList.isEmpty()) {
                     switch (Objects.requireNonNull(thisLog).getOperationType()) {
                         case strOperationNewFolder:
-                            returnCode = FileFunctions.createDirectoryOperation(new File(thisLog.getDestinationPath()),
+                            returnCode = FileOperationsFunctions.createDirectoryOperation(new File(thisLog.getDestinationPath()),
                                     failedItemsList.get(0).getName(), view.getContext());
                             break;
                         case strOperationCompress:
-                            returnCode = FileFunctions.compressSelectedFilesOperation(thisLog.getDestinationPath(),
+                            returnCode = FileOperationsFunctions.compressSelectedFilesOperation(thisLog.getDestinationPath(),
                                     failedFilesList, view.getContext());
                             break;
                         case strOperationExtract:
-                            returnCode = FileFunctions.extractSelectedFileOperation(new File(failedItemsList.get(0).getOriginPath()),
+                            returnCode = FileOperationsFunctions.extractSelectedFileOperation(new File(failedItemsList.get(0).getOriginPath()),
                                     thisLog.getDestinationPath(),view.getContext());
                             break;
                         case strOperationCopy:
-                            returnCode = FileFunctions.copyMoveSelectionOperation(true, thisLog.getDestinationPath(),
+                            returnCode = FileOperationsFunctions.copyMoveSelectionOperation(true, thisLog.getDestinationPath(),
                                     failedFilesList, view.getContext());
                             break;
                         case strOperationMove:
-                            returnCode = FileFunctions.copyMoveSelectionOperation(false, thisLog.getDestinationPath(),
+                            returnCode = FileOperationsFunctions.copyMoveSelectionOperation(false, thisLog.getDestinationPath(),
                                     failedFilesList, view.getContext());
                             break;
                         case strOperationRename:
-                            returnCode = FileFunctions.renameSelectedFileOperation(new File(thisLog.getOriginPath()),
+                            returnCode = FileOperationsFunctions.renameSelectedFileOperation(new File(thisLog.getOriginPath()),
                                     failedItemsList.get(0).getNewName(), view.getContext());
                             break;
                         case strOperationDelete:
-                            returnCode = FileFunctions.deleteSelectedFilesOperation(thisLog.getOriginPath(),
+                            returnCode = FileOperationsFunctions.deleteSelectedFilesOperation(thisLog.getOriginPath(),
                                     failedFilesList, view.getContext());
                             break;
                         default:
