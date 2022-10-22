@@ -50,7 +50,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
     private final SelectedFilesManager selectedFilesManager;
     private final MainFragment mainFragment;
     private final Activity activityReference;
-    private File[] filesAndDirs;
+    private final File[] filesAndDirs;
 
     public FileItemsAdapter(Context context, File[] filesAndFolders, MainFragment mainFragment, Activity activityReference) {
         this.context = context;
@@ -546,19 +546,6 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
 
     public void clearCurrentFilesBeforeQuerySubmit() {
         selectedFilesManager.clearCurrentFilesBeforeQuerySubmit();
-    }
-
-    public void recoverCurrentFilesBeforeQuerySubmit() {
-
-        if (selectedFilesManager.getCurrentFilesBeforeQuerySubmit().size() != 0) {
-
-            filesAndDirs = new File[selectedFilesManager.getCurrentFilesBeforeQuerySubmit().size()];
-            int i = 0;
-            for (File file : selectedFilesManager.getCurrentFilesBeforeQuerySubmit())
-                filesAndDirs[i++] = file;
-
-            selectedFilesManager.clearCurrentFilesBeforeQuerySubmit();
-        }
     }
 
     public File[] getCurrentFilesBeforeQuerySubmit() {

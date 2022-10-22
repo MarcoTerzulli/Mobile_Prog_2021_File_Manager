@@ -133,16 +133,6 @@ public class MainActivity extends PermissionsActivity
         return navHostFragment == null ? null : navHostFragment.getChildFragmentManager().getFragments().get(0);
     }
 
-    /*public Fragment getVisibleFragment(){
-        FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
-        List<Fragment> fragments = fragmentManager.getFragments();
-        for(Fragment fragment : fragments){
-            if(fragment != null && fragment.isVisible())
-                return fragment;
-        }
-        return null;
-    }*/
-
     /**
      * Funzione per l'aggiornamento degli elementi mostrati nel menu in base al valore del parametro
      * menuCase.
@@ -497,17 +487,6 @@ public class MainActivity extends PermissionsActivity
         toolbar = findViewById(R.id.main_toolbar);
 
     }
-
-    /*private Fragment getForegroundFragment() {
-        FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
-        List<Fragment> fragmentsList = fragmentManager.getFragments();
-
-        for (Fragment fragment : fragmentsList) {
-            if (fragment != null && fragment.isVisible())
-                return fragment;
-        }
-        return null;
-    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
