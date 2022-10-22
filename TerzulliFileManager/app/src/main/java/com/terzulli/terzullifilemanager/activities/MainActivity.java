@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.SearchView;
@@ -20,7 +19,6 @@ import androidx.core.view.GravityCompat;
 import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -37,7 +35,8 @@ import com.terzulli.terzullifilemanager.fragments.LogFragment;
 import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
-import java.util.List;
+import java.util.Calendar;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -119,7 +118,6 @@ public class MainActivity extends PermissionsActivity
         if (searchView != null && !searchView.isIconified()) {
             final MenuItem itemSearch = toolbarMenu.findItem(R.id.menu_search);
             MenuItemCompat.collapseActionView(itemSearch);
-            //searchView.setIconified(true);
         }
     }
 
@@ -135,17 +133,15 @@ public class MainActivity extends PermissionsActivity
         return navHostFragment == null ? null : navHostFragment.getChildFragmentManager().getFragments().get(0);
     }
 
-    public Fragment getVisibleFragment(){
+    /*public Fragment getVisibleFragment(){
         FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
         List<Fragment> fragments = fragmentManager.getFragments();
-        if(fragments != null){
-            for(Fragment fragment : fragments){
-                if(fragment != null && fragment.isVisible())
-                    return fragment;
-            }
+        for(Fragment fragment : fragments){
+            if(fragment != null && fragment.isVisible())
+                return fragment;
         }
         return null;
-    }
+    }*/
 
     /**
      * Funzione per l'aggiornamento degli elementi mostrati nel menu in base al valore del parametro
@@ -457,8 +453,12 @@ public class MainActivity extends PermissionsActivity
 
         executor.execute(() -> {
             LogDatabase logDatabase = LogDatabase.getInstance(this);
-            // TODO cancellazione dei log più vecchi di 30 gg
 
+            // cancellazione dei log più vecchi di 30 giorni
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.MONTH, -1);
+            assert logDatabase != null;
+            Objects.requireNonNull(logDatabase.logDao()).deleteLogsOlderThanDate(cal.getTime());
         });
     }
 
@@ -581,13 +581,10 @@ public class MainActivity extends PermissionsActivity
                         return false;
                 }
             } else if(currentAdapter instanceof LogItemsAdapter) {
-                switch (item.getItemId()) {
-                    case R.id.menu_clear_logs:
-                        ((MainFragment)currentFragment).displayClearLogHistoryDialog();
-                        break;
-                    default:
-                        // non dovremmo mai arrivarci
-                        return false;
+                if (item.getItemId() == R.id.menu_clear_logs) {
+                    ((MainFragment) currentFragment).displayClearLogHistoryDialog();
+                } else {// non dovremmo mai arrivarci
+                    return false;
                 }
             }
         }
