@@ -20,12 +20,12 @@ import com.google.android.material.snackbar.Snackbar
 import com.terzulli.terzullifilemanager.R
 
 abstract class PermissionsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
-    private val PERMISSION_LIST_LENGTH = 3
-    private val PERMISSION_CODE_STORAGE = 0
-    private val PERMISSION_CODE_INSTALL_APK = 1
-    private val PERMISSION_CODE_ALL_FILES = 2
+    private val permissionListLenght = 3
+    private val permissionCodeStorage = 0
+    private val permissionCodeInstallApk = 1
+    private val permissionCodeAllFiles = 2
     private val onPermissionGrantedCallbacks =
-        arrayOfNulls<OnPermissionGranted>(PERMISSION_LIST_LENGTH)
+        arrayOfNulls<OnPermissionGranted>(permissionListLenght)
 
     fun checkStoragePermission(): Boolean {
         return (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -39,7 +39,6 @@ abstract class PermissionsActivity : AppCompatActivity(), OnRequestPermissionsRe
         isFirstStart: Boolean
     ) {
 
-        //Utils.disableScreenRotation(this);
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
             rationaleDialog
                 .setPositiveButton(R.string.grant) { thisDialog: DialogInterface, _: Int ->
@@ -87,16 +86,15 @@ abstract class PermissionsActivity : AppCompatActivity(), OnRequestPermissionsRe
             .setTitle(R.string.grant_permission)
             .setMessage(R.string.grant_permission_msg_storage)
             .setNegativeButton(R.string.button_cancel) { _: DialogInterface?, _: Int ->
-                //dialog.dismiss();
                 finish()
             }
             .setCancelable(false)
 
-        onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE] = onPermissionGranted
+        onPermissionGrantedCallbacks[permissionCodeStorage] = onPermissionGranted
 
         requestPermission(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            PERMISSION_CODE_STORAGE,
+            permissionCodeStorage,
             rationaleDialog,
             isFirstStart
         )
@@ -108,7 +106,7 @@ abstract class PermissionsActivity : AppCompatActivity(), OnRequestPermissionsRe
                 .setTitle(R.string.grant_permission)
                 .setMessage(R.string.grant_permission_msg_full_storage)
                 .setPositiveButton(R.string.grant) { _: DialogInterface?, _: Int ->
-                    onPermissionGrantedCallbacks[PERMISSION_CODE_ALL_FILES] = onPermissionGranted
+                    onPermissionGrantedCallbacks[permissionCodeAllFiles] = onPermissionGranted
 
                     try {
                         val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
@@ -136,45 +134,24 @@ abstract class PermissionsActivity : AppCompatActivity(), OnRequestPermissionsRe
         }
     }
 
-    fun requestApkInstallPermission(
-        isFirstStart: Boolean,
-        onPermissionGranted: OnPermissionGranted
-    ) {
-        val rationaleDialog = AlertDialog.Builder(this)
-            .setTitle(R.string.grant_permission)
-            .setMessage(R.string.grant_permission_msg_apk)
-            .setNegativeButton(R.string.button_cancel) { dialog: DialogInterface, _: Int -> dialog.dismiss() }
-            .setCancelable(false)
-
-        onPermissionGrantedCallbacks[PERMISSION_CODE_INSTALL_APK] = onPermissionGranted
-
-        requestPermission(
-            Manifest.permission.REQUEST_INSTALL_PACKAGES,
-            PERMISSION_CODE_INSTALL_APK,
-            rationaleDialog,
-            isFirstStart
-        )
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            PERMISSION_CODE_STORAGE -> if (permissionIsGranted(grantResults)) {
-                //Utils.enableScreenRotation(this);
-                onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE]!!.onPermissionGranted()
-                onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE] = null
+            permissionCodeStorage -> if (permissionIsGranted(grantResults)) {
+                onPermissionGrantedCallbacks[permissionCodeStorage]!!.onPermissionGranted()
+                onPermissionGrantedCallbacks[permissionCodeStorage] = null
             } else {
                 requestStoragePermission(
                     false,
-                    onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE]!!
+                    onPermissionGrantedCallbacks[permissionCodeStorage]!!
                 )
             }
 
-            PERMISSION_CODE_INSTALL_APK -> if (permissionIsGranted(grantResults)) {
-                onPermissionGrantedCallbacks[PERMISSION_CODE_INSTALL_APK]!!.onPermissionGranted()
-                onPermissionGrantedCallbacks[PERMISSION_CODE_INSTALL_APK] = null
+            permissionCodeInstallApk -> if (permissionIsGranted(grantResults)) {
+                onPermissionGrantedCallbacks[permissionCodeInstallApk]!!.onPermissionGranted()
+                onPermissionGrantedCallbacks[permissionCodeInstallApk] = null
             }
         }
     }
