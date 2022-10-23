@@ -256,12 +256,13 @@ public class Utils {
     }
 
     public static boolean fileIsImage(File file) {
-        switch (MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file)))) {
+        switch (MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file))).toLowerCase()) {
             case "png":
             case "jpg":
             case "jpeg":
             case "gif":
             case "bmp":
+            case "heic":
                 return true;
             default:
                 return false;
@@ -272,12 +273,13 @@ public class Utils {
         if (file.isDirectory())
             return R.drawable.ic_folder;
 
-        switch(MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file)))) {
+        switch(MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file))).toLowerCase()) {
             case "png":
             case "jpg":
             case "jpeg":
             case "gif":
             case "bmp":
+            case "heic":
                 return R.drawable.ic_file_image;
 
             case "mp3":
@@ -344,12 +346,13 @@ public class Utils {
         if (file.isDirectory())
             return strFileDirectory;
 
-        switch(MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file)))) {
+        switch(MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file))).toLowerCase()) {
             case "png":
             case "jpg":
             case "jpeg":
             case "gif":
             case "bmp":
+            case "heic":
                 return strFileImage;
 
             case "mp3":
