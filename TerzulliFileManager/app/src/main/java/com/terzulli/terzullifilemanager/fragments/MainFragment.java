@@ -799,7 +799,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             }
             
             hideCopyMoveExtractBar();
-            refreshList(false);
+            refreshList(true);
         });
 
         btnConfirm.setOnClickListener(view -> {
@@ -829,7 +829,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 ((FileItemsAdapter)currentAdapter).clearFileToExtractSelection();
 
             hideCopyMoveExtractBar();
-            refreshList(false);
+            refreshList(true);
         });
 
         btnConfirm.setOnClickListener(view -> {

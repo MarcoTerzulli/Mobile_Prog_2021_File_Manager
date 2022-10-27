@@ -82,7 +82,7 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         selectedFilesManager.setCopyMoveOperationTypeIsCopy(isCopy);
         saveSelectionForCopyMove();
         clearSelection();
-        mainFragment.refreshList(false);
+        mainFragment.refreshList(true);
 
         mainFragment.displayCopyMoveBar(isCopy, selectedFilesManager.getSelectedFilesToCopyMove().size());
     }
