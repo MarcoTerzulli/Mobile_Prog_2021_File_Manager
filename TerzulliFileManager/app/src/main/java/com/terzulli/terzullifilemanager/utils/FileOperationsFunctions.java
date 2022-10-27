@@ -1,5 +1,7 @@
 package com.terzulli.terzullifilemanager.utils;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -256,6 +258,12 @@ public class FileOperationsFunctions {
             } else {
                 operationErrorDescription = context.getResources().getString(R.string.error_cannot_rename);
                 returnCode = -1;
+            }
+
+            // aggiunta file rinominato ai file recenti
+            if(!to.isDirectory() && returnCode == 1) {
+                RecentsFilesManager recentsFilesManager = new RecentsFilesManager(context.getSharedPreferences("TerzulliFileManager", MODE_PRIVATE));
+                recentsFilesManager.addFileToRecentsFilesList(to);
             }
         } else {
             returnCode = -2;
@@ -519,6 +527,12 @@ public class FileOperationsFunctions {
         FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
                 new Date(), (returnCode == 1), strOperationCompress, "", compressPath,
                 operationErrorDescription, filesToCompress, filesWithErrors);
+
+        // aggiunta file compresso ai file recenti
+        if(!compressedFile.isDirectory() && returnCode == 1) {
+            RecentsFilesManager recentsFilesManager = new RecentsFilesManager(context.getSharedPreferences("TerzulliFileManager", MODE_PRIVATE));
+            recentsFilesManager.addFileToRecentsFilesList(compressedFile);
+        }
 
         return returnCode;
     }
