@@ -731,8 +731,9 @@ public class FileItemsAdapter extends RecyclerView.Adapter<FileItemsAdapter.Item
         if (!isSelected) {
             if (Utils.fileIsImage(selectedFile)) {
                 loadImageThumbnailAsync(selectedFile, holder);
-            } else
+            } else {
                 holder.itemIcon.setImageResource(Utils.getFileTypeIcon(selectedFile));
+            }
         } else {
             holder.itemIcon.setImageResource(R.drawable.ic_check_circle_filled);
         }
