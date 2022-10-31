@@ -7,18 +7,18 @@ import static com.terzulli.terzullifilemanager.utils.Utils.formatDateDetailsFull
 import static com.terzulli.terzullifilemanager.utils.Utils.getFileType;
 import static com.terzulli.terzullifilemanager.utils.Utils.humanReadableByteCountSI;
 import static com.terzulli.terzullifilemanager.utils.Utils.removeHiddenFilesFromArray;
-import static com.terzulli.terzullifilemanager.utils.Utils.strFileApplication;
-import static com.terzulli.terzullifilemanager.utils.Utils.strFileDirectory;
-import static com.terzulli.terzullifilemanager.utils.Utils.strLocationAudioFriendlyName;
-import static com.terzulli.terzullifilemanager.utils.Utils.strLocationDownloadsFriendlyName;
-import static com.terzulli.terzullifilemanager.utils.Utils.strLocationImagesFriendlyName;
-import static com.terzulli.terzullifilemanager.utils.Utils.strLocationInternalFriendlyName;
-import static com.terzulli.terzullifilemanager.utils.Utils.strLocationLogsFriendlyName;
-import static com.terzulli.terzullifilemanager.utils.Utils.strLocationRecentsFriendlyName;
-import static com.terzulli.terzullifilemanager.utils.Utils.strLocationVideosFriendlyName;
-import static com.terzulli.terzullifilemanager.utils.Utils.strSortByDate;
-import static com.terzulli.terzullifilemanager.utils.Utils.strSortByName;
-import static com.terzulli.terzullifilemanager.utils.Utils.strSortBySize;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_FILE_APPLICATION;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_FILE_DIRECTORY;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_LOCATION_AUDIO_FRIENDLY_NAME;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_LOCATION_DOWNLOADS_FRIENDLY_NAME;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_LOCATION_IMAGES_FRIENDLY_NAME;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_LOCATION_INTERNAL_FRIENDLY_NAME;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_LOCATION_LOGS_FRIENDLY_NAME;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_LOCATION_RECENTS_FRIENDLY_NAME;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_LOCATION_VIDEOS_FRIENDLY_NAME;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_SORT_BY_DATE;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_SORT_BY_NAME;
+import static com.terzulli.terzullifilemanager.utils.Utils.STR_SORT_BY_SIZE;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateDirectoryName;
 import static com.terzulli.terzullifilemanager.utils.Utils.validateGenericFileName;
 
@@ -152,8 +152,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public void loadLogs() {
 
-        pathHomeFriendlyName = strLocationLogsFriendlyName;
-        setActionBarTitle(strLocationLogsFriendlyName);
+        pathHomeFriendlyName = STR_LOCATION_LOGS_FRIENDLY_NAME;
+        setActionBarTitle(STR_LOCATION_LOGS_FRIENDLY_NAME);
 
         // forzo la posizione della scrollview a 0 per prevenire inconsistenze e crash se è in corso
         // un'animazione di scroll mentre setto un nuovo adapter
@@ -210,7 +210,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         long loadingTicket = ++activeLoadingsCounter;
 
         executor.execute(() -> {
-            String sortBy = sharedPreferences.getString("sortBy", strSortByName);
+            String sortBy = sharedPreferences.getString("sortBy", STR_SORT_BY_NAME);
             boolean sortOrderAscending = sharedPreferences.getBoolean("sortOrderAscending", true);
             Utils.sortFileAndDirectoriesList(filesAndDirs, sortBy, sortOrderAscending);
 
@@ -275,7 +275,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             File rootFile = new File(path);
             File[] filesAndDirs = rootFile.listFiles();
 
-            String sortBy = sharedPreferences.getString("sortBy", strSortByName);
+            String sortBy = sharedPreferences.getString("sortBy", STR_SORT_BY_NAME);
             boolean sortOrderAscending = sharedPreferences.getBoolean("sortOrderAscending", true);
             Utils.sortFileAndDirectoriesList(filesAndDirs, sortBy, sortOrderAscending);
 
@@ -418,19 +418,19 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void refreshList(boolean forceKeepBreadcrumb) {
 
         switch (pathHomeFriendlyName) {
-            case strLocationRecentsFriendlyName:
+            case STR_LOCATION_RECENTS_FRIENDLY_NAME:
                 loadRecentsFiles();
                 break;
-            case strLocationAudioFriendlyName:
+            case STR_LOCATION_AUDIO_FRIENDLY_NAME:
                 loadAudioFiles();
                 break;
-            case strLocationVideosFriendlyName:
+            case STR_LOCATION_VIDEOS_FRIENDLY_NAME:
                 loadVideosFiles();
                 break;
-            case strLocationImagesFriendlyName:
+            case STR_LOCATION_IMAGES_FRIENDLY_NAME:
                 loadImagesFiles();
                 break;
-            case strLocationLogsFriendlyName:
+            case STR_LOCATION_LOGS_FRIENDLY_NAME:
                 loadLogs();
                 break;
             default:
@@ -886,7 +886,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(view.getContext());
         alertBuilder.setTitle(R.string.action_sort_by);
 
-        AtomicReference<String> sortBy = new AtomicReference<>(sharedPreferences.getString("sortBy", strSortByName));
+        AtomicReference<String> sortBy = new AtomicReference<>(sharedPreferences.getString("sortBy", STR_SORT_BY_NAME));
         SharedPreferences.Editor sharedPrefEditor = sharedPreferences.edit();
 
         alertBuilder.setPositiveButton(R.string.sort_ascending, (dialog, which) -> {
@@ -911,12 +911,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         int checkedItem = 0;
         switch (sortBy.get()) {
-            case strSortByName:
+            case STR_SORT_BY_NAME:
                 break;
-            case strSortBySize:
+            case STR_SORT_BY_SIZE:
                 checkedItem = 1;
                 break;
-            case strSortByDate:
+            case STR_SORT_BY_DATE:
                 checkedItem = 2;
                 break;
             default:
@@ -925,13 +925,13 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         alertBuilder.setSingleChoiceItems(items, checkedItem, (dialog, which) -> {
             switch (which) {
                 case 0:
-                    sortBy.set(strSortByName);
+                    sortBy.set(STR_SORT_BY_NAME);
                     break;
                 case 1:
-                    sortBy.set(strSortBySize);
+                    sortBy.set(STR_SORT_BY_SIZE);
                     break;
                 case 2:
-                    sortBy.set(strSortByDate);
+                    sortBy.set(STR_SORT_BY_DATE);
                     break;
             }
         });
@@ -951,8 +951,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 "<br><br><b>" + activityReference.getResources().getString(R.string.prop_type) + "</b>: ";
 
         switch (fileType) {
-            case strFileDirectory:
-            case strFileApplication:
+            case STR_FILE_DIRECTORY:
+            case STR_FILE_APPLICATION:
                 break;
             default:
                 message += MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file))).toUpperCase();
@@ -961,12 +961,12 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         message += " " + fileType;
 
-        if (!fileType.equals(strFileDirectory))
+        if (!fileType.equals(STR_FILE_DIRECTORY))
             message += "<br><br><b>" + activityReference.getResources().getString(R.string.sort_size) + "</b>: " + fileSize;
 
         message += "<br><br><b>" + activityReference.getResources().getString(R.string.sort_date_last_modified) + "</b>: " + fileLastModified;
 
-        if (fileType.equals(strFileDirectory)) {
+        if (fileType.equals(STR_FILE_DIRECTORY)) {
             int nItems = 0;
             File[] listFiles = file.listFiles();
 
@@ -993,7 +993,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public void loadPathDownload(boolean reloadBreadCrumb) {
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-        pathHomeFriendlyName = strLocationInternalFriendlyName;
+        pathHomeFriendlyName = STR_LOCATION_INTERNAL_FRIENDLY_NAME;
 
         loadPath(path, false, reloadBreadCrumb);
         //reloadBreadCrumb(path);
@@ -1001,7 +1001,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public void loadPathInternal(boolean reloadBreadCrumb) {
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
-        pathHomeFriendlyName = strLocationInternalFriendlyName;
+        pathHomeFriendlyName = STR_LOCATION_INTERNAL_FRIENDLY_NAME;
 
         loadPath(path, false, reloadBreadCrumb);
         //reloadBreadCrumb(path);
@@ -1020,7 +1020,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         for (File file : searchedResults)
             searchedResultsArr[i++] = file;
 
-        pathHomeFriendlyName = strLocationVideosFriendlyName;
+        pathHomeFriendlyName = STR_LOCATION_VIDEOS_FRIENDLY_NAME;
         loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_videos));
     }
 
@@ -1037,7 +1037,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         for (File file : searchedResults)
             searchedResultsArr[i++] = file;
 
-        pathHomeFriendlyName = strLocationAudioFriendlyName;
+        pathHomeFriendlyName = STR_LOCATION_AUDIO_FRIENDLY_NAME;
         loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_audio));
     }
 
@@ -1054,7 +1054,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         for (File file : searchedResults)
             searchedResultsArr[i++] = file;
 
-        pathHomeFriendlyName = strLocationImagesFriendlyName;
+        pathHomeFriendlyName = STR_LOCATION_IMAGES_FRIENDLY_NAME;
         loadSelection(searchedResultsArr, view.getResources().getString(R.string.drawer_menu_media_images));
     }
 
@@ -1072,7 +1072,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 recentsFilesArr[i++] = file;
         }
 
-        pathHomeFriendlyName = strLocationRecentsFriendlyName;
+        pathHomeFriendlyName = STR_LOCATION_RECENTS_FRIENDLY_NAME;
         loadSelection(recentsFilesArr, view.getResources().getString(R.string.drawer_menu_recent));
     }
 
@@ -1111,8 +1111,8 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
      * @return True se ci troviamo all'interno di una location "custom", false altrimenti.
      */
     public boolean isACustomLocationDisplayed() {
-        return !pathHomeFriendlyName.equals(strLocationInternalFriendlyName)
-                && !pathHomeFriendlyName.equals(strLocationDownloadsFriendlyName);
+        return !pathHomeFriendlyName.equals(STR_LOCATION_INTERNAL_FRIENDLY_NAME)
+                && !pathHomeFriendlyName.equals(STR_LOCATION_DOWNLOADS_FRIENDLY_NAME);
     }
 
     private ArrayList<String> getAllImagesUrls(@NonNull Activity context) {
@@ -1210,7 +1210,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         pathHome = Environment.getExternalStorageDirectory().getAbsolutePath();
         if (pathHomeFriendlyName == null)
-            pathHomeFriendlyName = strLocationInternalFriendlyName;
+            pathHomeFriendlyName = STR_LOCATION_INTERNAL_FRIENDLY_NAME;
 
         if (currentPath == null)
             currentPath = pathHome;

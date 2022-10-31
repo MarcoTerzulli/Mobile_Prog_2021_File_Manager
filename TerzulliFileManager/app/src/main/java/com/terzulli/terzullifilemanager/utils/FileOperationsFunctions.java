@@ -26,13 +26,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class FileOperationsFunctions {
-    public static final String strOperationNewFolder = "new_folder";
-    public static final String strOperationCompress = "compress";
-    public static final String strOperationExtract = "extract";
-    public static final String strOperationCopy = "copy";
-    public static final String strOperationMove = "move";
-    public static final String strOperationRename = "rename";
-    public static final String strOperationDelete = "delete";
+    public static final String STR_OPERATION_NEW_FOLDER = "new_folder";
+    public static final String STR_OPERATION_COMPRESS = "compress";
+    public static final String STR_OPERATION_EXTRACT = "extract";
+    public static final String STR_OPERATION_COPY = "copy";
+    public static final String STR_OPERATION_MOVE = "move";
+    public static final String STR_OPERATION_RENAME = "rename";
+    public static final String STR_OPERATION_DELETE = "delete";
 
     /**
      * Funzione per inserimento asincrono di log nel database
@@ -177,7 +177,7 @@ public class FileOperationsFunctions {
         }
 
         FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                new Date(), (returnCode == 1), strOperationExtract, extractPath, "",
+                new Date(), (returnCode == 1), STR_OPERATION_EXTRACT, extractPath, "",
                 operationErrorDescription, fileToExtract, "");
 
         return returnCode;
@@ -224,7 +224,7 @@ public class FileOperationsFunctions {
 
         // salvataggio risultato operazione su log
         FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                new Date(), (returnCode == 1), strOperationNewFolder, currentDirectory.getAbsolutePath(), currentDirectory.getAbsolutePath(),
+                new Date(), (returnCode == 1), STR_OPERATION_NEW_FOLDER, currentDirectory.getAbsolutePath(), currentDirectory.getAbsolutePath(),
                 operationErrorDescription, newDir, "");
 
         return returnCode;
@@ -272,7 +272,7 @@ public class FileOperationsFunctions {
 
         // salvataggio risultato operazione su log
         FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                new Date(), (returnCode == 1), strOperationRename, path, "",
+                new Date(), (returnCode == 1), STR_OPERATION_RENAME, path, "",
                 operationErrorDescription, file, newName);
 
         return returnCode;
@@ -303,7 +303,7 @@ public class FileOperationsFunctions {
 
         // salvataggio risultato operazione su log
         FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context), new Date(),
-                filesWithErrors.isEmpty(), strOperationDelete, originalPath, "",
+                filesWithErrors.isEmpty(), STR_OPERATION_DELETE, originalPath, "",
                 operationErrorDescription, filestoDelete, filesWithErrors);
 
         if(!filesWithErrors.isEmpty())
@@ -339,9 +339,9 @@ public class FileOperationsFunctions {
         File newLocation = new File(destinationPath);
 
         ArrayList<File> filesWithErrors = new ArrayList<>();
-        String operationType = strOperationCopy;
+        String operationType = STR_OPERATION_COPY;
         if(!isCopy)
-            operationType = strOperationMove;
+            operationType = STR_OPERATION_MOVE;
         String operationErrorDescription = "";
         int returnCode = 1;
 
@@ -525,7 +525,7 @@ public class FileOperationsFunctions {
 
         // salvataggio risultato operazione su log
         FileOperationsFunctions.insertOpLogIntoDatabase(LogDatabase.getInstance(context),
-                new Date(), (returnCode == 1), strOperationCompress, "", compressPath,
+                new Date(), (returnCode == 1), STR_OPERATION_COMPRESS, "", compressPath,
                 operationErrorDescription, filesToCompress, filesWithErrors);
 
         // aggiunta file compresso ai file recenti

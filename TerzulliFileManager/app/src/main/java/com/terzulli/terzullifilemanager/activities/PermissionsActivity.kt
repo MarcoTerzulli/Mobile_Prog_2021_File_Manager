@@ -20,12 +20,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.terzulli.terzullifilemanager.R
 
 abstract class PermissionsActivity : AppCompatActivity(), OnRequestPermissionsResultCallback {
-    private val permissionListLenght = 3
-    private val permissionCodeStorage = 0
-    private val permissionCodeInstallApk = 1
-    private val permissionCodeAllFiles = 2
     private val onPermissionGrantedCallbacks =
-        arrayOfNulls<OnPermissionGranted>(permissionListLenght)
+        arrayOfNulls<OnPermissionGranted>(PERMISSION_LIST_LENGTH)
 
     fun checkStoragePermission(): Boolean {
         return (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -90,11 +86,11 @@ abstract class PermissionsActivity : AppCompatActivity(), OnRequestPermissionsRe
             }
             .setCancelable(false)
 
-        onPermissionGrantedCallbacks[permissionCodeStorage] = onPermissionGranted
+        onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE] = onPermissionGranted
 
         requestPermission(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            permissionCodeStorage,
+            PERMISSION_CODE_STORAGE,
             rationaleDialog,
             isFirstStart
         )
@@ -106,7 +102,7 @@ abstract class PermissionsActivity : AppCompatActivity(), OnRequestPermissionsRe
                 .setTitle(R.string.grant_permission)
                 .setMessage(R.string.grant_permission_msg_full_storage)
                 .setPositiveButton(R.string.grant) { _: DialogInterface?, _: Int ->
-                    onPermissionGrantedCallbacks[permissionCodeAllFiles] = onPermissionGranted
+                    onPermissionGrantedCallbacks[PERMISSION_CODE_ALL_FILES] = onPermissionGranted
 
                     try {
                         val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
@@ -139,19 +135,19 @@ abstract class PermissionsActivity : AppCompatActivity(), OnRequestPermissionsRe
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            permissionCodeStorage -> if (permissionIsGranted(grantResults)) {
-                onPermissionGrantedCallbacks[permissionCodeStorage]!!.onPermissionGranted()
-                onPermissionGrantedCallbacks[permissionCodeStorage] = null
+            PERMISSION_CODE_STORAGE -> if (permissionIsGranted(grantResults)) {
+                onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE]!!.onPermissionGranted()
+                onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE] = null
             } else {
                 requestStoragePermission(
                     false,
-                    onPermissionGrantedCallbacks[permissionCodeStorage]!!
+                    onPermissionGrantedCallbacks[PERMISSION_CODE_STORAGE]!!
                 )
             }
 
-            permissionCodeInstallApk -> if (permissionIsGranted(grantResults)) {
-                onPermissionGrantedCallbacks[permissionCodeInstallApk]!!.onPermissionGranted()
-                onPermissionGrantedCallbacks[permissionCodeInstallApk] = null
+            PERMISSION_CODE_INSTALL_APK -> if (permissionIsGranted(grantResults)) {
+                onPermissionGrantedCallbacks[PERMISSION_CODE_INSTALL_APK]!!.onPermissionGranted()
+                onPermissionGrantedCallbacks[PERMISSION_CODE_INSTALL_APK] = null
             }
         }
     }
@@ -171,5 +167,12 @@ abstract class PermissionsActivity : AppCompatActivity(), OnRequestPermissionsRe
 
     interface OnPermissionGranted {
         fun onPermissionGranted()
+    }
+
+    companion object {
+        private const val PERMISSION_LIST_LENGTH = 3
+        private const val PERMISSION_CODE_STORAGE = 0
+        private const val PERMISSION_CODE_INSTALL_APK = 1
+        private const val PERMISSION_CODE_ALL_FILES = 2
     }
 }

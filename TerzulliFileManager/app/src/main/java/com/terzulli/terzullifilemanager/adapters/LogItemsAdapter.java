@@ -1,12 +1,12 @@
 package com.terzulli.terzullifilemanager.adapters;
 
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationCompress;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationCopy;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationDelete;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationExtract;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationMove;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationNewFolder;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationRename;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_COMPRESS;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_COPY;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_DELETE;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_EXTRACT;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_MOVE;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_NEW_FOLDER;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_RENAME;
 
 import android.app.Activity;
 import android.content.Context;
@@ -69,25 +69,25 @@ public class LogItemsAdapter extends RecyclerView.Adapter<LogItemsAdapter.ItemsV
 
         // nome
         switch (selectedLog.getOperationType()) {
-            case strOperationNewFolder:
+            case STR_OPERATION_NEW_FOLDER:
                 holder.itemName.setText(context.getResources().getString(R.string.log_op_type_new_folder));
                 break;
-            case strOperationCompress:
+            case STR_OPERATION_COMPRESS:
                 holder.itemName.setText(context.getResources().getString(R.string.log_op_type_compress));
                 break;
-            case strOperationExtract:
+            case STR_OPERATION_EXTRACT:
                 holder.itemName.setText(context.getResources().getString(R.string.log_op_type_extract));
                 break;
-            case strOperationCopy:
+            case STR_OPERATION_COPY:
                 holder.itemName.setText(context.getResources().getString(R.string.log_op_type_copy));
                 break;
-            case strOperationMove:
+            case STR_OPERATION_MOVE:
                 holder.itemName.setText(context.getResources().getString(R.string.log_op_type_move));
                 break;
-            case strOperationRename:
+            case STR_OPERATION_RENAME:
                 holder.itemName.setText(context.getResources().getString(R.string.log_op_type_rename));
                 break;
-            case strOperationDelete:
+            case STR_OPERATION_DELETE:
                 holder.itemName.setText(context.getResources().getString(R.string.log_op_type_delete));
                 break;
             default:

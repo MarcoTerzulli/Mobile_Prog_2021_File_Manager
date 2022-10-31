@@ -21,26 +21,26 @@ import java.util.List;
 public class Utils {
 
     // string constants
-    public static final String strSortByName = "NAME";
-    public static final String strSortBySize = "SIZE";
-    public static final String strSortByDate = "DATE";
-    public static final String strFileDocument = "Document";
-    public static final String strFileSpreadsheet = "Spreadsheet";
-    public static final String strFileVideo = "Video";
-    public static final String strFileImage = "Image";
-    public static final String strFileAudio = "Audio";
-    public static final String strFileArchive = "Archive";
-    public static final String strFileDirectory = "Folder";
-    public static final String strFilePresentation = "Presentation";
-    public static final String strFileApplication = "Android application";
-    public static final String strFileGeneric = "File";
-    public static final String strLocationInternalFriendlyName = "Internal Storage";
-    public static final String strLocationRecentsFriendlyName = "Recents";
-    public static final String strLocationAudioFriendlyName = "Audio";
-    public static final String strLocationVideosFriendlyName = "Videos";
-    public static final String strLocationImagesFriendlyName = "Images";
-    public static final String strLocationDownloadsFriendlyName = "Downloads";
-    public static final String strLocationLogsFriendlyName = "Logs";
+    public static final String STR_SORT_BY_NAME = "NAME";
+    public static final String STR_SORT_BY_SIZE = "SIZE";
+    public static final String STR_SORT_BY_DATE = "DATE";
+    public static final String STR_FILE_DOCUMENT = "Document";
+    public static final String STR_FILE_SPREADSHEET = "Spreadsheet";
+    public static final String STR_FILE_VIDEO = "Video";
+    public static final String STR_FILE_IMAGE = "Image";
+    public static final String STR_FILE_AUDIO = "Audio";
+    public static final String STR_FILE_ARCHIVE = "Archive";
+    public static final String STR_FILE_DIRECTORY = "Folder";
+    public static final String STR_FILE_PRESENTATION = "Presentation";
+    public static final String STR_FILE_APPLICATION = "Android application";
+    public static final String STR_FILE_GENERIC = "File";
+    public static final String STR_LOCATION_INTERNAL_FRIENDLY_NAME = "Internal Storage";
+    public static final String STR_LOCATION_RECENTS_FRIENDLY_NAME = "Recents";
+    public static final String STR_LOCATION_AUDIO_FRIENDLY_NAME = "Audio";
+    public static final String STR_LOCATION_VIDEOS_FRIENDLY_NAME = "Videos";
+    public static final String STR_LOCATION_IMAGES_FRIENDLY_NAME = "Images";
+    public static final String STR_LOCATION_DOWNLOADS_FRIENDLY_NAME = "Downloads";
+    public static final String STR_LOCATION_LOGS_FRIENDLY_NAME = "Logs";
 
     public static void sortByName(File[] files, final boolean ascending) {
         if (files == null)
@@ -129,10 +129,10 @@ public class Utils {
 
     public static void sortFileAndDirectoriesList(File[] filesAndDirs, final String sortBy, final boolean ascending) {
         switch (sortBy) {
-            case strSortBySize:
+            case STR_SORT_BY_SIZE:
                 Utils.sortBySize(filesAndDirs, ascending);
                 break;
-            case strSortByDate:
+            case STR_SORT_BY_DATE:
                 Utils.sortByDate(filesAndDirs, ascending);
                 break;
             default:
@@ -156,7 +156,7 @@ public class Utils {
         String mimeType = getReadableMimeTypeAndExtension(file);
 
         details = formattedDateString + ", " + formattedUsedSpace;
-        if (!mimeType.equals("") && !mimeType.equals(strFileGeneric))
+        if (!mimeType.equals("") && !mimeType.equals(STR_FILE_GENERIC))
             details +=  ", " + mimeType;
             //details +=  ", " + getFileType(file);
         else
@@ -344,7 +344,7 @@ public class Utils {
 
     public static String getFileType(File file) {
         if (file.isDirectory())
-            return strFileDirectory;
+            return STR_FILE_DIRECTORY;
 
         switch(MimeTypeMap.getFileExtensionFromUrl(String.valueOf(Uri.fromFile(file))).toLowerCase()) {
             case "png":
@@ -353,20 +353,20 @@ public class Utils {
             case "gif":
             case "bmp":
             case "heic":
-                return strFileImage;
+                return STR_FILE_IMAGE;
 
             case "mp3":
             case "wav":
             case "ogg":
             case "midi":
-                return strFileAudio;
+                return STR_FILE_AUDIO;
 
             case "mp4":
             case "rmvb":
             case "avi":
             case "flv":
             case "3gp":
-                return strFileVideo;
+                return STR_FILE_VIDEO;
 
             case "java":
             case "cpp":
@@ -382,28 +382,28 @@ public class Utils {
             case "doc":
             case "docx":
             case "pdf":
-                return strFileDocument;
+                return STR_FILE_DOCUMENT;
 
             case "xls":
             case "xlsx":
-                return strFileSpreadsheet;
+                return STR_FILE_SPREADSHEET;
 
             case "ppt":
             case "pptx":
-                return strFilePresentation;
+                return STR_FILE_PRESENTATION;
 
             case "jar":
             case "zip":
             case "rar":
             case "gz":
             case "7z":
-                return strFileArchive;
+                return STR_FILE_ARCHIVE;
 
             case "apk":
-                return strFileApplication;
+                return STR_FILE_APPLICATION;
 
             default:
-                return strFileGeneric;
+                return STR_FILE_GENERIC;
         }
     }
 

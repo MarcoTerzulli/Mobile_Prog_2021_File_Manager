@@ -1,12 +1,12 @@
 package com.terzulli.terzullifilemanager.fragments;
 
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationCompress;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationCopy;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationDelete;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationExtract;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationMove;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationNewFolder;
-import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.strOperationRename;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_COMPRESS;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_COPY;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_DELETE;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_EXTRACT;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_MOVE;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_NEW_FOLDER;
+import static com.terzulli.terzullifilemanager.utils.FileOperationsFunctions.STR_OPERATION_RENAME;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -72,7 +72,7 @@ public class LogFragment extends Fragment {
                 // annullo questo caricamento
 
                 switch (Objects.requireNonNull(thisLog).getOperationType()) {
-                    case strOperationNewFolder:
+                    case STR_OPERATION_NEW_FOLDER:
                         typeValue.setText(view.getResources().getString(R.string.log_op_type_new_folder));
 
                         destPathContainer.setVisibility(View.VISIBLE);
@@ -82,27 +82,27 @@ public class LogFragment extends Fragment {
                         if(itemsList != null && !itemsList.isEmpty())
                             newNameValue.setText(itemsList.get(0).getName());
                         break;
-                    case strOperationCompress:
+                    case STR_OPERATION_COMPRESS:
                         typeValue.setText(view.getResources().getString(R.string.log_op_type_compress));
                         destPathContainer.setVisibility(View.VISIBLE);
                         destPathValue.setText(thisLog.getDestinationPath());
                         break;
-                    case strOperationExtract:
+                    case STR_OPERATION_EXTRACT:
                         typeValue.setText(view.getResources().getString(R.string.log_op_type_extract));
                         destPathContainer.setVisibility(View.VISIBLE);
                         destPathValue.setText(thisLog.getDestinationPath());
                         break;
-                    case strOperationCopy:
+                    case STR_OPERATION_COPY:
                         typeValue.setText(view.getResources().getString(R.string.log_op_type_copy));
                         destPathContainer.setVisibility(View.VISIBLE);
                         destPathValue.setText(thisLog.getDestinationPath());
                         break;
-                    case strOperationMove:
+                    case STR_OPERATION_MOVE:
                         typeValue.setText(view.getResources().getString(R.string.log_op_type_move));
                         destPathContainer.setVisibility(View.VISIBLE);
                         destPathValue.setText(thisLog.getDestinationPath());
                         break;
-                    case strOperationRename:
+                    case STR_OPERATION_RENAME:
                         typeValue.setText(view.getResources().getString(R.string.log_op_type_rename));
 
                         originPathContainer.setVisibility(View.VISIBLE);
@@ -112,7 +112,7 @@ public class LogFragment extends Fragment {
                         if(itemsList != null && !itemsList.isEmpty())
                             newNameValue.setText(itemsList.get(0).getNewName());
                         break;
-                    case strOperationDelete:
+                    case STR_OPERATION_DELETE:
                         typeValue.setText(view.getResources().getString(R.string.log_op_type_delete));
                         originPathContainer.setVisibility(View.VISIBLE);
                         originPathValue.setText(thisLog.getOriginPath());
@@ -230,31 +230,31 @@ public class LogFragment extends Fragment {
 
                 if(!failedItemsList.isEmpty()) {
                     switch (Objects.requireNonNull(thisLog).getOperationType()) {
-                        case strOperationNewFolder:
+                        case STR_OPERATION_NEW_FOLDER:
                             returnCode = FileOperationsFunctions.createDirectoryOperation(new File(thisLog.getDestinationPath()),
                                     failedItemsList.get(0).getName(), view.getContext());
                             break;
-                        case strOperationCompress:
+                        case STR_OPERATION_COMPRESS:
                             returnCode = FileOperationsFunctions.compressSelectedFilesOperation(thisLog.getDestinationPath(),
                                     failedFilesList, view.getContext());
                             break;
-                        case strOperationExtract:
+                        case STR_OPERATION_EXTRACT:
                             returnCode = FileOperationsFunctions.extractSelectedFileOperation(new File(failedItemsList.get(0).getOriginPath()),
                                     thisLog.getDestinationPath(),view.getContext());
                             break;
-                        case strOperationCopy:
+                        case STR_OPERATION_COPY:
                             returnCode = FileOperationsFunctions.copyMoveSelectionOperation(true, thisLog.getDestinationPath(),
                                     failedFilesList, view.getContext());
                             break;
-                        case strOperationMove:
+                        case STR_OPERATION_MOVE:
                             returnCode = FileOperationsFunctions.copyMoveSelectionOperation(false, thisLog.getDestinationPath(),
                                     failedFilesList, view.getContext());
                             break;
-                        case strOperationRename:
+                        case STR_OPERATION_RENAME:
                             returnCode = FileOperationsFunctions.renameSelectedFileOperation(new File(thisLog.getOriginPath()),
                                     failedItemsList.get(0).getNewName(), view.getContext());
                             break;
-                        case strOperationDelete:
+                        case STR_OPERATION_DELETE:
                             returnCode = FileOperationsFunctions.deleteSelectedFilesOperation(thisLog.getOriginPath(),
                                     failedFilesList, view.getContext());
                             break;

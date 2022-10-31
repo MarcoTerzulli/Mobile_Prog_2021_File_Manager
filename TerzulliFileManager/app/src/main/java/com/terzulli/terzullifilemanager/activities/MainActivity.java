@@ -459,7 +459,7 @@ public class MainActivity extends PermissionsActivity
             sharedPrefEditor.putBoolean("showHidden", false);
 
         if(!sharedPreferences.contains("sortBy"))
-            sharedPrefEditor.putString("sortBy", Utils.strSortByName);
+            sharedPrefEditor.putString("sortBy", Utils.STR_SORT_BY_NAME);
 
         if(!sharedPreferences.contains("sortOrderAscending"))
             sharedPrefEditor.putBoolean("sortOrderAscending", true);
