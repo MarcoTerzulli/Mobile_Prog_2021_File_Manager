@@ -185,7 +185,7 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     initializeEmptyDirectoryLayout(false);
 
                     assert logsList != null;
-                    currentAdapter = new LogItemsAdapter(view.getContext(), logsList, this, requireActivity());
+                    currentAdapter = new LogItemsAdapter(view.getContext(), logsList, requireActivity());
                     recyclerView.setAdapter(currentAdapter);
                     recyclerView.scrollToPosition(0);
                     swipeRefreshLayout.setRefreshing(false);

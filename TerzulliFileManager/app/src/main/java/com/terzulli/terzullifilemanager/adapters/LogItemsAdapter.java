@@ -25,30 +25,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.terzulli.terzullifilemanager.R;
 import com.terzulli.terzullifilemanager.activities.MainActivity;
-import com.terzulli.terzullifilemanager.database.LogDatabase;
 import com.terzulli.terzullifilemanager.database.entities.TableLog;
 import com.terzulli.terzullifilemanager.fragments.LogFragment;
-import com.terzulli.terzullifilemanager.fragments.MainFragment;
 import com.terzulli.terzullifilemanager.utils.Utils;
 
 import java.util.ArrayList;
 
 public class LogItemsAdapter extends RecyclerView.Adapter<LogItemsAdapter.ItemsViewHolder> {
     private final Context context;
-    private final MainFragment mainFragment;
     private final Activity activityReference;
-    private ArrayList<TableLog> logsList;
-    private LogDatabase logDatabase;
+    private final ArrayList<TableLog> logsList;
 
-    public LogItemsAdapter(Context context, ArrayList<TableLog> logsList, MainFragment mainFragment, Activity activityReference) {
+    public LogItemsAdapter(Context context, ArrayList<TableLog> logsList, Activity activityReference) {
         this.context = context;
-        this.mainFragment = mainFragment;
         this.activityReference = activityReference;
 
         this.logsList = new ArrayList<>(logsList.size());
         this.logsList.addAll(logsList);
-
-        logDatabase = LogDatabase.getInstance(context);
     }
 
     @NonNull
