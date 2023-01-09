@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Utils {
+public abstract class Utils {
 
     // string constants
     public static final String STR_SORT_BY_NAME = "NAME";

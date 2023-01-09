@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class FileOperationsFunctions {
+public abstract class FileOperationsFunctions {
     public static final String STR_OPERATION_NEW_FOLDER = "new_folder";
     public static final String STR_OPERATION_COMPRESS = "compress";
     public static final String STR_OPERATION_EXTRACT = "extract";
