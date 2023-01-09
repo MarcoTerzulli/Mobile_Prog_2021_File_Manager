@@ -357,15 +357,17 @@ public class MainActivity extends PermissionsActivity
     public void setActionBarToggleDefault() {
         Drawable drawerIcon = ResourcesCompat.getDrawable(activity.getResources(), R.drawable.ic_menu, activity.getTheme());
 
-        actionBarDrawerToggle.setHomeAsUpIndicator(drawerIcon);
+        if(actionBarDrawerToggle != null) {
+            actionBarDrawerToggle.setHomeAsUpIndicator(drawerIcon);
 
-        actionBarDrawerToggle.setToolbarNavigationClickListener(v -> {
-            if (drawer.isDrawerVisible(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
-            } else {
-                drawer.openDrawer(GravityCompat.START);
-            }
-        });
+            actionBarDrawerToggle.setToolbarNavigationClickListener(v -> {
+                if (drawer.isDrawerVisible(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                } else {
+                    drawer.openDrawer(GravityCompat.START);
+                }
+            });
+        }
 
         drawer.addDrawerListener(actionBarDrawerToggle);
     }
