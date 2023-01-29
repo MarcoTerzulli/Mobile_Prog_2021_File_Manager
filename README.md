@@ -50,6 +50,9 @@ The Application has been developed to support devices with ```Android Sdk``` ver
 
 Some screenshots of the main sections of the application:
 
+
+<img src="Images/img_drawer.png" align="right" width="40%" height="40%"></img>
+
 [alt text](https://github.com/MarcoTerzulli/Mobile_Prog_2021_File_Manager/blob/main/Images/img_drawer.png?raw=true)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
