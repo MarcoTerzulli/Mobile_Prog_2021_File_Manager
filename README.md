@@ -51,9 +51,9 @@ The Application has been developed to support devices with ```Android Sdk``` ver
 Some screenshots of the main sections of the application:
 
 
-<img src="Images/img_drawer.png" align="center" width="26%" height="26%"></img>
-<img src="Images/img_menu_open.png" align="center" width="25%" height="25%"></img>
-<img src="Images/img_log_details.png" align="center" width="25%" height="25%"></img>
+<img src="Images/img_drawer.png" style="align-content: center;" width="26%" height="26%"></img>
+<img src="Images/img_menu_open.png" style="align-content: center;" width="25%" height="25%"></img>
+<img src="Images/img_log_details.png" style="align-content: center;" width="25%" height="25%"></img>
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
