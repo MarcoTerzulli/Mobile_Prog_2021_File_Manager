@@ -13,6 +13,7 @@
         <a href="#how-the-application-works">How the Application Works</a>
     </li>
 	<li><a href="#application-purpose-and-limitations">Application Purposes and Limitations</a></li>
+	<li><a href="#schreenshots">Screenshots</a></li>
 	<li><a href="#software--used-for-developmento">Software Used for Development</a></li>
 	<li><a href="#known-issues">Known Issues</a></li>
 </ol>
@@ -45,6 +46,15 @@ The Application has been developed to support devices with ```Android Sdk``` ver
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
+## Screenshots
+
+Some screenshots of the main sections of the application:
+
+[alt text](https://github.com/MarcoTerzulli/Mobile_Prog_2021_File_Manager/blob/main/Images/img_drawer.png?raw=true)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
 
 ## Software Used for Development
 * [JetBrains Android Studio](https://developer.android.com/studio) - IDE used for development and testing
@@ -53,6 +63,8 @@ The Application has been developed to support devices with ```Android Sdk``` ver
 
 
 ## Known Issues
+
+No known issues so far!
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
